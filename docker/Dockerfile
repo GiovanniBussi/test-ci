@@ -9,10 +9,10 @@ WORKDIR /root
 COPY plumed2.tgz /root/
 
 # install libraries and plumed
-RUN buildDeps="git" \
- && runtimeDeps="gawk make vim zlib1g git g++ xxd" \
+RUN \
  && yum -y update \
- && yum -y install $buildDeps $runtimeDeps \
+ && yum -y group install "Development Tools" \
+ && yum -y group install gawk xxd git \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
