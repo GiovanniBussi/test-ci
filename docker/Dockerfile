@@ -18,15 +18,5 @@ RUN \
  && ./configure \
  && make -j 4 \
  && make install \
- && cd ../ \
- && rm -fr plumed2 \
- && rm -f plumed2.tgz
-
-# switch to plumed user
-RUN useradd -ms /bin/bash plumed
-USER plumed
-WORKDIR /home/plumed
-
-# by default enter bash
-CMD /bin/bash
+ && make installcheck
 
