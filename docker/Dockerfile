@@ -1,8 +1,7 @@
 # Start from latest ubuntu
 FROM centos:7
 
-RUN \
-    yum -y update \
+RUN yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install gawk vim zlib gsl-devel fftw-devel
 
@@ -14,12 +13,10 @@ WORKDIR /home/plumed
 # assumes a file plumed2.tgz is present in the Dockerfile directory
 COPY plumed2.tgz /home/plumed
 
-# install and test plumed
-RUN \
-    tar xzf plumed2.tgz \
+# build and test plumed (no install)
+RUN tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
  && make -j 4 \
- && make install \
- && make installcheck
+ && make check
 
