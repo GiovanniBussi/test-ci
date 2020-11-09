@@ -1,5 +1,5 @@
 # Start from latest ubuntu
-FROM ubuntu:17.04
+FROM ubuntu:18.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 # this is home for root user
