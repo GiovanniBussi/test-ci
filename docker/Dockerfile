@@ -16,7 +16,7 @@ COPY plumed2.tgz /home/plumed
 
 # install and test plumed
 RUN \
- && tar xzf plumed2.tgz \
+    tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
  && make -j 4 \
