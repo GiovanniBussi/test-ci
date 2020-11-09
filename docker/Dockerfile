@@ -10,7 +10,7 @@ COPY plumed2.tgz /root/
 
 # install libraries and plumed
 RUN \
- && yum -y update \
+    yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y group install gawk xxd git \
  && tar xzf plumed2.tgz \
