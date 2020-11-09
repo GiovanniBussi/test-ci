@@ -1,18 +1,19 @@
 # Start from latest ubuntu
 FROM centos:7
 
-# this is home for root user
-WORKDIR /root
+RUN useradd -ms /bin/bash plumed
+USER plumed
+WORKDIR /home/plumed
 
 # import plumed code.
 # assumes a file plumed2.tgz is present in the Dockerfile directory
-COPY plumed2.tgz /root/
+COPY plumed2.tgz /home/plumed
 
 # install libraries and plumed
 RUN \
-    yum -y update \
- && yum -y group install "Development Tools" \
- && yum -y install gawk vim git \
+    sudo yum -y update \
+ && sudo yum -y group install "Development Tools" \
+ && sudo yum -y install gawk vim zlib gsl-devel fftw-devel \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
