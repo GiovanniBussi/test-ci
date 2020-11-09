@@ -12,7 +12,7 @@ COPY plumed2.tgz /root/
 RUN \
     yum -y update \
  && yum -y group install "Development Tools" \
- && yum -y group install gawk xxd git \
+ && yum -y install gawk vim git \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
