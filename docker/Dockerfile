@@ -2,9 +2,9 @@
 FROM centos:7
 
 RUN \
-    sudo yum -y update \
- && sudo yum -y group install "Development Tools" \
- && sudo yum -y install gawk vim zlib gsl-devel fftw-devel
+    yum -y update \
+ && yum -y group install "Development Tools" \
+ && yum -y install gawk vim zlib gsl-devel fftw-devel
 
 RUN useradd -ms /bin/bash plumed
 USER plumed
