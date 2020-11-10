@@ -15,11 +15,11 @@ COPY plumed2.tgz /home/plumed
 
 # build and test plumed (no install)
 RUN . /etc/bashrc \
- && module avail \
  && module load mpi \
+ && export OMPI_MCA_btl_base_warn_component_unused=0 \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
- && ./configure \
+ && ./configure --enable-modules=all --enable-boost_serialization \
  && make -j 4 \
  && make check
 
