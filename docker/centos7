@@ -14,7 +14,8 @@ WORKDIR /home/plumed
 COPY plumed2.tgz /home/plumed
 
 # build and test plumed (no install)
-RUN module load openmpi \
+RUN . /etc/bashrc \
+ && module load openmpi \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure \
