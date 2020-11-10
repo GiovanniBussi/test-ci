@@ -24,8 +24,8 @@ RUN . /etc/bashrc \
  && export LD_LIBRARY_PATH=$HOME/opt/lib:$LD_LIBRARY_PATH \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
- && ./travis/install.boost release \
- && ./travis/install.xdrfile \
+ && .travis/install.boost release \
+ && .travis/install.xdrfile \
  && ./configure --enable-modules=all --enable-boost_serialization \
  && make -j 4 \
  && make check
