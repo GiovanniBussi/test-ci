@@ -3,7 +3,8 @@ FROM centos:7
 
 RUN yum -y update \
  && yum -y group install "Development Tools" \
- && yum -y install environment-modules gawk vim zlib-devel gsl-devel fftw-devel openmpi openmpi-devel
+ && yum -y install environment-modules gawk vim zlib-devel gsl-devel fftw-devel openmpi openmpi-devel python3 \
+ && pip3 install cython numpy pandas mdtraj MDAnalysis nose
 
 RUN useradd -ms /bin/bash plumed
 USER plumed
@@ -17,6 +18,7 @@ COPY plumed2.tgz /home/plumed
 RUN . /etc/bashrc \
  && module load mpi \
  && export OMPI_MCA_btl_base_warn_component_unused=0 \
+ && export PYTHON_BIN=python3 \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && ./configure --enable-modules=all --enable-boost_serialization \
