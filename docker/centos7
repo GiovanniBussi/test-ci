@@ -4,7 +4,8 @@ FROM centos:7
 RUN yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install environment-modules gawk vim wget \
-                   lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel
+                   lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel \
+                   python3 python3-devel python36-Cython
 
 RUN useradd -ms /bin/bash plumed
 USER plumed
@@ -23,6 +24,7 @@ RUN . /etc/bashrc \
  && export INCLUDE=$HOME/opt/include:$INCLUDE \
  && export LIBRARY_PATH=$HOME/opt/lib:$LIBRARY_PATH \
  && export LD_LIBRARY_PATH=$HOME/opt/lib:$LD_LIBRARY_PATH \
+ && export PYTHONPATH=$PWD/python:$PYTHONPATH \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && .travis/install.boost release \
