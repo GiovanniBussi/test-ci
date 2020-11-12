@@ -15,8 +15,7 @@ env:
 
 jobs:
   linux:
-# I keep 18.04 since there are a few issues with the pdf manual compilation on ubuntu 20
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
