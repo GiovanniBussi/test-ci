@@ -80,7 +80,7 @@ jobs:
       run: |
         sudo apt-get install -y graphviz
         sudo apt-get install -y doxygen-latex
-        ./.travis/install.doxygen Release_1_8_14
+        ./.travis/install.doxygen Release_1_8_15
         echo "PLUMED_CONFIG=$PLUMED_CONFIG --enable-pdfdoc --enable-asmjit" >> $GITHUB_ENV
         # make sure all tests are run
         echo "PLUMED_ALL_TESTS=yes" >> $GITHUB_ENV
@@ -140,6 +140,14 @@ jobs:
         GIT_TOKEN: ${{ secrets.GIT_TOKEN_PLUMEDBOT }}
       run: |
          ./.travis/push doc
+    - name: Upload doc to artifacts
+      if: contains( matrix.variant, '-doc-' )
+      uses: actions/upload-artifact@v2
+      with:
+        name: doc
+        path: |
+          user-doc
+          developer-doc
 
   codecheck:
     runs-on: ubuntu-18.04
