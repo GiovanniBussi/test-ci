@@ -3409,6 +3409,18 @@ void plumed_f_cmd_safe_ ## type_ ## suffix(char*c,char*key,type*val,__PLUMED_WRA
   safe.flags= 0x2000000*2 + 0x10000*code + sizeof(type); \
   safe.opt=NULL; \
   plumed_cmd_safe(plumed_f2c(c),key,safe); \
+} \
+void plumed_f_cmd_safe_nothrow_ ## type_ ## suffix(char*c,char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape,void*callbackp,void(*callbackf)(void*,int,const char*,const void*)) { \
+  plumed_safeptr safe; \
+  safe.ptr=val; \
+  safe.nelem=0; \
+  safe.shape=shape; \
+  safe.flags= 0x2000000*2 + 0x10000*code + sizeof(type); \
+  safe.opt=NULL; \
+  plumed_nothrow_handler handler; \
+  handler.ptr=callbackp; \
+  handler.handler=callbackf; \
+  plumed_cmd_safe_nothrow(plumed_f2c(c),key,safe,handler); \
 }
 
 #define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,code) \
@@ -3451,31 +3463,6 @@ __PLUMED_IMPLEMENT_FORTRAN(plumed_f_gvalid,PLUMED_F_GVALID,(int*i),(i)) {
   assert(i);
   *i=plumed_gvalid();
 }
-
-/* New in PLUMED 2.8 */
-
-#define __PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE_INNER(type,type_,code, suffix) \
-void plumed_f_gcmd_safe_ ## type_ ## suffix(char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape) { \
-  plumed_safeptr safe; \
-  safe.ptr=val; \
-  safe.nelem=0; \
-  safe.shape=shape; \
-  safe.flags= 0x2000000*2 + 0x10000*code + sizeof(type); \
-  safe.opt=NULL; \
-  plumed_gcmd_safe(key,safe); \
-}
-
-#define __PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(type,type_,code) \
-  __PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE_INNER(type,type_,code,) \
-  __PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE_INNER(type,type_,code,_scalar)
-
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(float,float,4)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(double,double,4)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(long double,long_double,4)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(int,int,3)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(short,short,3)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(long,long,3)
-__PLUMED_IMPLEMENT_FORTRAN_GCMD_SAFE(char,char,3)
 
 #endif /*}*/
 
