@@ -123,16 +123,6 @@ module plumed_module
   end interface
 
   interface
-    subroutine plumed_f_cmd_safe_char(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      character(kind=c_char)                :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_char
-  end interface
-
-  interface
     subroutine plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -168,24 +158,6 @@ module plumed_module
 
 #: for t in types
 #: for k in kinds[t]
-  interface
-    subroutine plumed_f_cmd_safe_${cname(k)}$_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      ${t}$(kind=${k}$)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_${cname(k)}$_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_${cname(k)}$(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      ${t}$(kind=${k}$)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_${cname(k)}$
-  end interface
   interface
     subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar(p,key,val,pass_shape,e,eh) bind(C)
       import
@@ -256,7 +228,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-         call plumed_f_cmd_safe_char(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
      end subroutine plumed_f_cmd_char
 
@@ -304,7 +276,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_${cname(k)}$${scalar}$(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_${cname(k)}$${scalar}$(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_${t}$_${ik}$_${r}$
     subroutine plumed_f_gcmd_${t}$_${ik}$_${r}$(key,val,dummy,error,ierror)

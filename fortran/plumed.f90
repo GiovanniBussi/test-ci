@@ -124,16 +124,6 @@ module plumed_module
   end interface
 
   interface
-    subroutine plumed_f_cmd_safe_char(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      character(kind=c_char)                :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_char
-  end interface
-
-  interface
     subroutine plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -214,24 +204,6 @@ module plumed_module
   end interface plumed_f_gcmd
 
   interface
-    subroutine plumed_f_cmd_safe_int_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_int)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_int_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_int(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_int)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_int
-  end interface
-  interface
     subroutine plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -252,24 +224,6 @@ module plumed_module
       type(c_ptr),                    value :: e
       type(c_ptr),                    value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_int
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_short_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_short)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_short_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_short(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_short)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_short
   end interface
   interface
     subroutine plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,e,eh) bind(C)
@@ -294,24 +248,6 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_short
   end interface
   interface
-    subroutine plumed_f_cmd_safe_long_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_long)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_long_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_long(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      integer(kind=c_long)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_long
-  end interface
-  interface
     subroutine plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -332,24 +268,6 @@ module plumed_module
       type(c_ptr),                    value :: e
       type(c_ptr),                    value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_long
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_float_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_float)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_float_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_float(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_float)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_float
   end interface
   interface
     subroutine plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,e,eh) bind(C)
@@ -374,24 +292,6 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_float
   end interface
   interface
-    subroutine plumed_f_cmd_safe_double_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_double)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_double_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_double(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_double)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_double
-  end interface
-  interface
     subroutine plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -412,24 +312,6 @@ module plumed_module
       type(c_ptr),                    value :: e
       type(c_ptr),                    value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_double
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_long_double_scalar(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_long_double)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_long_double_scalar
-  end interface
-  interface
-    subroutine plumed_f_cmd_safe_long_double(p,key,val,pass_shape) bind(C)
-      import
-      character(kind=c_char), intent(in)    :: p(32)
-      character(kind=c_char), intent(in)    :: key(*)
-      real(kind=c_long_double)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-    end subroutine plumed_f_cmd_safe_long_double
   end interface
   interface
     subroutine plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,e,eh) bind(C)
@@ -499,7 +381,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-         call plumed_f_cmd_safe_char(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
      end subroutine plumed_f_cmd_char
 
@@ -533,7 +415,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_int_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_0
     subroutine plumed_f_gcmd_integer_0_0(key,val,dummy,error,ierror)
@@ -566,7 +448,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_int(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_1
     subroutine plumed_f_gcmd_integer_0_1(key,val,dummy,error,ierror)
@@ -600,7 +482,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_int(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_2
     subroutine plumed_f_gcmd_integer_0_2(key,val,dummy,error,ierror)
@@ -635,7 +517,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_int(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_3
     subroutine plumed_f_gcmd_integer_0_3(key,val,dummy,error,ierror)
@@ -671,7 +553,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_int(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_4
     subroutine plumed_f_gcmd_integer_0_4(key,val,dummy,error,ierror)
@@ -703,7 +585,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_short_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_0
     subroutine plumed_f_gcmd_integer_1_0(key,val,dummy,error,ierror)
@@ -736,7 +618,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_short(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_1
     subroutine plumed_f_gcmd_integer_1_1(key,val,dummy,error,ierror)
@@ -770,7 +652,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_short(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_2
     subroutine plumed_f_gcmd_integer_1_2(key,val,dummy,error,ierror)
@@ -805,7 +687,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_short(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_3
     subroutine plumed_f_gcmd_integer_1_3(key,val,dummy,error,ierror)
@@ -841,7 +723,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_short(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_4
     subroutine plumed_f_gcmd_integer_1_4(key,val,dummy,error,ierror)
@@ -873,7 +755,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_0
     subroutine plumed_f_gcmd_integer_2_0(key,val,dummy,error,ierror)
@@ -906,7 +788,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_1
     subroutine plumed_f_gcmd_integer_2_1(key,val,dummy,error,ierror)
@@ -940,7 +822,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_2
     subroutine plumed_f_gcmd_integer_2_2(key,val,dummy,error,ierror)
@@ -975,7 +857,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_3
     subroutine plumed_f_gcmd_integer_2_3(key,val,dummy,error,ierror)
@@ -1011,7 +893,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_4
     subroutine plumed_f_gcmd_integer_2_4(key,val,dummy,error,ierror)
@@ -1043,7 +925,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_float_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_0
     subroutine plumed_f_gcmd_real_0_0(key,val,dummy,error,ierror)
@@ -1076,7 +958,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_float(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_1
     subroutine plumed_f_gcmd_real_0_1(key,val,dummy,error,ierror)
@@ -1110,7 +992,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_float(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_2
     subroutine plumed_f_gcmd_real_0_2(key,val,dummy,error,ierror)
@@ -1145,7 +1027,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_float(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_3
     subroutine plumed_f_gcmd_real_0_3(key,val,dummy,error,ierror)
@@ -1181,7 +1063,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_float(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_4
     subroutine plumed_f_gcmd_real_0_4(key,val,dummy,error,ierror)
@@ -1213,7 +1095,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_double_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_0
     subroutine plumed_f_gcmd_real_1_0(key,val,dummy,error,ierror)
@@ -1246,7 +1128,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_1
     subroutine plumed_f_gcmd_real_1_1(key,val,dummy,error,ierror)
@@ -1280,7 +1162,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_2
     subroutine plumed_f_gcmd_real_1_2(key,val,dummy,error,ierror)
@@ -1315,7 +1197,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_3
     subroutine plumed_f_gcmd_real_1_3(key,val,dummy,error,ierror)
@@ -1351,7 +1233,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_4
     subroutine plumed_f_gcmd_real_1_4(key,val,dummy,error,ierror)
@@ -1383,7 +1265,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_double_scalar(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_0
     subroutine plumed_f_gcmd_real_2_0(key,val,dummy,error,ierror)
@@ -1416,7 +1298,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_1
     subroutine plumed_f_gcmd_real_2_1(key,val,dummy,error,ierror)
@@ -1450,7 +1332,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_2
     subroutine plumed_f_gcmd_real_2_2(key,val,dummy,error,ierror)
@@ -1485,7 +1367,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_3
     subroutine plumed_f_gcmd_real_2_3(key,val,dummy,error,ierror)
@@ -1521,7 +1403,7 @@ module plumed_module
            ierror=myerror%code
          endif
        else
-        call plumed_f_cmd_safe_long_double(p,key,val,pass_shape)
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_4
     subroutine plumed_f_gcmd_real_2_4(key,val,dummy,error,ierror)
