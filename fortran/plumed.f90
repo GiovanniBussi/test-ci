@@ -124,6 +124,19 @@ module plumed_module
   end interface
 
   interface
+    subroutine plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+      import
+      character(kind=c_char), intent(in)    :: p(32)
+      character(kind=c_char), intent(in)    :: key(*)
+      type(c_ptr),                    value :: val
+      integer(kind=c_size_t) :: pass_shape(*)
+      integer(kind=c_int),            value :: nocopy
+      type(c_ptr),                    value :: e
+      type(c_ptr),                    value :: eh
+    end subroutine plumed_f_cmd_safe_nothrow_ptr
+  end interface
+
+  interface
     subroutine plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,nocopy,e,eh) bind(C)
       import
       character(kind=c_char), intent(in)    :: p(32)
@@ -137,6 +150,7 @@ module plumed_module
   end interface
 
   interface plumed_f_cmd
+    module procedure plumed_f_cmd_ptr
     module procedure plumed_f_cmd_char
     module procedure plumed_f_cmd_integer_0_0
     module procedure plumed_f_cmd_integer_0_1
@@ -171,6 +185,7 @@ module plumed_module
   end interface plumed_f_cmd
 
   interface plumed_f_gcmd
+    module procedure plumed_f_gcmd_ptr
     module procedure plumed_f_gcmd_char
     module procedure plumed_f_gcmd_integer_0_0
     module procedure plumed_f_gcmd_integer_0_1
@@ -380,6 +395,50 @@ module plumed_module
        endif
      end subroutine error_handler
 
+     subroutine plumed_f_cmd_ptr(p,key,val,dummy,error,ierror,nocopy)
+       character(kind=c_char,len=32), intent(in)    :: p
+       character(kind=c_char,len=*),  intent(in)    :: key
+       type(c_ptr),                     value       :: val
+       type(dummy_type),   optional                 :: dummy
+       type(plumed_error), optional,  intent(out)   :: error
+       integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
+       type(plumed_error), target :: myerror
+       integer(kind=c_size_t) :: pass_shape(1)
+       integer(kind=c_int)    :: inocopy
+       pass_shape=(/0/)
+       if(present(nocopy)) then
+         if(nocopy) then
+           inocopy=1
+         endif
+       else
+         inocopy=0
+       endif
+       if(present(error) .or. present(ierror)) then
+         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,inocopy,c_loc(myerror),c_funloc(error_handler))
+         if(present(error)) then
+           error=myerror
+         endif
+         if(present(ierror)) then
+           ierror=myerror%code
+         endif
+       else
+         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,inocopy,c_null_ptr,c_null_ptr)
+       endif
+     end subroutine plumed_f_cmd_ptr
+
+     subroutine plumed_f_gcmd_ptr(key,val,dummy,error,ierror,nocopy)
+       character(kind=c_char,len=*),  intent(in)    :: key
+       type(c_ptr),                      value      :: val
+       type(dummy_type),   optional                 :: dummy
+       type(plumed_error), optional,  intent(out)   :: error
+       integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
+       character(kind=c_char,len=32) :: global
+       call plumed_f_global(global)
+       call plumed_f_cmd(global,key,val,error=error,ierror=ierror)
+     end subroutine plumed_f_gcmd_ptr
+
      subroutine plumed_f_cmd_char(p,key,val,dummy,error,ierror,nocopy)
        character(kind=c_char,len=32), intent(in)    :: p
        character(kind=c_char,len=*),  intent(in)    :: key
@@ -419,7 +478,7 @@ module plumed_module
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
        logical,            optional,  intent(in)    :: nocopy
-       character(len=32) :: global
+       character(kind=c_char,len=32) :: global
        call plumed_f_global(global)
        call plumed_f_cmd(global,key,val,error=error,ierror=ierror)
      end subroutine plumed_f_gcmd_char
@@ -462,7 +521,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_0_0
@@ -505,7 +564,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_0_1
@@ -549,7 +608,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_0_2
@@ -594,7 +653,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_0_3
@@ -640,7 +699,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_0_4
@@ -682,7 +741,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_1_0
@@ -725,7 +784,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_1_1
@@ -769,7 +828,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_1_2
@@ -814,7 +873,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_1_3
@@ -860,7 +919,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_1_4
@@ -902,7 +961,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_2_0
@@ -945,7 +1004,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_2_1
@@ -989,7 +1048,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_2_2
@@ -1034,7 +1093,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_2_3
@@ -1080,7 +1139,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_integer_2_4
@@ -1122,7 +1181,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_0_0
@@ -1165,7 +1224,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_0_1
@@ -1209,7 +1268,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_0_2
@@ -1254,7 +1313,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_0_3
@@ -1300,7 +1359,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_0_4
@@ -1342,7 +1401,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_1_0
@@ -1385,7 +1444,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_1_1
@@ -1429,7 +1488,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_1_2
@@ -1474,7 +1533,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_1_3
@@ -1520,7 +1579,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_1_4
@@ -1562,7 +1621,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_2_0
@@ -1605,7 +1664,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_2_1
@@ -1649,7 +1708,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_2_2
@@ -1694,7 +1753,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_2_3
@@ -1740,7 +1799,7 @@ module plumed_module
       type(plumed_error), optional,  intent(out)   :: error
       integer,            optional,  intent(out)   :: ierror
       logical,            optional,  intent(in)    :: nocopy
-      character(len=32) :: global
+      character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
       call plumed_f_cmd(global,key,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine plumed_f_gcmd_real_2_4

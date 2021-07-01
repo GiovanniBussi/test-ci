@@ -3400,14 +3400,14 @@ __PLUMED_IMPLEMENT_FORTRAN(plumed_f_use_count,PLUMED_F_USE_COUNT,(char*c,int*i),
 
 /* New in PLUMED 2.8 */
 
-#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,code) \
+#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,size,code) \
 void plumed_f_cmd_safe_nothrow_ ## type_ (char*c,char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape,int nocopy,void*callbackp,void(*callbackf)(void*,int,const char*,const void*)) { \
   plumed_safeptr safe; \
   plumed_nothrow_handler handler; \
   safe.ptr=val; \
   safe.nelem=0; \
   safe.shape=shape; \
-  safe.flags= (nocopy?1:0)* 0x10000000 + 0x2000000*2 + 0x10000*code + sizeof(type); \
+  safe.flags= (nocopy?1:0)* 0x10000000 + 0x2000000*2 + 0x10000*code + size; \
   safe.opt=NULL; \
   if(callbackf) { \
     handler.ptr=callbackp; \
@@ -3418,13 +3418,21 @@ void plumed_f_cmd_safe_nothrow_ ## type_ (char*c,char*key,type*val,__PLUMED_WRAP
   } \
 }
 
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(float,float,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(double,double,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(long double,long_double,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(int,int,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(short,short,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(long,long,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(char,char,3)
+#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_EMPTY(type,type_,code) \
+        __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,0,code)
+
+#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(type,type_,code) \
+        __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,sizeof(type),code)
+
+
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_EMPTY(void,ptr,0)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(float,float,4)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(double,double,4)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(long double,long_double,4)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(int,int,3)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(short,short,3)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(long,long,3)
+__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(char,char,3)
 
 #if __PLUMED_WRAPPER_GLOBAL /*{*/
 

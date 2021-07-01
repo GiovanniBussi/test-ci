@@ -1,11 +1,14 @@
 subroutine test3()
 use plumed_module
+use iso_c_binding
 implicit none
 
 character(len=32) :: pl
 type(plumed_error) :: error
+type(c_ptr)        :: ptr
 integer :: ierror
 integer :: s
+integer, target :: natoms
 open(10,file="error_codes")
 
 call plumed_f_create_invalid(pl)
@@ -27,6 +30,12 @@ call plumed_f_cmd(pl,"init"//achar(0),0)
 s=0
 call plumed_f_cmd(pl,"setStopFlag"//achar(0),s,nocopy=.true.,error=error)
 write(10,*)error%code
+call plumed_f_finalize(pl)
+
+call plumed_f_create(pl)
+natoms=999
+call plumed_f_cmd(pl,"setNatoms"//achar(0),c_loc(natoms))
+call plumed_f_cmd(pl,"init",0)
 call plumed_f_finalize(pl)
 
 close(10)
