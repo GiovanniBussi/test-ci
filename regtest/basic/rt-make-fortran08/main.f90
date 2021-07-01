@@ -8,6 +8,7 @@ PROGRAM main
   CALL TEST3()
   CALL TEST4()
   CALL TEST5()
+  CALL TEST6()
   call p%cmd("init")
   call p%finalize()
 END PROGRAM main
