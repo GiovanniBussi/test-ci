@@ -54,7 +54,8 @@ module plumed_module_f08
     pl_cmd_real_2_3, &
     pl_cmd_real_2_4, &
     pl_cmd, &
-    pl_cmd_char
+    pl_cmd_char, &
+    pl_cmd_ptr
 
     procedure :: pl_cmd_integer_0_0
     procedure :: pl_cmd_integer_0_1
@@ -88,6 +89,7 @@ module plumed_module_f08
     procedure :: pl_cmd_real_2_4
     procedure :: pl_cmd
     procedure :: pl_cmd_char
+    procedure :: pl_cmd_ptr
 
     procedure, public :: finalize => pl_finalize
     procedure, public :: incref => pl_incref
@@ -212,6 +214,20 @@ module plumed_module_f08
        endif
        call plumed_f_cmd(this%handle,key // c_null_char,val // c_null_char,error=error,ierror=ierror,nocopy=nocopy)
      end subroutine pl_cmd_char
+
+     subroutine pl_cmd_ptr(this,key,val,dummy,error,ierror,nocopy)
+       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
+       character(kind=c_char,len=*),  intent(in)    :: key
+       type(c_ptr),                        value    :: val
+       type(dummy_type),   optional,  intent(inout) :: dummy
+       type(plumed_error), optional,  intent(out)   :: error
+       integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
+       if(.not.this%initialized) then
+         call plumed_create(this)
+       endif
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
+     end subroutine pl_cmd_ptr
 
     subroutine pl_cmd_integer_0_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization

@@ -112,10 +112,12 @@ END SUBROUTINE TEST5
 
 SUBROUTINE TEST6()
   USE PLUMED_MODULE_F08
+  USE ISO_C_BINDING
   IMPLICIT NONE
   TYPE(PLUMED) :: pippo
   TYPE(PLUMED_ERROR) :: error
   INTEGER :: ierror
+  INTEGER, TARGET :: natoms
   open(10,file="error_codes")
   error%code=-1 ! check if this is overwritten
   call pippo%cmd("init",error=error)
@@ -131,6 +133,11 @@ SUBROUTINE TEST6()
   ierror=-1 ! check if this is overwritten
   call pippo%cmd("initxx",ierror=ierror)
   write(10,*) "should be nonzero",ierror
+
+  call plumed_create(pippo) ! reset instance
+  natoms=999
+  call pippo%cmd("setNatoms",c_loc(natoms))
+  call pippo%cmd("init")
   close(10)
 END SUBROUTINE TEST6
 
