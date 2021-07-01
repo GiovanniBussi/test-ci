@@ -186,390 +186,422 @@ module plumed_module_f08
        endif
      end subroutine pl_assign
 
-     impure elemental subroutine pl_cmd(this,key,dummy,error,ierror)
+     impure elemental subroutine pl_cmd(this,key,dummy,error,ierror,nocopy)
        class(plumed),                 intent(inout) :: this ! inout to allow for initialization
        character(kind=c_char,len=*),  intent(in)    :: key
        type(dummy_type),   optional,  intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,0,error=error,ierror=ierror) ! FIX: replace this to send NULL
+       call plumed_f_cmd(this%handle,key // c_null_char,0,error=error,ierror=ierror,nocopy=nocopy) ! FIX: replace this to send NULL
      end subroutine pl_cmd
 
-     subroutine pl_cmd_char(this,key,val,dummy,error,ierror)
+     subroutine pl_cmd_char(this,key,val,dummy,error,ierror,nocopy)
        class(plumed),                 intent(inout) :: this ! inout to allow for initialization
        character(kind=c_char,len=*),  intent(in)    :: key
        character(kind=c_char,len=*), asynchronous   :: val
        type(dummy_type),   optional,  intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val // c_null_char,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val // c_null_char,error=error,ierror=ierror,nocopy=nocopy)
      end subroutine pl_cmd_char
 
-    subroutine pl_cmd_integer_0_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_0_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_0_0
-    subroutine pl_cmd_integer_0_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_0_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_0_1
-    subroutine pl_cmd_integer_0_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_0_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_0_2
-    subroutine pl_cmd_integer_0_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_0_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_0_3
-    subroutine pl_cmd_integer_0_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_0_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_0_4
-    subroutine pl_cmd_integer_1_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_1_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_1_0
-    subroutine pl_cmd_integer_1_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_1_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_1_1
-    subroutine pl_cmd_integer_1_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_1_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_1_2
-    subroutine pl_cmd_integer_1_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_1_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_1_3
-    subroutine pl_cmd_integer_1_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_1_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_1_4
-    subroutine pl_cmd_integer_2_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_2_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_2_0
-    subroutine pl_cmd_integer_2_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_2_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_2_1
-    subroutine pl_cmd_integer_2_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_2_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_2_2
-    subroutine pl_cmd_integer_2_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_2_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_2_3
-    subroutine pl_cmd_integer_2_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_integer_2_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_integer_2_4
-    subroutine pl_cmd_real_0_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_0_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_0_0
-    subroutine pl_cmd_real_0_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_0_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_0_1
-    subroutine pl_cmd_real_0_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_0_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_0_2
-    subroutine pl_cmd_real_0_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_0_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_0_3
-    subroutine pl_cmd_real_0_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_0_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_0_4
-    subroutine pl_cmd_real_1_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_1_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_1_0
-    subroutine pl_cmd_real_1_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_1_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_1_1
-    subroutine pl_cmd_real_1_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_1_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_1_2
-    subroutine pl_cmd_real_1_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_1_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_1_3
-    subroutine pl_cmd_real_1_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_1_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_1_4
-    subroutine pl_cmd_real_2_0(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_2_0(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_2_0
-    subroutine pl_cmd_real_2_1(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_2_1(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_2_1
-    subroutine pl_cmd_real_2_2(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_2_2(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_2_2
-    subroutine pl_cmd_real_2_3(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_2_3(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_2_3
-    subroutine pl_cmd_real_2_4(this,key,val,dummy,error,ierror)
+    subroutine pl_cmd_real_2_4(this,key,val,dummy,error,ierror,nocopy)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        integer,            optional,  intent(out)   :: ierror
+       logical,            optional,  intent(in)    :: nocopy
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror)
+       call plumed_f_cmd(this%handle,key // c_null_char,val,error=error,ierror=ierror,nocopy=nocopy)
     end subroutine pl_cmd_real_2_4
 
 end module plumed_module_f08
