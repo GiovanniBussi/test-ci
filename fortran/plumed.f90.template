@@ -160,7 +160,7 @@ module plumed_module
 #: for t in types
 #: for k in kinds[t]
   interface
-    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_${cname(k)}$")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -172,7 +172,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_${cname(k)}$")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)

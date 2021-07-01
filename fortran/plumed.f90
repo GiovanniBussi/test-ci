@@ -205,7 +205,7 @@ module plumed_module
   end interface plumed_f_gcmd
 
   interface
-    subroutine plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_int")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -217,7 +217,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_int_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_int")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -229,7 +229,8 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_int
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,nocopy,e,eh)&
+        & bind(C,name="plumed_f_cmd_safe_nothrow_short")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -241,7 +242,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_short_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_short")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -253,7 +254,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_short
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_long")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -265,7 +266,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_long_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_long")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -277,7 +278,8 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_long
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,nocopy,e,eh)&
+        & bind(C,name="plumed_f_cmd_safe_nothrow_float")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -289,7 +291,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_float_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_float")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -301,7 +303,8 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_float
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,nocopy,e,eh)&
+        & bind(C,name="plumed_f_cmd_safe_nothrow_double")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -313,7 +316,7 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_double_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_double")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -325,7 +328,8 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_double
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,nocopy,e,eh)&
+        & bind(C,name="plumed_f_cmd_safe_nothrow_long_double")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
@@ -337,7 +341,8 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_long_double_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,nocopy,e,eh) bind(C,name="plumed_f_cmd_safe_nothrow_long_&
+        &double")
       import
       character(kind=c_char), intent(in)    :: p(32)
       character(kind=c_char), intent(in)    :: key(*)
