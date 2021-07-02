@@ -3401,13 +3401,13 @@ __PLUMED_IMPLEMENT_FORTRAN(plumed_f_use_count,PLUMED_F_USE_COUNT,(char*c,int*i),
 /* New in PLUMED 2.8 */
 
 #define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,size,code) \
-void plumed_f_cmd_safe_nothrow_ ## type_ (char*c,char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape,int nocopy,void*callbackp,void(*callbackf)(void*,int,const char*,const void*)) { \
+void plumed_f_cmd_safe_nothrow_ ## type_ (char*c,char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape,int isconst,int nocopy,void*callbackp,void(*callbackf)(void*,int,const char*,const void*)) { \
   plumed_safeptr safe; \
   plumed_nothrow_handler handler; \
   safe.ptr=val; \
   safe.nelem=0; \
   safe.shape=shape; \
-  safe.flags= (nocopy?1:0)* 0x10000000 + 0x2000000*2 + 0x10000*code + size; \
+  safe.flags= (nocopy?1:0)* 0x10000000 + 0x2000000*(2+(isconst?1:0)) + 0x10000*code + size; \
   safe.opt=NULL; \
   if(callbackf) { \
     handler.ptr=callbackp; \

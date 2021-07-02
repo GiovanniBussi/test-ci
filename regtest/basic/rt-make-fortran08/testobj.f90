@@ -136,7 +136,7 @@ SUBROUTINE TEST6()
 
   call plumed_create(pippo) ! reset instance
   natoms=999
-  call pippo%cmd("setNatoms",c_loc(natoms))
+  call pippo%cmd("setNatoms",c_loc(natoms),const=.true.)
   call pippo%cmd("init")
   close(10)
 END SUBROUTINE TEST6
