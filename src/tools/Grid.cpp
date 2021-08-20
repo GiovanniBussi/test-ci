@@ -162,7 +162,7 @@ unsigned GridBase::getDimension() const {
 GridBase::index_t GridBase::getIndex(const std::vector<unsigned> & indices) const {
   plumed_dbg_assert(indices.size()==dimension_);
   for(unsigned int i=0; i<dimension_; i++)
-    if(indices[i]>=nbin_[i]) {
+    if(indices[i]>nbin_[i]) {
       std::string is;
       Tools::convert(i,is);
       std::string msg="ERROR: the system is looking for a value outside the grid along the " + is + " ("+getArgNames()[i]+")";
