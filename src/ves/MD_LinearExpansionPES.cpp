@@ -317,10 +317,15 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
     error("problem with initial_position keyword, you need to give either one value or a value for each replica.");
   }
 
+  auto deleter=[](FILE* f) { fclose(f); };
+  FILE* file_dummy = fopen("/dev/null","w+");
+  plumed_assert(file_dummy);
+  // call fclose when file_dummy_deleter goes out of scope
+  std::unique_ptr<FILE,decltype(deleter)> file_dummy_deleter(file_dummy,deleter);
+  // Note: this should be declared before plumed_bf to make sure the file is closed after plumed_bf has been destroyed
 
   plumed_bf = Tools::make_unique<PLMD::PlumedMain>();
   unsigned int nn=1;
-  FILE* file_dummy = fopen("/dev/null","w+");
   plumed_bf->cmd("setNatoms",&nn);
   plumed_bf->cmd("setLog",file_dummy);
   plumed_bf->cmd("init",&nn);
@@ -578,6 +583,9 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
   potential=calc_energy(positions,forces); double ttt=calc_temp(velocities);
 
   FILE* fp=fopen(stats_filename.c_str(),"w+");
+  // call fclose when fp_deleter goes out of scope
+  std::unique_ptr<FILE,decltype(deleter)> fp_deleter(fp,deleter);
+
   double conserved = potential+1.5*ttt+therm_eng;
   //std::fprintf(fp,"%d %f %f %f %f %f %f %f %f \n", 0, 0., positions[0][0], positions[0][1], positions[0][2], conserved, ttt, potential, therm_eng );
   if( intra.Get_rank()==0 ) {
@@ -665,11 +673,8 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
   }
 
   potential_expansion_pntr.reset();
-  plumed_bf.reset(); // make sure this is destroyed before file_dummy is closed
   //printf("Rank: %d, Size: %d \n", pc.Get_rank(), pc.Get_size() );
   //printf("Rank: %d, Size: %d, MultiSimCommRank: %d, MultiSimCommSize: %d \n", pc.Get_rank(), pc.Get_size(), multi_sim_comm.Get_rank(), multi_sim_comm.Get_size() );
-  fclose(fp);
-  fclose(file_dummy);
 
   return 0;
 }
