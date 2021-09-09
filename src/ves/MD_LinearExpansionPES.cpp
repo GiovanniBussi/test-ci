@@ -214,7 +214,6 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
   unsigned int stepWrite=1000;
 
   std::unique_ptr<PLMD::PlumedMain> plumed;
-  std::unique_ptr<PLMD::PlumedMain> plumed_bf;
 
   size_t replicas;
   unsigned int coresPerReplica;
@@ -324,7 +323,7 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
   std::unique_ptr<FILE,decltype(deleter)> file_dummy_deleter(file_dummy,deleter);
   // Note: this should be declared before plumed_bf to make sure the file is closed after plumed_bf has been destroyed
 
-  plumed_bf = Tools::make_unique<PLMD::PlumedMain>();
+  auto plumed_bf = Tools::make_unique<PLMD::PlumedMain>();
   unsigned int nn=1;
   plumed_bf->cmd("setNatoms",&nn);
   plumed_bf->cmd("setLog",file_dummy);
@@ -672,7 +671,6 @@ int MD_LinearExpansionPES::main( FILE* in, FILE* out, PLMD::Communicator& pc) {
     }
   }
 
-  potential_expansion_pntr.reset();
   //printf("Rank: %d, Size: %d \n", pc.Get_rank(), pc.Get_size() );
   //printf("Rank: %d, Size: %d, MultiSimCommRank: %d, MultiSimCommSize: %d \n", pc.Get_rank(), pc.Get_size(), multi_sim_comm.Get_rank(), multi_sim_comm.Get_size() );
 
