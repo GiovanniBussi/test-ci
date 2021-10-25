@@ -133,7 +133,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_ptr
   end interface
 
@@ -147,7 +147,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_char
   end interface
 
@@ -232,7 +232,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_int_scalar
   end interface
   interface
@@ -245,7 +245,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_int
   end interface
   interface
@@ -259,7 +259,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_short_scalar
   end interface
   interface
@@ -273,7 +273,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_short
   end interface
   interface
@@ -287,7 +287,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_long_scalar
   end interface
   interface
@@ -300,7 +300,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_long
   end interface
   interface
@@ -314,7 +314,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_float_scalar
   end interface
   interface
@@ -328,7 +328,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_float
   end interface
   interface
@@ -342,7 +342,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_double_scalar
   end interface
   interface
@@ -356,7 +356,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_double
   end interface
   interface
@@ -370,7 +370,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_long_double_scalar
   end interface
   interface
@@ -384,7 +384,7 @@ module plumed_module
       integer(kind=c_int),            value :: const
       integer(kind=c_int),            value :: nocopy
       type(c_ptr),                    value :: e
-      type(c_ptr),                    value :: eh
+      type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_long_double
   end interface
 
