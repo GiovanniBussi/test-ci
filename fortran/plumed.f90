@@ -394,32 +394,18 @@ module plumed_module
        ierror=code
      end subroutine plumed_f_eh
 
-     subroutine plumed_f_cmd_ptr(p,key,val,dummy,ierror,const,nocopy)
+     subroutine plumed_f_cmd_ptr(p,key,val,dummy,ierror)
        character(kind=c_char,len=32), intent(in)    :: p
        character(kind=c_char,len=*),  intent(in)    :: key
        type(c_ptr),                     value       :: val
        type(dummy_type),   optional                 :: dummy
        integer,            optional,  intent(out)   :: ierror
-       logical,            optional,  intent(in)    :: const
-       logical,            optional,  intent(in)    :: nocopy
        integer,            target :: myerror
        integer(kind=c_size_t) :: pass_shape(1)
        integer(kind=c_int)    :: inocopy,iconst
        pass_shape=(/0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -429,44 +415,28 @@ module plumed_module
        endif
      end subroutine plumed_f_cmd_ptr
 
-     subroutine plumed_f_gcmd_ptr(key,val,dummy,ierror,const,nocopy)
+     subroutine plumed_f_gcmd_ptr(key,val,dummy,ierror)
        character(kind=c_char,len=*),  intent(in)    :: key
        type(c_ptr),                      value      :: val
        type(dummy_type),   optional                 :: dummy
        integer,            optional,  intent(out)   :: ierror
-       logical,            optional,  intent(in)    :: const
-       logical,            optional,  intent(in)    :: nocopy
        character(kind=c_char,len=32) :: global
        call plumed_f_global(global)
-       call plumed_f_cmd(global,key,val,ierror=ierror,const=const,nocopy=nocopy)
+       call plumed_f_cmd(global,key,val,ierror=ierror)
      end subroutine plumed_f_gcmd_ptr
 
-     subroutine plumed_f_cmd_char(p,key,val,dummy,ierror,const,nocopy)
+     subroutine plumed_f_cmd_char(p,key,val,dummy,ierror)
        character(kind=c_char,len=32), intent(in)    :: p
        character(kind=c_char,len=*),  intent(in)    :: key
        character(kind=c_char,len=*), asynchronous   :: val
        type(dummy_type),   optional                 :: dummy
        integer,            optional,  intent(out)   :: ierror
-       logical,            optional,  intent(in)    :: const
-       logical,            optional,  intent(in)    :: nocopy
        integer,            target :: myerror
        integer(kind=c_size_t) :: pass_shape(2)
        integer(kind=c_int)    :: inocopy,iconst
        pass_shape=(/len(val),0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -476,43 +446,28 @@ module plumed_module
        endif
      end subroutine plumed_f_cmd_char
 
-     subroutine plumed_f_gcmd_char(key,val,dummy,ierror,nocopy)
+     subroutine plumed_f_gcmd_char(key,val,dummy,ierror)
        character(kind=c_char,len=*),  intent(in)    :: key
        character(kind=c_char,len=*), asynchronous   :: val
        type(dummy_type),   optional                 :: dummy
        integer,            optional,  intent(out)   :: ierror
-       logical,            optional,  intent(in)    :: nocopy
        character(kind=c_char,len=32) :: global
        call plumed_f_global(global)
        call plumed_f_cmd(global,key,val,ierror=ierror)
      end subroutine plumed_f_gcmd_char
 
-    subroutine plumed_f_cmd_integer_0_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_0_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -521,43 +476,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_0
-    subroutine plumed_f_gcmd_integer_0_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_0_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_int), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_0_0
-    subroutine plumed_f_cmd_integer_0_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_0_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -566,44 +506,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_1
-    subroutine plumed_f_gcmd_integer_0_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_0_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_int), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_0_1
-    subroutine plumed_f_cmd_integer_0_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_0_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -612,24 +537,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_2
-    subroutine plumed_f_gcmd_integer_0_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_0_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_int), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_0_2
-    subroutine plumed_f_cmd_integer_0_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_0_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -637,20 +559,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -659,24 +569,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_3
-    subroutine plumed_f_gcmd_integer_0_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_0_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_int), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_0_3
-    subroutine plumed_f_cmd_integer_0_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_0_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_int), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -685,20 +592,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -707,42 +602,27 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_0_4
-    subroutine plumed_f_gcmd_integer_0_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_0_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_int), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_0_4
-    subroutine plumed_f_cmd_integer_1_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_1_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -751,43 +631,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_0
-    subroutine plumed_f_gcmd_integer_1_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_1_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_short), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_1_0
-    subroutine plumed_f_cmd_integer_1_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_1_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -796,44 +661,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_1
-    subroutine plumed_f_gcmd_integer_1_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_1_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_short), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_1_1
-    subroutine plumed_f_cmd_integer_1_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_1_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -842,24 +692,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_2
-    subroutine plumed_f_gcmd_integer_1_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_1_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_short), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_1_2
-    subroutine plumed_f_cmd_integer_1_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_1_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -867,20 +714,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -889,24 +724,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_3
-    subroutine plumed_f_gcmd_integer_1_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_1_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_short), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_1_3
-    subroutine plumed_f_cmd_integer_1_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_1_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_short), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -915,20 +747,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -937,42 +757,27 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_1_4
-    subroutine plumed_f_gcmd_integer_1_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_1_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_short), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_1_4
-    subroutine plumed_f_cmd_integer_2_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_2_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -981,43 +786,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_0
-    subroutine plumed_f_gcmd_integer_2_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_2_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_long), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_2_0
-    subroutine plumed_f_cmd_integer_2_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_2_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1026,44 +816,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_1
-    subroutine plumed_f_gcmd_integer_2_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_2_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_long), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_2_1
-    subroutine plumed_f_cmd_integer_2_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_2_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1072,24 +847,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_2
-    subroutine plumed_f_gcmd_integer_2_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_2_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_long), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_2_2
-    subroutine plumed_f_cmd_integer_2_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_2_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -1097,20 +869,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1119,24 +879,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_3
-    subroutine plumed_f_gcmd_integer_2_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_2_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_long), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_2_3
-    subroutine plumed_f_cmd_integer_2_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_integer_2_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(KIND=c_long), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -1145,20 +902,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1167,42 +912,27 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_integer_2_4
-    subroutine plumed_f_gcmd_integer_2_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_integer_2_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       integer(kind=c_long), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_integer_2_4
-    subroutine plumed_f_cmd_real_0_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_0_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1211,43 +941,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_0
-    subroutine plumed_f_gcmd_real_0_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_0_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_float), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_0_0
-    subroutine plumed_f_cmd_real_0_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_0_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1256,44 +971,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_1
-    subroutine plumed_f_gcmd_real_0_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_0_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_float), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_0_1
-    subroutine plumed_f_cmd_real_0_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_0_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1302,24 +1002,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_2
-    subroutine plumed_f_gcmd_real_0_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_0_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_float), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_0_2
-    subroutine plumed_f_cmd_real_0_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_0_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -1327,20 +1024,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1349,24 +1034,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_3
-    subroutine plumed_f_gcmd_real_0_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_0_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_float), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_0_3
-    subroutine plumed_f_cmd_real_0_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_0_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_float), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -1375,20 +1057,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1397,42 +1067,27 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_0_4
-    subroutine plumed_f_gcmd_real_0_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_0_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_float), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_0_4
-    subroutine plumed_f_cmd_real_1_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_1_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1441,43 +1096,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_0
-    subroutine plumed_f_gcmd_real_1_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_1_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_double), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_1_0
-    subroutine plumed_f_cmd_real_1_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_1_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1486,44 +1126,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_1
-    subroutine plumed_f_gcmd_real_1_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_1_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_double), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_1_1
-    subroutine plumed_f_cmd_real_1_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_1_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1532,24 +1157,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_2
-    subroutine plumed_f_gcmd_real_1_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_1_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_double), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_1_2
-    subroutine plumed_f_cmd_real_1_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_1_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -1557,20 +1179,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1579,24 +1189,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_3
-    subroutine plumed_f_gcmd_real_1_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_1_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_double), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_1_3
-    subroutine plumed_f_cmd_real_1_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_1_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_double), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -1605,20 +1212,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1627,42 +1222,27 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_1_4
-    subroutine plumed_f_gcmd_real_1_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_1_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_double), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_1_4
-    subroutine plumed_f_cmd_real_2_0(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_2_0(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1671,43 +1251,28 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_0
-    subroutine plumed_f_gcmd_real_2_0(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_2_0(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_long_double), asynchronous              :: val
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_2_0
-    subroutine plumed_f_cmd_real_2_1(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_2_1(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1716,44 +1281,29 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_1
-    subroutine plumed_f_gcmd_real_2_1(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_2_1(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_long_double), asynchronous              :: val(:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_2_1
-    subroutine plumed_f_cmd_real_2_2(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_2_2(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1762,24 +1312,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_2
-    subroutine plumed_f_gcmd_real_2_2(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_2_2(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_long_double), asynchronous              :: val(:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_2_2
-    subroutine plumed_f_cmd_real_2_3(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_2_3(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(4)
@@ -1787,20 +1334,8 @@ module plumed_module
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1809,24 +1344,21 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_3
-    subroutine plumed_f_gcmd_real_2_3(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_2_3(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_long_double), asynchronous              :: val(:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_2_3
-    subroutine plumed_f_cmd_real_2_4(p,key,val,dummy,ierror,const,nocopy)
+    subroutine plumed_f_cmd_real_2_4(p,key,val,dummy,ierror)
       character(kind=c_char,len=32), intent(in)    :: p
       character(kind=c_char,len=*),  intent(in)    :: key
       real(KIND=c_long_double), asynchronous              :: val(:,:,:,:)
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: const
-      logical,            optional,  intent(in)    :: nocopy
       integer,            target :: myerror
       integer(kind=c_int)    :: inocopy,iconst
       integer(kind=c_size_t) :: pass_shape(5)
@@ -1835,20 +1367,8 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       if(present(nocopy)) then
-         if(nocopy) then
-           inocopy=1
-         endif
-       else
-         inocopy=0
-       endif
-       if(present(const)) then
-         if(const) then
-           iconst=1
-         endif
-       else
-         iconst=0
-       endif
+       inocopy=0
+       iconst=0
        if(present(ierror)) then
          myerror=0
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
@@ -1857,15 +1377,14 @@ module plumed_module
          call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_ptr)
        endif
     end subroutine plumed_f_cmd_real_2_4
-    subroutine plumed_f_gcmd_real_2_4(key,val,dummy,ierror,nocopy)
+    subroutine plumed_f_gcmd_real_2_4(key,val,dummy,ierror)
       character(kind=c_char,len=*),  intent(in)    :: key
       real(kind=c_long_double), asynchronous              :: val(:,:,:,:)
       type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
-      logical,            optional,  intent(in)    :: nocopy
       character(kind=c_char,len=32) :: global
       call plumed_f_global(global)
-      call plumed_f_cmd(global,key,val,ierror=ierror,nocopy=nocopy)
+      call plumed_f_cmd(global,key,val,ierror=ierror)
     end subroutine plumed_f_gcmd_real_2_4
 
 end module plumed_module

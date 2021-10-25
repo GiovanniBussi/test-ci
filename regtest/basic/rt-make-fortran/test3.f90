@@ -30,13 +30,6 @@ write(10,*)ierror
 call plumed_f_finalize(pl)
 
 call plumed_f_create(pl)
-call plumed_f_cmd(pl,"init"//achar(0),0)
-s=0
-call plumed_f_cmd(pl,"setStopFlag"//achar(0),s,nocopy=.true.,ierror=ierror)
-write(10,*)ierror
-call plumed_f_finalize(pl)
-
-call plumed_f_create(pl)
 natoms=999
 allocate(positions(3,natoms))
 positions=3.0
@@ -52,16 +45,6 @@ call plumed_f_cmd(pl,"readInputLine"//achar(0),"c: CENTER ATOMS=1-999"//achar(0)
 call plumed_f_cmd(pl,"readInputLine"//achar(0),"DUMPATOMS ATOMS=c FILE=traj.xyz"//achar(0))
 call plumed_f_cmd(pl,"readInputLine"//achar(0),"d: DISTANCE ATOMS=1,2"//achar(0))
 call plumed_f_cmd(pl,"readInputLine"//achar(0),"RESTRAINT ARG=d KAPPA=10.0 AT=10.0"//achar(0))
-call plumed_f_cmd(pl,"setStep"//achar(0),1)
-call plumed_f_cmd(pl,"setPositions"//achar(0),positions)
-call plumed_f_cmd(pl,"setMasses"//achar(0),masses)
-call plumed_f_cmd(pl,"setForces"//achar(0),forces,const=.true.)
-call plumed_f_cmd(pl,"setBox"//achar(0),box)
-call plumed_f_cmd(pl,"setVirial"//achar(0),virial)
-call plumed_f_cmd(pl,"calc"//achar(0),0,ierror=ierror)
-if(ierror==0)then
-  stop "should give an error"
-endif
 call plumed_f_cmd(pl,"setStep"//achar(0),1)
 call plumed_f_cmd(pl,"setPositions"//achar(0),positions)
 call plumed_f_cmd(pl,"setMasses"//achar(0),masses)
