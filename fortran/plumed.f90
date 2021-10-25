@@ -390,7 +390,7 @@ module plumed_module
 
   contains
 
-     subroutine error_handler(error_ptr,code,what_ptr,opt_ptr) bind(C)
+     subroutine plumed_f_eh(error_ptr,code,what_ptr,opt_ptr) bind(C)
        type(c_ptr),         value :: error_ptr
        integer(kind=c_int), value :: code
        type(c_ptr),         value :: what_ptr
@@ -412,7 +412,7 @@ module plumed_module
            error%what(j:j)=p_chars(j)
          enddo
        endif
-     end subroutine error_handler
+     end subroutine plumed_f_eh
 
      subroutine plumed_f_cmd_ptr(p,key,val,dummy,error,ierror,const,nocopy)
        character(kind=c_char,len=32), intent(in)    :: p
@@ -442,7 +442,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -495,7 +495,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -547,7 +547,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -598,7 +598,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -650,7 +650,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -703,7 +703,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -757,7 +757,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_int(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -807,7 +807,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_short_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -858,7 +858,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -910,7 +910,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -963,7 +963,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1017,7 +1017,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_short(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1067,7 +1067,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1118,7 +1118,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1170,7 +1170,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1223,7 +1223,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1277,7 +1277,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1327,7 +1327,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_float_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1378,7 +1378,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1430,7 +1430,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1483,7 +1483,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1537,7 +1537,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_float(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1587,7 +1587,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1638,7 +1638,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1690,7 +1690,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1743,7 +1743,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1797,7 +1797,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1847,8 +1847,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handle&
-             &r))
+         call plumed_f_cmd_safe_nothrow_long_double_scalar(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1899,7 +1898,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -1951,7 +1950,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -2004,7 +2003,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
@@ -2058,7 +2057,7 @@ module plumed_module
          iconst=0
        endif
        if(present(error) .or. present(ierror)) then
-         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(error_handler))
+         call plumed_f_cmd_safe_nothrow_long_double(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_eh))
          if(present(error)) then
            error=myerror
          endif
