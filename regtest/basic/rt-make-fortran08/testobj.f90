@@ -116,7 +116,6 @@ SUBROUTINE TEST6()
   IMPLICIT NONE
   TYPE(PLUMED) :: pippo
   TYPE(PLUMED_ERROR) :: error
-  INTEGER :: ierror
   INTEGER, TARGET :: natoms
   open(10,file="error_codes")
   error%code=-1 ! check if this is overwritten
@@ -127,12 +126,12 @@ SUBROUTINE TEST6()
   write(10,*) "should be nonzero",error%code
 
   call plumed_create(pippo) ! reset instance
-  ierror=-1 ! check if this is overwritten
-  call pippo%cmd("init",ierror=ierror)
-  write(10,*) "should be zero",ierror
-  ierror=-1 ! check if this is overwritten
-  call pippo%cmd("initxx",ierror=ierror)
-  write(10,*) "should be nonzero",ierror
+  error%code=-1 ! check if this is overwritten
+  call pippo%cmd("init",error=error)
+  write(10,*) "should be zero",error%code
+  error%code=-1 ! check if this is overwritten
+  call pippo%cmd("initxx",error=error)
+  write(10,*) "should be nonzero",error%code
 
   call plumed_create(pippo) ! reset instance
   natoms=999
