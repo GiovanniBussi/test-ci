@@ -6,7 +6,10 @@ module plumed_module
   use iso_c_binding
   implicit none
 
+  ! names are private by default
   private
+
+  ! only these names are public
   public :: plumed_f_create
   public :: plumed_f_create_dlopen
   public :: plumed_f_create_reference
@@ -23,13 +26,16 @@ module plumed_module
   public :: plumed_f_gfinalize
   public :: plumed_f_gvalid
 
+  ! used to enforce keyword-only arguments
   type :: dummy_type
   end type dummy_type
 
+  ! this type maps to the struct plumed defined in src/wrapper/Plumed.h
   type, bind(C) :: cplumed
     type(c_ptr) :: ptr
   end type cplumed
 
+  ! this function is used to translate 32-char to c identifiers, only used internally
   interface
     function plumed_f2c(c) bind(C)
       import
@@ -37,6 +43,8 @@ module plumed_module
       type(cplumed) :: plumed_f2c
     end function plumed_f2c
   end interface
+
+  ! now there are interfaces to the classic Fortran functions
 
   interface
     subroutine plumed_f_create(c) bind(C)
@@ -129,6 +137,8 @@ module plumed_module
     end subroutine plumed_f_gvalid
   end interface
 
+  ! now there are the interfaces to the special C function handling type checks and exceptions
+
   interface
     subroutine plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
       import
@@ -156,76 +166,6 @@ module plumed_module
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_char
   end interface
-
-  interface plumed_f_cmd
-    module procedure plumed_f_cmd_ptr
-    module procedure plumed_f_cmd_char
-    module procedure plumed_f_cmd_integer_0_0
-    module procedure plumed_f_cmd_integer_0_1
-    module procedure plumed_f_cmd_integer_0_2
-    module procedure plumed_f_cmd_integer_0_3
-    module procedure plumed_f_cmd_integer_0_4
-    module procedure plumed_f_cmd_integer_1_0
-    module procedure plumed_f_cmd_integer_1_1
-    module procedure plumed_f_cmd_integer_1_2
-    module procedure plumed_f_cmd_integer_1_3
-    module procedure plumed_f_cmd_integer_1_4
-    module procedure plumed_f_cmd_integer_2_0
-    module procedure plumed_f_cmd_integer_2_1
-    module procedure plumed_f_cmd_integer_2_2
-    module procedure plumed_f_cmd_integer_2_3
-    module procedure plumed_f_cmd_integer_2_4
-    module procedure plumed_f_cmd_real_0_0
-    module procedure plumed_f_cmd_real_0_1
-    module procedure plumed_f_cmd_real_0_2
-    module procedure plumed_f_cmd_real_0_3
-    module procedure plumed_f_cmd_real_0_4
-    module procedure plumed_f_cmd_real_1_0
-    module procedure plumed_f_cmd_real_1_1
-    module procedure plumed_f_cmd_real_1_2
-    module procedure plumed_f_cmd_real_1_3
-    module procedure plumed_f_cmd_real_1_4
-    module procedure plumed_f_cmd_real_2_0
-    module procedure plumed_f_cmd_real_2_1
-    module procedure plumed_f_cmd_real_2_2
-    module procedure plumed_f_cmd_real_2_3
-    module procedure plumed_f_cmd_real_2_4
-  end interface plumed_f_cmd
-
-  interface plumed_f_gcmd
-    module procedure plumed_f_gcmd_ptr
-    module procedure plumed_f_gcmd_char
-    module procedure plumed_f_gcmd_integer_0_0
-    module procedure plumed_f_gcmd_integer_0_1
-    module procedure plumed_f_gcmd_integer_0_2
-    module procedure plumed_f_gcmd_integer_0_3
-    module procedure plumed_f_gcmd_integer_0_4
-    module procedure plumed_f_gcmd_integer_1_0
-    module procedure plumed_f_gcmd_integer_1_1
-    module procedure plumed_f_gcmd_integer_1_2
-    module procedure plumed_f_gcmd_integer_1_3
-    module procedure plumed_f_gcmd_integer_1_4
-    module procedure plumed_f_gcmd_integer_2_0
-    module procedure plumed_f_gcmd_integer_2_1
-    module procedure plumed_f_gcmd_integer_2_2
-    module procedure plumed_f_gcmd_integer_2_3
-    module procedure plumed_f_gcmd_integer_2_4
-    module procedure plumed_f_gcmd_real_0_0
-    module procedure plumed_f_gcmd_real_0_1
-    module procedure plumed_f_gcmd_real_0_2
-    module procedure plumed_f_gcmd_real_0_3
-    module procedure plumed_f_gcmd_real_0_4
-    module procedure plumed_f_gcmd_real_1_0
-    module procedure plumed_f_gcmd_real_1_1
-    module procedure plumed_f_gcmd_real_1_2
-    module procedure plumed_f_gcmd_real_1_3
-    module procedure plumed_f_gcmd_real_1_4
-    module procedure plumed_f_gcmd_real_2_0
-    module procedure plumed_f_gcmd_real_2_1
-    module procedure plumed_f_gcmd_real_2_2
-    module procedure plumed_f_gcmd_real_2_3
-    module procedure plumed_f_gcmd_real_2_4
-  end interface plumed_f_gcmd
 
   interface
     subroutine plumed_f_cmd_safe_nothrow_int_scalar(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
@@ -384,8 +324,82 @@ module plumed_module
     end subroutine plumed_f_cmd_safe_nothrow_long_double
   end interface
 
+  ! here are the interfaces used for overloading
+  interface plumed_f_cmd
+    module procedure plumed_f_cmd_ptr
+    module procedure plumed_f_cmd_char
+    module procedure plumed_f_cmd_integer_0_0
+    module procedure plumed_f_cmd_integer_0_1
+    module procedure plumed_f_cmd_integer_0_2
+    module procedure plumed_f_cmd_integer_0_3
+    module procedure plumed_f_cmd_integer_0_4
+    module procedure plumed_f_cmd_integer_1_0
+    module procedure plumed_f_cmd_integer_1_1
+    module procedure plumed_f_cmd_integer_1_2
+    module procedure plumed_f_cmd_integer_1_3
+    module procedure plumed_f_cmd_integer_1_4
+    module procedure plumed_f_cmd_integer_2_0
+    module procedure plumed_f_cmd_integer_2_1
+    module procedure plumed_f_cmd_integer_2_2
+    module procedure plumed_f_cmd_integer_2_3
+    module procedure plumed_f_cmd_integer_2_4
+    module procedure plumed_f_cmd_real_0_0
+    module procedure plumed_f_cmd_real_0_1
+    module procedure plumed_f_cmd_real_0_2
+    module procedure plumed_f_cmd_real_0_3
+    module procedure plumed_f_cmd_real_0_4
+    module procedure plumed_f_cmd_real_1_0
+    module procedure plumed_f_cmd_real_1_1
+    module procedure plumed_f_cmd_real_1_2
+    module procedure plumed_f_cmd_real_1_3
+    module procedure plumed_f_cmd_real_1_4
+    module procedure plumed_f_cmd_real_2_0
+    module procedure plumed_f_cmd_real_2_1
+    module procedure plumed_f_cmd_real_2_2
+    module procedure plumed_f_cmd_real_2_3
+    module procedure plumed_f_cmd_real_2_4
+  end interface plumed_f_cmd
+
+  interface plumed_f_gcmd
+    module procedure plumed_f_gcmd_ptr
+    module procedure plumed_f_gcmd_char
+    module procedure plumed_f_gcmd_integer_0_0
+    module procedure plumed_f_gcmd_integer_0_1
+    module procedure plumed_f_gcmd_integer_0_2
+    module procedure plumed_f_gcmd_integer_0_3
+    module procedure plumed_f_gcmd_integer_0_4
+    module procedure plumed_f_gcmd_integer_1_0
+    module procedure plumed_f_gcmd_integer_1_1
+    module procedure plumed_f_gcmd_integer_1_2
+    module procedure plumed_f_gcmd_integer_1_3
+    module procedure plumed_f_gcmd_integer_1_4
+    module procedure plumed_f_gcmd_integer_2_0
+    module procedure plumed_f_gcmd_integer_2_1
+    module procedure plumed_f_gcmd_integer_2_2
+    module procedure plumed_f_gcmd_integer_2_3
+    module procedure plumed_f_gcmd_integer_2_4
+    module procedure plumed_f_gcmd_real_0_0
+    module procedure plumed_f_gcmd_real_0_1
+    module procedure plumed_f_gcmd_real_0_2
+    module procedure plumed_f_gcmd_real_0_3
+    module procedure plumed_f_gcmd_real_0_4
+    module procedure plumed_f_gcmd_real_1_0
+    module procedure plumed_f_gcmd_real_1_1
+    module procedure plumed_f_gcmd_real_1_2
+    module procedure plumed_f_gcmd_real_1_3
+    module procedure plumed_f_gcmd_real_1_4
+    module procedure plumed_f_gcmd_real_2_0
+    module procedure plumed_f_gcmd_real_2_1
+    module procedure plumed_f_gcmd_real_2_2
+    module procedure plumed_f_gcmd_real_2_3
+    module procedure plumed_f_gcmd_real_2_4
+  end interface plumed_f_gcmd
+
   contains
 
+     ! this is a callback function.
+     ! notice that it ends up in global namespace (no protection for being a module function!)
+     ! be careful with name thus
      subroutine plumed_f_eh(ierror_ptr,code,what_ptr,opt_ptr) bind(C)
        type(c_ptr),         value :: ierror_ptr
        integer(kind=c_int), value :: code
@@ -395,6 +409,8 @@ module plumed_module
        call c_f_pointer(ierror_ptr,ierror)
        ierror=code
      end subroutine plumed_f_eh
+
+     ! we then define all the functions needed for overloading
 
      subroutine plumed_f_cmd_ptr(p,key,val,dummy,ierror)
        character(kind=c_char,len=32), intent(in)    :: p

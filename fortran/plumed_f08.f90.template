@@ -5,20 +5,28 @@ module plumed_module_f08
   use iso_c_binding
   implicit none
 
+  ! names are private by default
   private
 
+  ! only these names are public
   public :: plumed
   public :: plumed_create
   public :: plumed_installed
   public :: plumed_error
 
+  ! used to enforce keyword-only arguments
   type dummy_type
   end type dummy_type
 
+  ! this type maps to the struct plumed defined in src/wrapper/Plumed.h
   type, bind(C) :: cplumed
     type(c_ptr) :: ptr
   end type cplumed
 
+  ! this type is used to manipulate a plumed instance
+  ! since it has a destructor, if contains a logical label to check if it has been initialized
+  ! it also contains a number of methods
+  ! notice that constructor (plumed_create) is NOT a member
   type plumed
     type(cplumed), private :: handle
     logical,       private :: initialized = .false.
@@ -57,10 +65,13 @@ module plumed_module_f08
     procedure :: pl_assign
   end type plumed
 
+  ! this type holds the information associated to a thrown exception
   type :: plumed_error
     integer                         :: code=0
     character(len = :), allocatable :: what
   end type plumed_error
+
+  ! now there are interfaces to some of the classic C functions, only used internally
 
   interface
     function cplumed_create() bind(C,name="plumed_create")
@@ -115,6 +126,8 @@ module plumed_module_f08
     end function cplumed_use_count
   end interface
 
+  ! now there are the interfaces to the special C function handling type checks and exceptions
+
   interface
     subroutine plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
       import
@@ -142,18 +155,6 @@ module plumed_module_f08
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_char
   end interface
-
-  interface plumed_f_cmd
-    module procedure plumed_f_cmd_ptr
-    module procedure plumed_f_cmd_char
-#: for t in types
-#: for ik in range(len(kinds[t]))
-#: for r in range(maxrank+1)
-    module procedure plumed_f_cmd_${t}$_${ik}$_${r}$
-#: endfor
-#: endfor
-#: endfor
-  end interface plumed_f_cmd
 
 #: for t in types
 #: for k in kinds[t]
@@ -186,8 +187,24 @@ module plumed_module_f08
 #: endfor
 #: endfor
 
+  ! here are the interfaces used for overloading
+  interface plumed_f_cmd
+    module procedure plumed_f_cmd_ptr
+    module procedure plumed_f_cmd_char
+#: for t in types
+#: for ik in range(len(kinds[t]))
+#: for r in range(maxrank+1)
+    module procedure plumed_f_cmd_${t}$_${ik}$_${r}$
+#: endfor
+#: endfor
+#: endfor
+  end interface plumed_f_cmd
+
   contains
 
+     ! this is a callback function.
+     ! notice that it ends up in global namespace (no protection for being a module function!)
+     ! be careful with name thus
      subroutine plumed_f_f08_eh(error_ptr,code,what_ptr,opt_ptr) bind(C)
        type(c_ptr),         value :: error_ptr
        integer(kind=c_int), value :: code
@@ -211,6 +228,8 @@ module plumed_module_f08
          enddo
        endif
      end subroutine plumed_f_f08_eh
+
+     ! we then define all the functions needed for overloading
 
      subroutine plumed_f_cmd_ptr(p,key,val,dummy,error,const,nocopy)
        type(cplumed),                 intent(in)    :: p
@@ -331,11 +350,13 @@ module plumed_module_f08
 #: endfor
 #: endfor
 
+     ! this is a soft wrapper to a C function
      function plumed_installed() result(res)
        logical             :: res
        res=cplumed_installed()>0
      end function plumed_installed
 
+     ! this is the constructor
      impure elemental subroutine plumed_create(this,kernel)
        type(plumed),    intent(out)          :: this
        character(len=*), intent(in), optional :: kernel
@@ -346,6 +367,8 @@ module plumed_module_f08
        endif
        this%initialized=.true.
      end subroutine plumed_create
+
+     ! then we define all member functions
 
      impure elemental subroutine pl_finalize(this)
        class(plumed), intent(inout) :: this
