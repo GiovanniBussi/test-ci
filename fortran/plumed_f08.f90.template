@@ -82,13 +82,6 @@ module plumed_module_f08
   end interface
 
   interface
-    subroutine plumed_f_create_invalid(c) bind(C)
-      import
-      character(kind=c_char), intent(out) :: c(32)
-    end subroutine plumed_f_create_invalid
-  end interface
-
-  interface
     subroutine plumed_f_finalize(c) bind(C)
       import
       character(kind=c_char), intent(in) :: c(32)
@@ -116,37 +109,6 @@ module plumed_module_f08
       character(kind=c_char), intent(in)  :: c(32)
       integer(kind=c_int),    intent(out) :: i
     end subroutine plumed_f_use_count
-  end interface
-
-  interface
-    subroutine plumed_f_global(c) bind(C)
-      import
-      character(kind=c_char), intent(out) :: c(32)
-    end subroutine plumed_f_global
-  end interface 
-
-  interface
-    subroutine plumed_f_ginitialized(i) bind(C)
-      import
-      integer(kind=c_int), intent(out) :: i
-    end subroutine plumed_f_ginitialized
-  end interface
-
-  interface
-    subroutine plumed_f_gcreate() bind(C)
-    end subroutine plumed_f_gcreate
-  end interface
-  
-  interface
-    subroutine plumed_f_gfinalize() bind(C)
-    end subroutine plumed_f_gfinalize
-  end interface
-
-  interface
-    subroutine plumed_f_gvalid(i) bind(C)
-      import
-      integer(kind=c_int),    intent(out) :: i
-    end subroutine plumed_f_gvalid
   end interface
 
   interface
