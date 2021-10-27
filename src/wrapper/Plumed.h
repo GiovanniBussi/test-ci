@@ -714,7 +714,7 @@ typedef struct {
     0x10000000 * 1 to forbid pointer copy (pointer copy is also forbidden for pass-by-value)
     0x20000000 and higher bits are ignored, reserved for future extensions
   */
-  unsigned long int flags;
+  __PLUMED_WRAPPER_STD size_t flags;
   /** Optional information, not used yet  */
   void* opt;
 } plumed_safeptr;
