@@ -3408,11 +3408,7 @@ void plumed_f_cmd_safe_nothrow_ ## type_ ## suffix (plumed p,char*key,type*val,_
   safe.shape=shape; \
   safe.flags= flags + 0x10000*code + size; \
   safe.opt=NULL; \
-  if(handler.handler) { \
-    plumed_cmd_safe_nothrow(p,key,safe,handler); \
-  } else { \
-    plumed_cmd_safe(p,key,safe); \
-  } \
+  plumed_cmd_safe_nothrow(p,key,safe,handler); \
 }
 
 #define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,size,code) \
