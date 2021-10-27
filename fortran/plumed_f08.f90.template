@@ -129,28 +129,26 @@ module plumed_module_f08
   ! now there are the interfaces to the special C function handling type checks and exceptions
 
   interface
-    subroutine plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,flags,e,eh) bind(C)
       import
       type(cplumed),                  value :: p
       character(kind=c_char), intent(in)    :: key(*)
       type(c_ptr),                    value :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-      integer(kind=c_int),            value :: const
-      integer(kind=c_int),            value :: nocopy
+      integer(kind=c_size_t)                :: pass_shape(*)
+      integer(kind=c_size_t),         value :: flags
       type(c_ptr),                    value :: e
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_ptr
   end interface
 
   interface
-    subroutine plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,flags,e,eh) bind(C)
       import
       type(cplumed),                  value :: p
       character(kind=c_char), intent(in)    :: key(*)
       character(kind=c_char)                :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-      integer(kind=c_int),            value :: const
-      integer(kind=c_int),            value :: nocopy
+      integer(kind=c_size_t)                :: pass_shape(*)
+      integer(kind=c_size_t),         value :: flags
       type(c_ptr),                    value :: e
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_char
@@ -159,27 +157,25 @@ module plumed_module_f08
 #: for t in types
 #: for k in kinds[t]
   interface
-    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar(p,key,val,pass_shape,flags,e,eh) bind(C)
       import
       type(cplumed),                  value :: p
       character(kind=c_char), intent(in)    :: key(*)
       ${t}$(kind=${k}$)                           :: val
-      integer(kind=c_size_t) :: pass_shape(*)
-      integer(kind=c_int),            value :: const
-      integer(kind=c_int),            value :: nocopy
+      integer(kind=c_size_t)                :: pass_shape(*)
+      integer(kind=c_size_t),         value :: flags
       type(c_ptr),                    value :: e
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$_scalar
   end interface
   interface
-    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$(p,key,val,pass_shape,const,nocopy,e,eh) bind(C)
+    subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$(p,key,val,pass_shape,flags,e,eh) bind(C)
       import
       type(cplumed),                  value :: p
       character(kind=c_char), intent(in)    :: key(*)
       ${t}$(kind=${k}$)                           :: val(*)
-      integer(kind=c_size_t) :: pass_shape(*)
-      integer(kind=c_int),            value :: const
-      integer(kind=c_int),            value :: nocopy
+      integer(kind=c_size_t)                :: pass_shape(*)
+      integer(kind=c_size_t),         value :: flags
       type(c_ptr),                    value :: e
       type(c_funptr),                 value :: eh
     end subroutine plumed_f_cmd_safe_nothrow_${cname(k)}$
@@ -241,27 +237,24 @@ module plumed_module_f08
        logical,            optional,  intent(in)    :: nocopy
        type(plumed_error), target :: myerror
        integer(kind=c_size_t) :: pass_shape(1)
-       integer(kind=c_int)    :: inocopy,iconst
+       integer(kind=c_size_t) :: flags
        pass_shape=(/0/)
+       flags=33554432*2 ! 0x2000000*2, non-const pointer
        if(present(nocopy)) then
          if(nocopy) then
-           inocopy=1
+           flags=flags+268435456 ! 0x10000000
          endif
-       else
-         inocopy=0
        endif
        if(present(const)) then
          if(const) then
-           iconst=1
+           flags=flags+33554432 ! 0x2000000, make pointer const
          endif
-       else
-         iconst=0
        endif
        if(present(error)) then
-         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_f08_eh))
+         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,flags,c_loc(myerror),c_funloc(plumed_f_f08_eh))
          error=myerror
        else
-         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_funptr)
+         call plumed_f_cmd_safe_nothrow_ptr(p,key,val,pass_shape,flags,c_null_ptr,c_null_funptr)
        endif
      end subroutine plumed_f_cmd_ptr
 
@@ -275,27 +268,24 @@ module plumed_module_f08
        logical,            optional,  intent(in)    :: nocopy
        type(plumed_error), target :: myerror
        integer(kind=c_size_t) :: pass_shape(2)
-       integer(kind=c_int)    :: inocopy,iconst
+       integer(kind=c_size_t) :: flags
        pass_shape=(/len(val),0/)
+       flags=33554432*2 ! 0x2000000*2, non-const pointer
        if(present(nocopy)) then
          if(nocopy) then
-           inocopy=1
+           flags=flags+268435456 ! 0x10000000
          endif
-       else
-         inocopy=0
        endif
        if(present(const)) then
          if(const) then
-           iconst=1
+           flags=flags+33554432 ! 0x2000000, make pointer const
          endif
-       else
-         iconst=0
        endif
        if(present(error)) then
-         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_f08_eh))
+         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,flags,c_loc(myerror),c_funloc(plumed_f_f08_eh))
          error=myerror
        else
-         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_funptr)
+         call plumed_f_cmd_safe_nothrow_char(p,key,val,pass_shape,flags,c_null_ptr,c_null_funptr)
        endif
      end subroutine plumed_f_cmd_char
 
@@ -312,7 +302,7 @@ module plumed_module_f08
       logical,            optional,  intent(in)    :: const
       logical,            optional,  intent(in)    :: nocopy
       type(plumed_error), target :: myerror
-      integer(kind=c_int)    :: inocopy,iconst
+      integer(kind=c_size_t) :: flags
 #: if r==0
 #: set scalar = "_scalar"
       integer(kind=c_size_t) :: pass_shape(2)
@@ -325,25 +315,22 @@ module plumed_module_f08
 #: endfor
       pass_shape(${r+1}$)=0
 #: endif
+       flags=33554432*2 ! 0x2000000*2, non-const pointer
        if(present(nocopy)) then
          if(nocopy) then
-           inocopy=1
+           flags=flags+268435456 ! 0x10000000
          endif
-       else
-         inocopy=0
        endif
        if(present(const)) then
          if(const) then
-           iconst=1
+           flags=flags+33554432 ! 0x2000000, make pointer const
          endif
-       else
-         iconst=0
        endif
        if(present(error)) then
-         call plumed_f_cmd_safe_nothrow_${cname(k)}$${scalar}$(p,key,val,pass_shape,iconst,inocopy,c_loc(myerror),c_funloc(plumed_f_f08_eh))
+         call plumed_f_cmd_safe_nothrow_${cname(k)}$${scalar}$(p,key,val,pass_shape,flags,c_loc(myerror),c_funloc(plumed_f_f08_eh))
          error=myerror
        else
-         call plumed_f_cmd_safe_nothrow_${cname(k)}$${scalar}$(p,key,val,pass_shape,iconst,inocopy,c_null_ptr,c_null_funptr)
+         call plumed_f_cmd_safe_nothrow_${cname(k)}$${scalar}$(p,key,val,pass_shape,flags,c_null_ptr,c_null_funptr)
        endif
     end subroutine plumed_f_cmd_${t}$_${ik}$_${r}$
 #: endfor
