@@ -450,7 +450,7 @@ module plumed_module_f08
        if(.not.this%initialized) then
          call plumed_create(this)
        endif
-       call plumed_f_cmd(this%handle,key // c_null_char,0,error=error,const=const,nocopy=nocopy) ! FIX: replace this to send NULL
+       call plumed_f_cmd(this%handle,key // c_null_char,c_null_ptr,error=error,const=const,nocopy=nocopy)
      end subroutine pl_cmd
 
      subroutine pl_cmd_char(this,key,val,dummy,error,const,nocopy)
