@@ -3409,6 +3409,15 @@ void plumed_f_cmd_safe_nothrow_ ## type_ ## suffix (plumed p,char*key,type*val,_
   safe.flags= flags + 0x10000*code + size; \
   safe.opt=NULL; \
   plumed_cmd_safe_nothrow(p,key,safe,handler); \
+} \
+plumed_safeptr plumed_f_safeptr_ ## type_ ## suffix(type*val,__PLUMED_WRAPPER_STD size_t nelem,__PLUMED_WRAPPER_STD size_t*shape,__PLUMED_WRAPPER_STD size_t flags,void*opt) {\
+  plumed_safeptr safe; \
+  safe.ptr=val; \
+  safe.nelem=nelem; \
+  safe.shape=shape; \
+  safe.flags= flags + 0x10000*code + size; \
+  safe.opt=opt; \
+  return safe; \
 }
 
 #define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,size,code) \
