@@ -50,6 +50,8 @@ module plumed_module
     type(c_ptr)            :: opt
   end type cplumed_safeptr
 
+  integer(kind=c_size_t), parameter :: flags_ptr = 67108864 ! 0x2000000*2
+
   ! this function is used to translate 32-char to c identifiers, only used internally
   interface
     function plumed_f2c(c) bind(C)
@@ -417,14 +419,10 @@ module plumed_module
        integer,            optional,  intent(out)   :: ierror
        integer,            target :: myerror
        integer(kind=c_size_t) :: pass_shape(1)
-       integer(kind=c_size_t) :: flags
        type(cplumed_nothrow_handler) :: nothrow
-       type(cplumed_safeptr) :: safe
        integer(kind=c_size_t) :: nelem
        pass_shape=(/0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_ptr(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -432,7 +430,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_ptr(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -456,14 +455,10 @@ module plumed_module
        integer,            optional,  intent(out)   :: ierror
        integer,            target :: myerror
        integer(kind=c_size_t) :: pass_shape(2)
-       integer(kind=c_size_t) :: flags
        type(cplumed_nothrow_handler) :: nothrow
-       type(cplumed_safeptr) :: safe
        integer(kind=c_size_t) :: nelem
        pass_shape=(/len(val),0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_char(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -471,7 +466,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_char(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -494,15 +490,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_int_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -510,7 +502,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_int_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -531,16 +524,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_int(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -548,7 +537,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_int(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -569,17 +559,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_int(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -587,7 +573,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_int(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -608,18 +595,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_int(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -627,7 +610,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_int(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -648,9 +632,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -658,9 +640,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_int(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -668,7 +648,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_int(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -689,15 +670,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_short_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -705,7 +682,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_short_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -726,16 +704,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_short(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -743,7 +717,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_short(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -764,17 +739,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_short(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -782,7 +753,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_short(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -803,18 +775,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_short(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -822,7 +790,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_short(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -843,9 +812,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -853,9 +820,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_short(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -863,7 +828,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_short(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -884,15 +850,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -900,7 +862,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -921,16 +884,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -938,7 +897,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -959,17 +919,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -977,7 +933,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -998,18 +955,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1017,7 +970,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1038,9 +992,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -1048,9 +1000,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1058,7 +1008,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1079,15 +1030,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_float_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1095,7 +1042,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_float_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1116,16 +1064,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_float(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1133,7 +1077,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_float(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1154,17 +1099,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_float(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1172,7 +1113,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_float(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1193,18 +1135,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_float(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1212,7 +1150,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_float(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1233,9 +1172,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -1243,9 +1180,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_float(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1253,7 +1188,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_float(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1274,15 +1210,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_double_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1290,7 +1222,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_double_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1311,16 +1244,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1328,7 +1257,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1349,17 +1279,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1367,7 +1293,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1388,18 +1315,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1407,7 +1330,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1428,9 +1352,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -1438,9 +1360,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1448,7 +1368,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1469,15 +1390,11 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape=(/1,0/)
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_double_scalar(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1485,7 +1402,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_double_scalar(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1506,16 +1424,12 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(2)
       pass_shape(1)=size(val,1)
       pass_shape(2)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1523,7 +1437,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1544,17 +1459,13 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(3)
       pass_shape(1)=size(val,2)
       pass_shape(2)=size(val,1)
       pass_shape(3)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1562,7 +1473,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1583,18 +1495,14 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(4)
       pass_shape(1)=size(val,3)
       pass_shape(2)=size(val,2)
       pass_shape(3)=size(val,1)
       pass_shape(4)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1602,7 +1510,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
@@ -1623,9 +1532,7 @@ module plumed_module
        type(dummy_type),   optional                 :: dummy
       integer,            optional,  intent(out)   :: ierror
       integer,            target :: myerror
-      integer(kind=c_size_t) :: flags
       type(cplumed_nothrow_handler) :: nothrow
-      type(cplumed_safeptr) :: safe
       integer(kind=c_size_t) :: nelem
       integer(kind=c_size_t) :: pass_shape(5)
       pass_shape(1)=size(val,4)
@@ -1633,9 +1540,7 @@ module plumed_module
       pass_shape(3)=size(val,2)
       pass_shape(4)=size(val,1)
       pass_shape(5)=0
-       flags=33554432*2 ! 0x2000000*2, non-const pointer
        nelem=product(pass_shape)
-       safe=plumed_f_safeptr_long_double(val,nelem,pass_shape,flags,c_null_ptr)
        myerror=0
        nothrow%ptr=c_loc(myerror)
        if(present(ierror)) then
@@ -1643,7 +1548,8 @@ module plumed_module
        else
          nothrow%handler=c_null_funptr
        endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key,safe,nothrow)
+       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
+         plumed_f_safeptr_long_double(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
        if(present(ierror)) then
          ierror=myerror
        endif
