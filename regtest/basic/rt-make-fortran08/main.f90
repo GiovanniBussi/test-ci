@@ -11,4 +11,5 @@ PROGRAM main
   CALL TEST6()
   call p%cmd("init")
   call p%finalize()
+  call TESTFULL()
 END PROGRAM main
