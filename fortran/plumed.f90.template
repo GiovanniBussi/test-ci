@@ -60,7 +60,7 @@ module plumed_module
     end function plumed_f2c
   end interface
 
-  ! this subroutine provides a typesafe, not throwing interfafe to plumed
+  ! this subroutine provides a typesafe, not throwing interface to plumed
   interface
     subroutine plumed_cmd_safe_nothrow(p,key,safeptr,nothrow) bind(C)
       import

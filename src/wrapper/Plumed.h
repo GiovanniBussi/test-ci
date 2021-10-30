@@ -3400,46 +3400,37 @@ __PLUMED_IMPLEMENT_FORTRAN(plumed_f_use_count,PLUMED_F_USE_COUNT,(char*c,int*i),
 
 /* New in PLUMED 2.8 */
 
-#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_INNER(type,type_,size,code,suffix) \
-void plumed_f_cmd_safe_nothrow_ ## type_ ## suffix (plumed p,char*key,type*val,__PLUMED_WRAPPER_STD size_t*shape,__PLUMED_WRAPPER_STD size_t flags,plumed_nothrow_handler handler) { \
-  plumed_safeptr safe; \
-  safe.ptr=val; \
-  safe.nelem=0; \
-  safe.shape=shape; \
-  safe.flags= flags + 0x10000*code + size; \
-  safe.opt=NULL; \
-  plumed_cmd_safe_nothrow(p,key,safe,handler); \
-} \
+/* note: flags & (~0x1ffffff) removes bits that are set here (code and size) */
+
+#define __PLUMED_IMPLEMENT_F_SAFEPTR_INNER(type,type_,size,code,suffix) \
 plumed_safeptr plumed_f_safeptr_ ## type_ ## suffix(type*val,__PLUMED_WRAPPER_STD size_t nelem,__PLUMED_WRAPPER_STD size_t*shape,__PLUMED_WRAPPER_STD size_t flags,void*opt) {\
   plumed_safeptr safe; \
   safe.ptr=val; \
   safe.nelem=nelem; \
   safe.shape=shape; \
-  safe.flags= flags + 0x10000*code + size; \
+  safe.flags= (flags & (~0x1ffffff)) + 0x10000*code + size; \
   safe.opt=opt; \
   return safe; \
 }
 
-#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,size,code) \
-  __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_INNER(type,type_,size,code,) \
-  __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_INNER(type,type_,size,code,_scalar)
+#define __PLUMED_IMPLEMENT_F_SAFEPTR(type,type_,size,code) \
+  __PLUMED_IMPLEMENT_F_SAFEPTR_INNER(type,type_,size,code,) \
+  __PLUMED_IMPLEMENT_F_SAFEPTR_INNER(type,type_,size,code,_scalar)
 
+#define __PLUMED_IMPLEMENT_F_SAFEPTR_EMPTY(type,type_,code) \
+        __PLUMED_IMPLEMENT_F_SAFEPTR(type,type_,0,code)
 
-#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_EMPTY(type,type_,code) \
-        __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,0,code)
+#define __PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(type,type_,code) \
+        __PLUMED_IMPLEMENT_F_SAFEPTR(type,type_,sizeof(type),code)
 
-#define __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(type,type_,code) \
-        __PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE(type,type_,sizeof(type),code)
-
-
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_EMPTY(void,ptr,0)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(float,float,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(double,double,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(long double,long_double,4)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(int,int,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(short,short,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(long,long,3)
-__PLUMED_IMPLEMENT_FORTRAN_CMD_SAFE_SIZED(char,char,3)
+__PLUMED_IMPLEMENT_F_SAFEPTR_EMPTY(void,ptr,0)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(float,float,4)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(double,double,4)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(long double,long_double,4)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(int,int,3)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(short,short,3)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(long,long,3)
+__PLUMED_IMPLEMENT_F_SAFEPTR_SIZED(char,char,3)
 
 #if __PLUMED_WRAPPER_GLOBAL /*{*/
 
