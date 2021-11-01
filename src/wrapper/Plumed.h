@@ -3075,6 +3075,11 @@ __PLUMED_WRAPPER_C_END
 __PLUMED_WRAPPER_C_BEGIN
 void plumed_cmd_safe_nothrow(plumed p,const char*key,plumed_safeptr safe,plumed_nothrow_handler nothrow) {
   plumed_implementation* pimpl;
+  /* This is to allow caller to use a null handler to imply that handling is not done */
+  if(!nothrow.handler) {
+     plumed_cmd_safe(p,key,safe);
+     return;
+  }
   /* obtain pimpl */
   pimpl=(plumed_implementation*) p.p;
   assert(plumed_check_pimpl(pimpl));
