@@ -2107,7 +2107,9 @@ private:
         }
         __PLUMED_WRAPPER_STD fprintf(stderr," )");
       }
-      __PLUMED_WRAPPER_STD fprintf(stderr," %lx %p\n",safe->safe.flags,safe->safe.opt);
+      /* %lx is for unsigned long that might be smaller than size_t.
+         I explicitly convert flags here to unsigned long to avoid cppcheck warnings */
+      __PLUMED_WRAPPER_STD fprintf(stderr," %lx %p\n",(unsigned long) safe->safe.flags,safe->safe.opt);
     }
     NothrowHandler h;
     h.code=0;
