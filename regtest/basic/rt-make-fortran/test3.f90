@@ -39,7 +39,7 @@ allocate(masses(natoms))
 masses=1.0
 box=0.0
 virial=0.0
-call plumed_f_cmd(pl,"setNatoms"//achar(0),c_loc(natoms))
+call plumed_f_cmd(pl,"setNatoms"//achar(0),natoms)
 call plumed_f_cmd(pl,"init"//achar(0),0)
 call plumed_f_cmd(pl,"readInputLine"//achar(0),"c: CENTER ATOMS=1-999"//achar(0))
 call plumed_f_cmd(pl,"readInputLine"//achar(0),"DUMPATOMS ATOMS=c FILE=traj.xyz"//achar(0))

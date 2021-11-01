@@ -61,7 +61,7 @@ module plumed_module
     end function plumed_f2c
   end interface
 
-  ! this subroutine provides a typesafe, not throwing interfafe to plumed
+  ! this subroutine provides a typesafe, not throwing interface to plumed
   interface
     subroutine plumed_cmd_safe_nothrow(p,key,safeptr,nothrow) bind(C)
       import
@@ -325,7 +325,6 @@ module plumed_module
 
   ! here are the interfaces used for overloading
   interface plumed_f_cmd
-    module procedure plumed_f_cmd_ptr
     module procedure plumed_f_cmd_char
     module procedure plumed_f_cmd_integer_0_0
     module procedure plumed_f_cmd_integer_0_1
@@ -360,7 +359,6 @@ module plumed_module
   end interface plumed_f_cmd
 
   interface plumed_f_gcmd
-    module procedure plumed_f_gcmd_ptr
     module procedure plumed_f_gcmd_char
     module procedure plumed_f_gcmd_integer_0_0
     module procedure plumed_f_gcmd_integer_0_1
@@ -410,42 +408,6 @@ module plumed_module
      end subroutine plumed_f_eh
 
      ! we then define all the functions needed for overloading
-
-     subroutine plumed_f_cmd_ptr(p,key,val,dummy,ierror)
-       character(kind=c_char,len=32), intent(in)    :: p
-       character(kind=c_char,len=*),  intent(in)    :: key
-       type(c_ptr),                     value       :: val
-       type(dummy_type),   optional                 :: dummy
-       integer,            optional,  intent(out)   :: ierror
-       integer,            target :: myerror
-       integer(kind=c_size_t) :: pass_shape(1)
-       type(cplumed_nothrow_handler) :: nothrow
-       integer(kind=c_size_t) :: nelem
-       pass_shape=(/0/)
-       nelem=product(pass_shape)
-       myerror=0
-       nothrow%ptr=c_loc(myerror)
-       if(present(ierror)) then
-         nothrow%handler=c_funloc(plumed_f_eh)
-       else
-         nothrow%handler=c_null_funptr
-       endif
-       call plumed_cmd_safe_nothrow(plumed_f2c(p),key, &
-         plumed_f_safeptr_ptr(val,nelem,pass_shape,flags_ptr,c_null_ptr),nothrow)
-       if(present(ierror)) then
-         ierror=myerror
-       endif
-     end subroutine plumed_f_cmd_ptr
-
-     subroutine plumed_f_gcmd_ptr(key,val,dummy,ierror)
-       character(kind=c_char,len=*),  intent(in)    :: key
-       type(c_ptr),                      value      :: val
-       type(dummy_type),   optional                 :: dummy
-       integer,            optional,  intent(out)   :: ierror
-       character(kind=c_char,len=32) :: global
-       call plumed_f_global(global)
-       call plumed_f_cmd(global,key,val,ierror=ierror)
-     end subroutine plumed_f_gcmd_ptr
 
      subroutine plumed_f_cmd_char(p,key,val,dummy,ierror)
        character(kind=c_char,len=32), intent(in)    :: p
