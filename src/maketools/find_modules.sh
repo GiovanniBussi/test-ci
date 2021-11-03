@@ -1,8 +1,15 @@
 #!/bin/bash
 
+echo "###################### DEBUG #######################"
+
+echo "$plumed_disabled_modules"
+echo "$plumed_enabled_modules"
+
 cd ../
 for dir in *
 do
+
+  echo "#### $dir"
   
   if test -f "$dir/module.type"
   then
@@ -13,3 +20,4 @@ do
     esac
   fi
 done
+echo "###################### DEBUG #######################"
