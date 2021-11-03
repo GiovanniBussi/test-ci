@@ -198,7 +198,7 @@ AC_ARG_ENABLE([modules],
          AC_MSG_ERROR([trying to remove module $modules_mod which does not exist])
        fi
        AC_MSG_NOTICE([Disabling module ${modules_mod}])
-       plumed_enabled_modules=$(echo $plumed_enabled_modules | sed "s/:$modules_mod://g")
+       plumed_enabled_modules=$(echo "$plumed_enabled_modules" | sed "s/:$modules_mod://g")
        plumed_disabled_modules=${plumed_disabled_modules}:$modules_mod: ;;
      (+*)
        modules_mod=`echo "${modules_mod}" | sed "s|+||"`
@@ -206,14 +206,14 @@ AC_ARG_ENABLE([modules],
          AC_MSG_ERROR([trying to add module $modules_mod which does not exist])
        fi
        AC_MSG_NOTICE([Enabling module ${modules_mod}])
-       plumed_disabled_modules=$(echo $plumed_disabled_modules | sed "s/:$modules_mod://g")
+       plumed_disabled_modules=$(echo "$plumed_disabled_modules" | sed "s/:$modules_mod://g")
        plumed_enabled_modules=${plumed_enabled_modules}:$modules_mod: ;;
      (*)
        if test ! -f src/$modules_mod/module.type ; then
          AC_MSG_ERROR([trying to add module $modules_mod which does not exist])
        fi
        AC_MSG_NOTICE([Enabling module ${modules_mod}])
-       plumed_disabled_modules=$(echo $plumed_disabled_modules | sed "s/:$modules_mod://g")
+       plumed_disabled_modules=$(echo "$plumed_disabled_modules" | sed "s/:$modules_mod://g")
        plumed_enabled_modules=${plumed_enabled_modules}:$modules_mod: ;;
      esac
    done
