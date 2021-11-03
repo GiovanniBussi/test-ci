@@ -123,20 +123,21 @@ jobs:
       run: |
         ccache -s -M 100M
         ./configure CXX="ccache $CXX" --enable-boost_serialization --disable-dependency-tracking --enable-modules=all LDFLAGS=-Wl,-rpath,$LD_LIBRARY_PATH $PLUMED_CONFIG --prefix="$HOME/opt"
+        cat Makefile.conf
         make -j 4
         make install
         # check for global symbols, see https://github.com/plumed/plumed2/issues/549
         make nmcheck
         ccache -s -M 100M
-    - name: Run tests
-      run: |
-         (while true; do  # see https://github.com/actions/virtual-environments/issues/1860
-              df -h
-              sleep 15
-              done) &
-         make --no-print-directory -C regtest testclean
-         # these can fail for numerical reasons
-         make -C regtest checkfail
+#   - name: Run tests
+#     run: |
+#        (while true; do  # see https://github.com/actions/virtual-environments/issues/1860
+#             df -h
+#             sleep 15
+#             done) &
+#        make --no-print-directory -C regtest testclean
+#        # these can fail for numerical reasons
+#        make -C regtest checkfail
     - name: Run python tests
       run: |
          nosetests -v -w python
