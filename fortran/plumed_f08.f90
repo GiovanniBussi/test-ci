@@ -2015,7 +2015,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_0_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer,  intent(in) :: val
+      integer(KIND=c_int), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2027,7 +2027,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_0_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer,  intent(in) :: val
+      integer(KIND=c_int), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2064,7 +2064,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_0_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2076,7 +2076,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_0_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2113,7 +2113,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_0_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2125,7 +2125,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_0_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2162,7 +2162,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_0_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2174,7 +2174,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_0_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2211,7 +2211,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_0_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2223,7 +2223,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_0_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_int), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_int), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2260,7 +2260,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_1_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer,  intent(in) :: val
+      integer(KIND=c_short), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2272,7 +2272,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_1_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer,  intent(in) :: val
+      integer(KIND=c_short), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2309,7 +2309,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_1_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2321,7 +2321,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_1_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2358,7 +2358,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_1_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2370,7 +2370,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_1_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2407,7 +2407,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_1_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2419,7 +2419,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_1_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2456,7 +2456,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_1_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2468,7 +2468,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_1_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_short), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_short), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2505,7 +2505,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_2_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer,  intent(in) :: val
+      integer(KIND=c_long), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2517,7 +2517,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_2_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer,  intent(in) :: val
+      integer(KIND=c_long), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2554,7 +2554,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_2_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2566,7 +2566,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_2_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2603,7 +2603,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_2_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2615,7 +2615,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_2_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2652,7 +2652,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_2_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2664,7 +2664,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_2_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2701,7 +2701,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_integer_2_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2713,7 +2713,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_integer_2_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      integer(KIND=c_long), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      integer(KIND=c_long), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2750,7 +2750,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_0_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer,  intent(in) :: val
+      real(KIND=c_float), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2762,7 +2762,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_0_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer,  intent(in) :: val
+      real(KIND=c_float), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2799,7 +2799,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_0_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2811,7 +2811,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_0_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2848,7 +2848,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_0_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2860,7 +2860,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_0_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2897,7 +2897,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_0_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2909,7 +2909,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_0_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2946,7 +2946,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_0_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2958,7 +2958,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_0_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_float), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_float), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -2995,7 +2995,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_1_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer,  intent(in) :: val
+      real(KIND=c_double), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3007,7 +3007,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_1_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer,  intent(in) :: val
+      real(KIND=c_double), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3044,7 +3044,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_1_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3056,7 +3056,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_1_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3093,7 +3093,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_1_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3105,7 +3105,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_1_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3142,7 +3142,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_1_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3154,7 +3154,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_1_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3191,7 +3191,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_1_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3203,7 +3203,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_1_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_double), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_double), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3240,7 +3240,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_2_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer,  intent(in) :: val
+      real(KIND=c_long_double), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3252,7 +3252,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_2_0(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer,  intent(in) :: val
+      real(KIND=c_long_double), target,  intent(in) :: val
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3289,7 +3289,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_2_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3301,7 +3301,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_2_1(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3338,7 +3338,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_2_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3350,7 +3350,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_2_2(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3387,7 +3387,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_2_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3399,7 +3399,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_2_3(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3436,7 +3436,7 @@ module plumed_module_f08
     subroutine pl_cmd_ptr_real_2_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
@@ -3448,7 +3448,7 @@ module plumed_module_f08
     subroutine pl_cmd_const_ptr_real_2_4(this,key,val,dummy,error)
       class(plumed),                 intent(inout) :: this ! inout to allow for initialization
       character(kind=c_char,len=*),  intent(in)    :: key
-      real(KIND=c_long_double), pointer, contiguous, intent(in) :: val(:,:,:,:)
+      real(KIND=c_long_double), target, contiguous, intent(in) :: val(:,:,:,:)
        type(dummy_type),   optional, intent(inout) :: dummy
        type(plumed_error), optional,  intent(out)   :: error
        if(.not.this%initialized) then
