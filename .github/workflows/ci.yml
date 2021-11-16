@@ -9,8 +9,6 @@ env:
   PLUMED_STACK_TRACE: yes
 # use two threads for openMP tests
   PLUMED_NUM_THREADS: 2
-# this is a temporary fix
-  PLUMED_DP2CUTOFF_NOSTRETCH: yes
 # these are used to build required packages
   CC: gcc
   CXX: g++
