@@ -368,7 +368,16 @@ double KernelFunctions::evaluate( const std::vector<Value*>& pos, std::vector<do
   }
   double kderiv, kval;
   if(ktype==gaussian || ktype==truncatedgaussian) {
-    kval=height*std::exp(-0.5*r2); kderiv=-kval;
+    if(0.5*r2>dp2cutoff) {
+      kval=0.0;
+      kderiv=0.0;
+    } else {
+      kval=height*std::exp(-0.5*r2); kderiv=-kval;
+      if(ktype==gaussian) {
+        kval=stretchA*kval+height*stretchB;
+        kderiv*=stretchA;
+      }
+    }
   } else {
     double r=sqrt(r2);
     if(ktype==triangular) {
@@ -389,10 +398,6 @@ double KernelFunctions::evaluate( const std::vector<Value*>& pos, std::vector<do
   }
   for(unsigned i=0; i<ndim(); ++i) derivatives[i]*=kderiv;
 
-  if(ktype==gaussian) {
-    kval=stretchA*kval+height*stretchB;
-    for(unsigned i=0; i<ndim(); ++i) derivatives[i]*=stretchA;
-  }
   if(doInt) {
     if((pos[0]->get() <= lowI_ || pos[0]->get() >= uppI_) && usederiv ) for(unsigned i=0; i<ndim(); ++i)derivatives[i]=0;
   }
