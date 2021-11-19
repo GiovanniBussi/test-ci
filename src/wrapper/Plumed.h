@@ -1107,7 +1107,7 @@ __PLUMED_WRAPPER_C_END
 #if __PLUMED_WRAPPER_C_TYPESAFE /*{*/
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_INNER(type_,typen_,flags_) \
-  static void plumed_cmd_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem, const size_t* shape) { \
+  static void plumed_cmdns_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem, const size_t* shape) { \
     plumed_safeptr safe; \
     safe.ptr=ptr; \
     safe.nelem=nelem; \
@@ -1115,6 +1115,12 @@ __PLUMED_WRAPPER_C_END
     safe.flags=flags_; \
     safe.opt=NULL; \
     plumed_cmd_safe(p,key,safe); \
+  } \
+  static void plumed_cmdn_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem) { \
+    plumed_cmdns_ ## typen_(p,key,ptr,nelem,NULL); \
+  } \
+  static void plumed_cmds_ ## typen_(plumed p,const char*key,type_*ptr, const size_t* shape) { \
+    plumed_cmdns_ ## typen_(p,key,ptr,0,shape); \
   }
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_OUTER(type,type_,code,size) \
@@ -1129,35 +1135,38 @@ __PLUMED_WRAPPER_C_END
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_SIZED(type,type_,code) \
   __PLUMED_WRAPPER_C_TYPESAFE_OUTER(type,type_,code,sizeof(type)) \
-  static void plumed_cmd_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem, const size_t* shape) { \
+  static void plumed_cmdns_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem, const size_t* shape) { \
     plumed_safeptr safe; \
-    char buffer[32]; \
-    assert(sizeof(type)<=32); \
     (void) nelem; \
     (void) shape; \
-    memcpy(buffer,&val,sizeof(type)); \
-    safe.ptr=&buffer[0]; \
+    safe.ptr=&val; \
     safe.nelem=1; \
     safe.shape=NULL; \
     safe.flags=sizeof(type) | (0x10000*(code)) | (0x2000000*1); \
     safe.opt=NULL; \
     plumed_cmd_safe(p,key,safe); \
+  } \
+  static void plumed_cmdn_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem) {  \
+    plumed_cmdns_ ## type_ ## _v(p,key,val,nelem,NULL); \
+  } \
+  static void plumed_cmds_ ## type_ ## _v(plumed p,const char*key,type val, const size_t* shape) {  \
+    plumed_cmdns_ ## type_ ## _v(p,key,val,0,shape); \
   }
 
-#define __PLUMED_WRAPPER_C_GENERIC1(type,typen_) \
-    type: plumed_cmd_ ## typen_,
+#define __PLUMED_WRAPPER_C_GENERIC1(flavor,type,typen_) \
+    type: plumed_ ## flavor ## _ ## typen_,
 
-#define __PLUMED_WRAPPER_C_GENERIC_EMPTY(type,type_) \
-  __PLUMED_WRAPPER_C_GENERIC1(type*,             type_ ## _p) \
-  __PLUMED_WRAPPER_C_GENERIC1(type const*,       type_ ## _c) \
-  __PLUMED_WRAPPER_C_GENERIC1(type**,            type_ ## _pp) \
-  __PLUMED_WRAPPER_C_GENERIC1(type*const*,       type_ ## _pc) \
-  __PLUMED_WRAPPER_C_GENERIC1(type const**,      type_ ## _cp) \
-  __PLUMED_WRAPPER_C_GENERIC1(type const*const*, type_ ## _cc)
+#define __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,type,type_) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type*,             type_ ## _p) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type const*,       type_ ## _c) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type**,            type_ ## _pp) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type*const*,       type_ ## _pc) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type const**,      type_ ## _cp) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type const*const*, type_ ## _cc)
 
-#define __PLUMED_WRAPPER_C_GENERIC2(type,type_) \
-  __PLUMED_WRAPPER_C_GENERIC_EMPTY(type,type_) \
-  __PLUMED_WRAPPER_C_GENERIC1(type,             type_ ## _v)
+#define __PLUMED_WRAPPER_C_GENERIC2(flavor,type,type_) \
+  __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,type,type_) \
+  __PLUMED_WRAPPER_C_GENERIC1(flavor,type,             type_ ## _v)
 
 /// Here we create all the required instances
 /// 1: void
@@ -1181,39 +1190,52 @@ __PLUMED_WRAPPER_C_TYPESAFE_SIZED(double,double,4)
 __PLUMED_WRAPPER_C_TYPESAFE_SIZED(long double,long_double,4)
 __PLUMED_WRAPPER_C_TYPESAFE_EMPTY(FILE,FILE,5)
 
-#define plumed_cmdn(p,key,val,nelem) _Generic((val), \
-    __PLUMED_WRAPPER_C_GENERIC_EMPTY(void,void) \
-    __PLUMED_WRAPPER_C_GENERIC2(char,char) \
-    __PLUMED_WRAPPER_C_GENERIC2(unsigned char,unsigned_char) \
-    __PLUMED_WRAPPER_C_GENERIC2(short,short) \
-    __PLUMED_WRAPPER_C_GENERIC2(unsigned short,unsigned_short) \
-    __PLUMED_WRAPPER_C_GENERIC2(int,int) \
-    __PLUMED_WRAPPER_C_GENERIC2(unsigned int,unsigned_int) \
-    __PLUMED_WRAPPER_C_GENERIC2(long,long) \
-    __PLUMED_WRAPPER_C_GENERIC2(unsigned long,unsigned_long) \
-    __PLUMED_WRAPPER_C_GENERIC2(long long,long_long) \
-    __PLUMED_WRAPPER_C_GENERIC2(unsigned long long,unsigned_long_long) \
-    __PLUMED_WRAPPER_C_GENERIC2(float,float) \
-    __PLUMED_WRAPPER_C_GENERIC2(double,double) \
-    __PLUMED_WRAPPER_C_GENERIC2(long double,long_double) \
-    __PLUMED_WRAPPER_C_GENERIC_EMPTY(FILE,FILE) \
-    default: plumed_cmd_void_c) \
-    (p,key,val,nelem,NULL)
+#define plumed_cmdns_inner(flavor,val) _Generic((val), \
+    __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,void,void) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,char,char) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned char,unsigned_char) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,short,short) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned short,unsigned_short) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,int,int) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned int,unsigned_int) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,long,long) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned long,unsigned_long) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,long long,long_long) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned long long,unsigned_long_long) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,float,float) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,double,double) \
+    __PLUMED_WRAPPER_C_GENERIC2(flavor,long double,long_double) \
+    __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,FILE,FILE) \
+    default: plumed_ ## flavor ## _void_c)
 
-#define plumed_cmd_c11(p,key,val) plumed_cmdn(p,key,val,0)
-#define plumed_gcmd_c11(key,val) plumed_cmdn(plumed_global(),key,val,0)
+#define plumed_cmd_2args(p,key,val,shape) plumed_cmdns_inner(cmdn,NULL) (p,key,NULL,0)
+
+#define plumed_cmd_3args(p,key,val) plumed_cmdns_inner(cmdn,val) (p,key,val,0)
+
+#define plumed_cmd_4args(p,key,val,X) _Generic((X), \
+    size_t *: plumed_cmdns_inner(cmds,val), \
+    char: plumed_cmdns_inner(cmdn,val), \
+    unsigned char: plumed_cmdns_inner(cmdn,val), \
+    short: plumed_cmdns_inner(cmdn,val), \
+    unsigned short: plumed_cmdns_inner(cmdn,val), \
+    int: plumed_cmdns_inner(cmdn,val), \
+    unsigned int: plumed_cmdns_inner(cmdn,val), \
+    long: plumed_cmdns_inner(cmdn,val), \
+    unsigned long: plumed_cmdns_inner(cmdn,val), \
+    long long: plumed_cmdns_inner(cmdn,val), \
+    unsigned long long: plumed_cmdns_inner(cmdn,val) \
+    ) (p,key,val,X)
+
+#define plumed_cmd_5args(p,key,val,nelem,shape) plumed_cmdns_inner(cmdns,val) (p,key,val,nelem,shape)
+
+#define __PLUMED_WRAPPER_C_GET_MACRO(_1,_2,_3,_4,_5,NAME,...) NAME
+#define plumed_cmd_c11(...) __PLUMED_WRAPPER_C_GET_MACRO(__VA_ARGS__, plumed_cmd_5args, plumed_cmd_4args, plumed_cmd_3args, plumed_cmd_2args)(__VA_ARGS__)
+
+#define plumed_gcmd_c11(...) plumed_cmd(plumed_global(),__VA_ARGS__)
 
 #define __PLUMED_WRAPPER_REDEFINE_CMD plumed_cmd_c11
 #define __PLUMED_WRAPPER_REDEFINE_GCMD plumed_gcmd_c11
 
-#else
-
-#define plumed_cmdn(p,key,val,nelem) plumed_cmd(p,key,val)
-
-#endif /*}*/
-
-#if __PLUMED_WRAPPER_GLOBAL /*{*/
-#define plumed_gcmdn(key,val,nelem) plumed_cmdn(plumed_global(),key,val,nelem)
 #endif /*}*/
 
 #endif /*}*/
@@ -2442,18 +2464,26 @@ __PLUMED_WRAPPER_ANONYMOUS_BEGIN /*{*/
   To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
   Available as of PLUMED 2.8.
 */
+void plumed_cmd_cxx(plumed p,const char*key) {
+  PLMD::Plumed(p).cmd(key);
+}
+
 template<typename T>
 void plumed_cmd_cxx(plumed p,const char*key,T val) {
   PLMD::Plumed(p).cmd(key,val);
 }
 
 template<typename T>
-void plumed_cmdn_cxx(plumed p,const char*key,T val,__PLUMED_WRAPPER_STD size_t nelem) {
-  PLMD::Plumed(p).cmd(key,val,nelem);
+void plumed_cmd_cxx(plumed p,const char*key,T val,__PLUMED_WRAPPER_STD size_t nelem,__PLUMED_WRAPPER_STD size_t* shape=NULL) {
+  PLMD::Plumed(p).cmd(key,val,nelem,shape);
+}
+
+template<typename T>
+void plumed_cmd_cxx(plumed p,const char*key,T val,__PLUMED_WRAPPER_STD size_t* shape) {
+  PLMD::Plumed(p).cmd(key,val,shape);
 }
 
 #define __PLUMED_WRAPPER_REDEFINE_CMD plumed_cmd_cxx
-#define plumed_cmdn plumed_cmdn_cxx
 
 #if __PLUMED_WRAPPER_GLOBAL /*{*/
 /**
@@ -2463,30 +2493,33 @@ void plumed_cmdn_cxx(plumed p,const char*key,T val,__PLUMED_WRAPPER_STD size_t n
   To be used through the macro plumed_gcmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
   Available as of PLUMED 2.8.
 */
+
+void plumed_gcmd_cxx(const char*key) {
+  PLMD::Plumed::gcmd(key);
+}
+
 template<typename T>
 void plumed_gcmd_cxx(const char*key,T val) {
   PLMD::Plumed::gcmd(key,val);
 }
 
 template<typename T>
-void plumed_gcmdn_cxx(const char*key,T val,__PLUMED_WRAPPER_STD size_t nelem) {
-  PLMD::Plumed::gcmd(key,val,nelem);
+void plumed_gcmd_cxx(const char*key,T val,__PLUMED_WRAPPER_STD size_t nelem,__PLUMED_WRAPPER_STD size_t* shape=NULL) {
+  PLMD::Plumed::gcmd(key,val,nelem,shape);
+}
+
+template<typename T>
+void plumed_gcmd_cxx(const char*key,T val,__PLUMED_WRAPPER_STD size_t* shape) {
+  PLMD::Plumed::gcmd(key,val,shape);
 }
 
 #define __PLUMED_WRAPPER_REDEFINE_GCMD plumed_gcmd_cxx
-#define plumed_gcmdn plumed_gcmdn_cxx
 
 #endif /*}*/
 
 __PLUMED_WRAPPER_ANONYMOUS_END /*}*/
 
 #else
-
-#define plumed_cmdn(p,key,val,nelem) plumed_cmd(p,key,val)
-
-#if __PLUMED_WRAPPER_GLOBAL /*{*/
-#define plumed_gcmdn(key,val,nelem) plumed_gcmd(key,val)
-#endif /*}*/
 
 #endif /*}*/
 
