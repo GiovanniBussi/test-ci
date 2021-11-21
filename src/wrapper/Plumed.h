@@ -1208,7 +1208,7 @@ __PLUMED_WRAPPER_C_TYPESAFE_EMPTY(FILE,FILE,5)
     __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,FILE,FILE) \
     default: plumed_ ## flavor ## _void_c)
 
-#define plumed_cmd_2args(p,key,val,shape) plumed_cmdns_inner(cmdn,NULL) (p,key,NULL,0)
+#define plumed_cmd_2args(p,key) plumed_cmdns_inner(cmdn,NULL) (p,key,NULL,0)
 
 #define plumed_cmd_3args(p,key,val) plumed_cmdns_inner(cmdn,val) (p,key,val,0)
 

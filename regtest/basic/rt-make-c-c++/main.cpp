@@ -1,4 +1,4 @@
-#define __PLUMED_WRAPPER_C_TYPESAFE 1
+#define __PLUMED_WRAPPER_CXX_BIND_C 1
 #include "plumed/wrapper/Plumed.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,9 +22,9 @@ int main(int argc,char*argv[]) {
 
   p=plumed_create();
 
-  positions=malloc(3*10*sizeof(double));
-  forces=malloc(3*10*sizeof(double));
-  masses=malloc(10*sizeof(double));
+  positions=(double*)malloc(3*10*sizeof(double));
+  forces=(double*)malloc(3*10*sizeof(double));
+  masses=(double*)malloc(10*sizeof(double));
   for(i=0;i<10;i++) {
     positions[3*i+0]=1.0+10*i;
     positions[3*i+1]=2.0+10*i;
