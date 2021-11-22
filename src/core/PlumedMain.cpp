@@ -659,13 +659,13 @@ void PlumedMain::init() {
 
 void PlumedMain::readInputFile(const std::string & str) {
   plumed_assert(initialized);
-  log.printf("FILE: %s\n",str.c_str());
+  log<<"FILE: "<<str<<"\n";
   IFile ifile;
   ifile.link(*this);
   ifile.open(str);
   ifile.allowNoEOL();
   readInputFile(ifile);
-  log.printf("END FILE: %s\n",str.c_str());
+  log<<"END FILE: "<<str<<"\n";
   log.flush();
 
 }
@@ -694,6 +694,8 @@ void PlumedMain::readInputLines(const std::string & str) {
   plumed_assert(initialized);
   if(str.empty()) return;
 
+  log<<"FILE: (temporary)\n";
+
   // Open a temporary file
   auto fp=std::tmpfile();
   plumed_assert(fp);
@@ -713,6 +715,7 @@ void PlumedMain::readInputLines(const std::string & str) {
   ifile.allowNoEOL();
 
   readInputFile(ifile);
+  log<<"END FILE: (temporary)\n";
 }
 
 void PlumedMain::readInputWords(const std::vector<std::string> & words) {
