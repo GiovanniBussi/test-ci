@@ -681,10 +681,10 @@
 #include <cstddef> /* size_t */
 #include <cstring> /* memcpy */
 #else
-#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h> /* FILE */
+#include <limits.h> /* CHAR_MIN */
 #endif
 
 /**
@@ -1334,12 +1334,14 @@ __PLUMED_WRAPPER_EXTERN_C_END /*}*/
 #include <cstring> /* strncat strlen */
 #include <cstdio> /* fprintf */
 #include <cassert> /* assert */
+#include <climits> /* CHAR_MIN */
 #else
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 #endif
 
 #include <exception> /* exception bad_exception */
