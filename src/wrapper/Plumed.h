@@ -670,9 +670,11 @@
 #if __PLUMED_WRAPPER_CXX_STD
 #include <cstddef> /* size_t */
 #include <cstring> /* memcpy */
+#include <cstdlib> /* malloc free */
 #else
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h> /* FILE */
 #include <limits.h> /* CHAR_MIN */
 #endif
@@ -744,6 +746,74 @@ typedef struct {
   /** Optional information, not used yet  */
   void* opt;
 } plumed_safeptr;
+
+typedef struct {
+  /** code used for translating messages */
+  int code;
+  /** short message buffer for non-throwing exceptions */
+  char exception_buffer[__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER];
+  /** if exception_buffer='\0', message stored as an allocatable string */
+  char* what;
+  /** error code for system_error */
+  int error_code;
+  /** allocated */
+  int allocated;
+} plumed_error;
+
+#ifdef __cplusplus
+inline
+#endif
+static void plumed_error_init(plumed_error* error) {
+  if(!error) return;
+  error->code=0;
+  error->exception_buffer[0]='\0';
+  error->what=__PLUMED_WRAPPER_CXX_NULLPTR;
+  error->error_code=0;
+  error->allocated=0;
+}
+
+#ifdef __cplusplus
+inline
+#endif
+static void plumed_error_finalize(plumed_error error) {
+  if(error.allocated) __PLUMED_WRAPPER_STD free(error.what);
+}
+
+#ifdef __cplusplus
+inline
+#endif
+static void plumed_error_set(void*ptr,int code,const char*what,const void* opt) {
+    plumed_error* error;
+    __PLUMED_WRAPPER_STD size_t len;
+    const void** options;
+
+    error=(plumed_error*) ptr;
+
+    error->code=code;
+    /*
+       These codes correspond to exceptions that should not allocate a separate buffer but use the fixed one.
+       Notice that a mismatch between the exceptions using the stack buffer here and those implementing
+       the stack buffer would be in practice harmless. However, it makes sense to be consistent.
+    */
+    if(code==10000 || (code>=11000 && code<12000)) {
+      __PLUMED_WRAPPER_STD strncat(error->exception_buffer,what,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
+      error->what=error->exception_buffer;
+      error->allocated=0;
+    } else {
+      len=__PLUMED_WRAPPER_STD strlen(what);
+      error->what=(char*)__PLUMED_WRAPPER_STD malloc(len+1);
+      __PLUMED_WRAPPER_STD strncpy(error->what,what,len+1);
+      error->allocated=1;
+    }
+
+    /* interpret optional arguments */
+    options=(const void**)opt;
+    if(options) while(*options) {
+        if(*((char*)*options)=='c') error->error_code=*((int*)*(options+1));
+        options+=2;
+      }
+}
+
 
 /** \relates plumed
     \brief Constructor
@@ -1097,20 +1167,37 @@ __PLUMED_WRAPPER_C_END
 #if __PLUMED_WRAPPER_C_TYPESAFE /*{*/
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_INNER(type_,typen_,flags_) \
-  static void plumed_cmdns_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem, const size_t* shape) { \
+  static void plumed_cmdnse_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem, const size_t* shape,plumed_error* error) { \
     plumed_safeptr safe; \
+    plumed_nothrow_handler nothrow; \
     safe.ptr=ptr; \
     safe.nelem=nelem; \
     safe.shape=(size_t*)shape; \
     safe.flags=flags_; \
     safe.opt=NULL; \
-    plumed_cmd_safe(p,key,safe); \
+    if(error) { \
+      plumed_error_init(error); \
+      nothrow.ptr=error; \
+      nothrow.handler=plumed_error_set; \
+      plumed_cmd_safe_nothrow(p,key,safe,nothrow); \
+    } else { \
+      plumed_cmd_safe(p,key,safe); \
+    } \
+  } \
+  static void plumed_cmdne_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem, plumed_error* error) { \
+    plumed_cmdnse_ ## typen_(p,key,ptr,nelem,NULL,error); \
+  } \
+  static void plumed_cmdse_ ## typen_(plumed p,const char*key,type_*ptr, const size_t* shape, plumed_error* error) { \
+    plumed_cmdnse_ ## typen_(p,key,ptr,0,shape,error); \
   } \
   static void plumed_cmdn_ ## typen_(plumed p,const char*key,type_*ptr, size_t nelem) { \
-    plumed_cmdns_ ## typen_(p,key,ptr,nelem,NULL); \
+    plumed_cmdnse_ ## typen_(p,key,ptr,nelem,NULL,NULL); \
   } \
   static void plumed_cmds_ ## typen_(plumed p,const char*key,type_*ptr, const size_t* shape) { \
-    plumed_cmdns_ ## typen_(p,key,ptr,0,shape); \
+    plumed_cmdnse_ ## typen_(p,key,ptr,0,shape,NULL); \
+  } \
+  static void plumed_cmde_ ## typen_(plumed p,const char*key,type_*ptr, plumed_error* error) { \
+    plumed_cmdnse_ ## typen_(p,key,ptr,0,NULL,error); \
   }
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_OUTER(type,type_,code,size) \
@@ -1125,8 +1212,9 @@ __PLUMED_WRAPPER_C_END
 
 #define __PLUMED_WRAPPER_C_TYPESAFE_SIZED(type,type_,code) \
   __PLUMED_WRAPPER_C_TYPESAFE_OUTER(type,type_,code,sizeof(type)) \
-  static void plumed_cmdns_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem, const size_t* shape) { \
+  static void plumed_cmdnse_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem, const size_t* shape, plumed_error* error) { \
     plumed_safeptr safe; \
+    plumed_nothrow_handler nothrow; \
     (void) nelem; \
     (void) shape; \
     safe.ptr=&val; \
@@ -1134,13 +1222,29 @@ __PLUMED_WRAPPER_C_END
     safe.shape=NULL; \
     safe.flags=sizeof(type) | (0x10000*(code)) | (0x2000000*1); \
     safe.opt=NULL; \
-    plumed_cmd_safe(p,key,safe); \
+    if(error) { \
+      plumed_error_init(error); \
+      nothrow.ptr=error; \
+      nothrow.handler=plumed_error_set; \
+      plumed_cmd_safe_nothrow(p,key,safe,nothrow); \
+    } else { \
+      plumed_cmd_safe(p,key,safe); \
+    } \
+  } \
+  static void plumed_cmdne_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem, plumed_error* error) {  \
+    plumed_cmdnse_ ## type_ ## _v(p,key,val,nelem,NULL,error); \
+  } \
+  static void plumed_cmdse_ ## type_ ## _v(plumed p,const char*key,type val, const size_t* shape, plumed_error* error) {  \
+    plumed_cmdnse_ ## type_ ## _v(p,key,val,0,shape,error); \
   } \
   static void plumed_cmdn_ ## type_ ## _v(plumed p,const char*key,type val, size_t nelem) {  \
-    plumed_cmdns_ ## type_ ## _v(p,key,val,nelem,NULL); \
+    plumed_cmdnse_ ## type_ ## _v(p,key,val,nelem,NULL,NULL); \
   } \
   static void plumed_cmds_ ## type_ ## _v(plumed p,const char*key,type val, const size_t* shape) {  \
-    plumed_cmdns_ ## type_ ## _v(p,key,val,0,shape); \
+    plumed_cmdnse_ ## type_ ## _v(p,key,val,0,shape,NULL); \
+  } \
+  static void plumed_cmde_ ## type_ ## _v(plumed p,const char*key,type val, plumed_error* error) {  \
+    plumed_cmdnse_ ## type_ ## _v(p,key,val,0,NULL,error); \
   }
 
 #define __PLUMED_WRAPPER_C_GENERIC1(flavor,type,typen_) \
@@ -1181,7 +1285,12 @@ __PLUMED_WRAPPER_C_TYPESAFE_SIZED(double,double,4)
 __PLUMED_WRAPPER_C_TYPESAFE_SIZED(long double,long_double,4)
 __PLUMED_WRAPPER_C_TYPESAFE_EMPTY(FILE,FILE,5)
 
-#define plumed_cmdns_inner(flavor,val) _Generic((val), \
+static void plumed_cmd_null_e(plumed p,const char*key,plumed_error* error,int ignore) {
+  (void) ignore;
+  plumed_cmde_void_p(p,key,NULL,error);
+}
+
+#define plumed_cmdnse_inner(flavor,val) _Generic((val), \
     __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,void,void) \
     __PLUMED_WRAPPER_C_GENERIC2(flavor,char,char) \
     __PLUMED_WRAPPER_C_GENERIC2(flavor,unsigned char,unsigned_char) \
@@ -1200,19 +1309,29 @@ __PLUMED_WRAPPER_C_TYPESAFE_EMPTY(FILE,FILE,5)
     __PLUMED_WRAPPER_C_GENERIC_EMPTY(flavor,FILE,FILE) \
     default: plumed_ ## flavor ## _void_c)
 
-#define plumed_cmd_2args(p,key) plumed_cmdns_inner(cmdn,NULL) (p,key,NULL,0)
+#define plumed_cmd_2args(p,key) plumed_cmdnse_inner(cmdn,NULL) (p,key,NULL,0)
 
-#define plumed_cmd_3args(p,key,val) plumed_cmdns_inner(cmdn,val) (p,key,val,0)
+#define plumed_cmd_3args(p,key,X) _Generic((X), \
+    plumed_error*: plumed_cmd_null_e, \
+    default:       plumed_cmdnse_inner(cmdn,X)) (p,key,X,0)
 
 /* ((X)+(size_t)0): for pointers, no op; for integers, convert to size_t */
 #define plumed_cmd_4args(p,key,val,X) _Generic(((X)+(size_t)0), \
-    const size_t *: plumed_cmdns_inner(cmds,val), \
-    size_t *: plumed_cmdns_inner(cmds,val), \
-    size_t: plumed_cmdns_inner(cmdn,val) \
+    const size_t *: plumed_cmdnse_inner(cmds,val), \
+    size_t *: plumed_cmdnse_inner(cmds,val), \
+    size_t: plumed_cmdnse_inner(cmdn,val), \
+    plumed_error*: plumed_cmdnse_inner(cmde,val) \
     ) (p,key,val,X)
 
-#define __PLUMED_WRAPPER_C_GET_MACRO(_1,_2,_3,_4,NAME,...) NAME
-#define plumed_cmd_c11(...) __PLUMED_WRAPPER_C_GET_MACRO(__VA_ARGS__, plumed_cmd_4args, plumed_cmd_3args, plumed_cmd_2args)(__VA_ARGS__)
+/* ((X)+(size_t)0): for pointers, no op; for integers, convert to size_t */
+#define plumed_cmd_5args(p,key,val,X,error) _Generic(((X)+(size_t)0), \
+    const size_t *: plumed_cmdnse_inner(cmdse,val), \
+    size_t *: plumed_cmdnse_inner(cmdse,val), \
+    size_t: plumed_cmdnse_inner(cmdne,val) \
+    ) (p,key,val,X,error)
+
+#define __PLUMED_WRAPPER_C_GET_MACRO(_1,_2,_3,_4,_5,NAME,...) NAME
+#define plumed_cmd_c11(...) __PLUMED_WRAPPER_C_GET_MACRO(__VA_ARGS__, plumed_cmd_5args, plumed_cmd_4args, plumed_cmd_3args, plumed_cmd_2args)(__VA_ARGS__)
 
 #define plumed_gcmd_c11(...) plumed_cmd(plumed_global(),__VA_ARGS__)
 
