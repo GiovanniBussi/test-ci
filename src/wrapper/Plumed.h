@@ -747,6 +747,35 @@ typedef struct {
   void* opt;
 } plumed_safeptr;
 
+/**
+  Small structure that is only defined locally to retrieve errors.
+
+  It is supposed to be used in the C11/C++ plumed_cmd interface as follows:
+\verbatim
+  plumed p;
+  plumed_error error;
+
+  p=plumed_create();
+
+  plumed_cmd(p,"setNatoms",10,&error);
+  if(error.code) {
+    fprintf(errors,"%d\n",error.code);
+    plumed_error_finalize(error); // make sure the error object is finalized!
+  }
+  // if no error was raised (error.code==0), it is not necessary to call plumed_error_finalize.
+  // but doing it is harmless
+
+  // no need to initialize error, it is written in the plumed_cmd function
+  plumed_cmd(p,"init",&error);
+  if(error.code) {
+    fprintf(errors,"%d\n",error.code);
+    plumed_error_finalize(error); // make sure the error object is finalized!
+  }
+\endverbatim
+
+  The layout of this structure is subject to change, and functions manipulating it
+  are defined as inline/static functions.
+*/
 typedef struct {
   /** code used for translating messages */
   int code;
@@ -761,6 +790,7 @@ typedef struct {
   int bad_exception;
 } plumed_error;
 
+/** Initialize error (for internal usage) */
 #ifdef __cplusplus
 inline
 #endif
@@ -772,11 +802,13 @@ static void plumed_error_init(plumed_error* error) {
   error->bad_exception=0;
 }
 
+/** Finalize error - should be called when an error is raised to avoid leaks */
 #ifdef __cplusplus
 inline
 #endif
 static void plumed_error_finalize(plumed_error error) {
   if(!error.bad_exception)
+/** in C++ we use new/delete to allow having a const char* what */
 #ifdef __cplusplus
     delete [] error.what;
 #else
@@ -784,6 +816,7 @@ static void plumed_error_finalize(plumed_error error) {
 #endif
 }
 
+/** Callback (for internal usage) */
 #ifdef __cplusplus
 inline
 #endif
@@ -820,7 +853,6 @@ static void plumed_error_set(void*ptr,int code,const char*what,const void* opt) 
       options+=2;
     }
 }
-
 
 /** \relates plumed
     \brief Constructor
