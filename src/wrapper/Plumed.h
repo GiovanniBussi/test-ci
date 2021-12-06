@@ -778,9 +778,9 @@ inline
 static void plumed_error_finalize(plumed_error error) {
   if(!error.bad_exception)
 #ifdef __cplusplus
-  delete [] error.what;
+    delete [] error.what;
 #else
-  free(error.what);
+    free(error.what);
 #endif
 }
 
@@ -788,37 +788,37 @@ static void plumed_error_finalize(plumed_error error) {
 inline
 #endif
 static void plumed_error_set(void*ptr,int code,const char*what,const void* opt) {
-    plumed_error* error;
-    __PLUMED_WRAPPER_STD size_t len;
-    const void** options;
-    char* what_tmp;
+  plumed_error* error;
+  __PLUMED_WRAPPER_STD size_t len;
+  const void** options;
+  char* what_tmp;
 
-    error=(plumed_error*) ptr;
+  error=(plumed_error*) ptr;
 
-    error->code=code;
-    error->error_code=0;
-    len=__PLUMED_WRAPPER_STD strlen(what);
+  error->code=code;
+  error->error_code=0;
+  len=__PLUMED_WRAPPER_STD strlen(what);
 #ifdef __cplusplus
-    what_tmp=new char[len+1];
+  what_tmp=new char[len+1];
 #else
-    what_tmp=malloc(len+1);
+  what_tmp=malloc(len+1);
 #endif
-    if(!what_tmp) {
-      error->what="cannot allocate error object";
-      error->code=11500;
-      error->bad_exception=1;
-      return;
+  if(!what_tmp) {
+    error->what="cannot allocate error object";
+    error->code=11500;
+    error->bad_exception=1;
+    return;
+  }
+  __PLUMED_WRAPPER_STD strncpy(what_tmp,what,len+1);
+
+  error->what=what_tmp;
+
+  /* interpret optional arguments */
+  options=(const void**)opt;
+  if(options) while(*options) {
+      if(*((char*)*options)=='c') error->error_code=*((int*)*(options+1));
+      options+=2;
     }
-    __PLUMED_WRAPPER_STD strncpy(what_tmp,what,len+1);
-
-    error->what=what_tmp;
-
-    /* interpret optional arguments */
-    options=(const void**)opt;
-    if(options) while(*options) {
-        if(*((char*)*options)=='c') error->error_code=*((int*)*(options+1));
-        options+=2;
-      }
 }
 
 
@@ -2602,50 +2602,50 @@ __PLUMED_WRAPPER_ANONYMOUS_BEGIN /*{*/
 */
 inline void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-    PLMD::Plumed::SafePtr s;
-    PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed::SafePtr s;
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-    PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #endif
 }
 
 template<typename T>
 void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-    PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-    PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
 #endif
 }
 
 template<typename T>
 void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-    PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-    PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
 template<typename T>
 void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-    PLMD::Plumed::SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-    PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed::SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-    PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
 template<typename T>
 void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-    PLMD::Plumed::SafePtr s(val,0,shape);
-    PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  PLMD::Plumed::SafePtr s(val,0,shape);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-    PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
