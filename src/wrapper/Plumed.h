@@ -750,14 +750,15 @@ typedef struct {
 typedef struct {
   /** code used for translating messages */
   int code;
-  /** short message buffer for non-throwing exceptions */
-  char exception_buffer[__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER];
-  /** if exception_buffer='\0', message stored as an allocatable string */
+  /** message */
+#ifdef __cplusplus
+  const
+#endif
   char* what;
   /** error code for system_error */
   int error_code;
-  /** allocated */
-  int allocated;
+  /** message could not be allocated */
+  int bad_exception;
 } plumed_error;
 
 #ifdef __cplusplus
@@ -766,17 +767,21 @@ inline
 static void plumed_error_init(plumed_error* error) {
   if(!error) return;
   error->code=0;
-  error->exception_buffer[0]='\0';
   error->what=__PLUMED_WRAPPER_CXX_NULLPTR;
   error->error_code=0;
-  error->allocated=0;
+  error->bad_exception=0;
 }
 
 #ifdef __cplusplus
 inline
 #endif
 static void plumed_error_finalize(plumed_error error) {
-  if(error.allocated) __PLUMED_WRAPPER_STD free(error.what);
+  if(!error.bad_exception)
+#ifdef __cplusplus
+  delete [] error.what;
+#else
+  free(error.what);
+#endif
 }
 
 #ifdef __cplusplus
@@ -786,25 +791,27 @@ static void plumed_error_set(void*ptr,int code,const char*what,const void* opt) 
     plumed_error* error;
     __PLUMED_WRAPPER_STD size_t len;
     const void** options;
+    char* what_tmp;
 
     error=(plumed_error*) ptr;
 
     error->code=code;
-    /*
-       These codes correspond to exceptions that should not allocate a separate buffer but use the fixed one.
-       Notice that a mismatch between the exceptions using the stack buffer here and those implementing
-       the stack buffer would be in practice harmless. However, it makes sense to be consistent.
-    */
-    if(code==10000 || (code>=11000 && code<12000)) {
-      __PLUMED_WRAPPER_STD strncat(error->exception_buffer,what,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
-      error->what=error->exception_buffer;
-      error->allocated=0;
-    } else {
-      len=__PLUMED_WRAPPER_STD strlen(what);
-      error->what=(char*)__PLUMED_WRAPPER_STD malloc(len+1);
-      __PLUMED_WRAPPER_STD strncpy(error->what,what,len+1);
-      error->allocated=1;
+    error->error_code=0;
+    len=__PLUMED_WRAPPER_STD strlen(what);
+#ifdef __cplusplus
+    what_tmp=new char[len+1];
+#else
+    what_tmp=malloc(len+1);
+#endif
+    if(!what_tmp) {
+      error->what="cannot allocate error object";
+      error->code=11500;
+      error->bad_exception=1;
+      return;
     }
+    __PLUMED_WRAPPER_STD strncpy(what_tmp,what,len+1);
+
+    error->what=what_tmp;
 
     /* interpret optional arguments */
     options=(const void**)opt;
@@ -2952,6 +2959,10 @@ void* plumed_attempt_dlopen(const char*path,int mode) {
     __PLUMED_FPRINTF(stderr,"+++ An error occurred. Message from dlopen(): %s +++\n",dlerror());
     strlenpath=__PLUMED_WRAPPER_STD strlen(path);
     pathcopy=(char*) __PLUMED_MALLOC(strlenpath+1);
+    if(!pathcopy) {
+      __PLUMED_FPRINTF(stderr,"+++ Allocation error +++\n");
+      __PLUMED_WRAPPER_STD abort();
+    }
     __PLUMED_WRAPPER_STD strncpy(pathcopy,path,strlenpath+1);
     pc=pathcopy+strlenpath-6;
     while(pc>=pathcopy && __PLUMED_WRAPPER_STD memcmp(pc,"Kernel",6)) pc--;
