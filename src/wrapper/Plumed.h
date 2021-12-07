@@ -2437,12 +2437,7 @@ public:
             rethrow any exception raised within PLUMED.
   */
   void cmd(const char*key) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-    SafePtr s;
-    cmd_priv(key,&s);
-#else
-    cmd_priv(key);
-#endif
+    plumed_cmd_cxx(main,key);
   }
 
   /**
@@ -2456,31 +2451,7 @@ public:
   */
   template<typename T>
   void cmd(const char*key,T val) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(main,key,&s);
-#else
-    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,&val);
-#endif
-  }
-
-  /**
-     Send a command to this plumed object
-      \param key The name of the command to be executed
-      \param val The argument, passed by pointer.
-      \note Similar to \ref plumed_cmd(). It actually called \ref plumed_cmd_nothrow() and
-            rethrow any exception raised within PLUMED.
-      \note Unless one defines __PLUMED_WRAPPER_CXX_TYPESAFE=0 or PLUMED library is <=2.7,
-             the type of the argument is checked.
-  */
-  template<typename T>
-  void cmd(const char*key,T* val) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(main,key,&s);
-#else
-    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
-#endif
+    plumed_cmd_cxx(main,key,val);
   }
 
   /**
@@ -2496,18 +2467,12 @@ public:
   */
   template<typename T>
   void cmd(const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-    SafePtr s(val,0,shape);
-    cmd_priv(main,key,&s);
-#else
-    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
-#endif
+    plumed_cmd_cxx(main,key,val,shape);
   }
 
 #if __cplusplus > 199711L
   template<typename T>
   void cmd(const char*key,T* val, std::initializer_list<std::size_t> shape) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
     if(shape.size()>4) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
     std::array<std::size_t,5> shape_;
     unsigned j=0;
@@ -2516,11 +2481,7 @@ public:
       j++;
     }
     shape_[j]=0;
-    SafePtr s(val,0,&shape_[0]);
-    cmd_priv(main,key,&s);
-#else
-    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
-#endif
+    plumed_cmd_cxx(main,key,val,&shape_[0]);
   }
 #endif
   /**
@@ -2536,12 +2497,7 @@ public:
   */
   template<typename T>
   void cmd(const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-    SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(main,key,&s);
-#else
-    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
-#endif
+    plumed_cmd_cxx(main,key,val,nelem);
   }
 
   /**
@@ -2567,6 +2523,7 @@ public:
   This function can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
   namely implement typechecks and rethrowing exception.
   To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+  They are also used by the Plumed::cmd functions to avoid code duplication.
   Available as of PLUMED 2.8.
 */
 static void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
