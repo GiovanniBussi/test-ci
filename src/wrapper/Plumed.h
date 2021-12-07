@@ -2401,7 +2401,7 @@ private:
   /**
     Private version of cmd. It is used here to avoid duplication of code between typesafe and not-typesafe versions
   */
-  void cmd_priv(const char*key, SafePtr*safe=__PLUMED_WRAPPER_CXX_NULLPTR, const void* unsafe=__PLUMED_WRAPPER_CXX_NULLPTR,plumed_error*error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  static void cmd_priv(plumed main,const char*key, SafePtr*safe=__PLUMED_WRAPPER_CXX_NULLPTR, const void* unsafe=__PLUMED_WRAPPER_CXX_NULLPTR,plumed_error*error=__PLUMED_WRAPPER_CXX_NULLPTR) {
     NothrowHandler h;
     plumed_nothrow_handler nothrow;
     if(error) {
@@ -2458,9 +2458,9 @@ public:
   void cmd(const char*key,T val) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
     SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(key,&s);
+    cmd_priv(main,key,&s);
 #else
-    cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val);
+    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,&val);
 #endif
   }
 
@@ -2477,9 +2477,9 @@ public:
   void cmd(const char*key,T* val) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
     SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(key,&s);
+    cmd_priv(main,key,&s);
 #else
-    cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
+    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
 #endif
   }
 
@@ -2498,9 +2498,9 @@ public:
   void cmd(const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
     SafePtr s(val,0,shape);
-    cmd_priv(key,&s);
+    cmd_priv(main,key,&s);
 #else
-    cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
+    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
 #endif
   }
 
@@ -2517,9 +2517,9 @@ public:
     }
     shape_[j]=0;
     SafePtr s(val,0,&shape_[0]);
-    cmd_priv(key,&s);
+    cmd_priv(main,key,&s);
 #else
-    cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
+    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
 #endif
   }
 #endif
@@ -2538,9 +2538,9 @@ public:
   void cmd(const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
     SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-    cmd_priv(key,&s);
+    cmd_priv(main,key,&s);
 #else
-    cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
+    cmd_priv(main,key,__PLUMED_WRAPPER_CXX_NULLPTR,val);
 #endif
   }
 
@@ -2562,8 +2562,6 @@ public:
     if(main.p) decref();
   }
 
-#if __PLUMED_WRAPPER_CXX_BIND_C /*{*/
-
 /**
   \related Plumed
   This function can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
@@ -2573,54 +2571,53 @@ public:
 */
 static void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s;
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  SafePtr s;
+  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #endif
 }
 
 template<typename T>
 static void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
+  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
 #endif
 }
 
 template<typename T>
 static void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
 template<typename T>
 static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
 template<typename T>
 static void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,shape);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+  SafePtr s(val,0,shape);
+  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
 }
 
-#define __PLUMED_WRAPPER_REDEFINE_CMD ::PLMD::Plumed::plumed_cmd_cxx
 
 #if __PLUMED_WRAPPER_GLOBAL /*{*/
 /**
@@ -2650,8 +2647,14 @@ static void plumed_gcmd_cxx(const char*key,T val, const __PLUMED_WRAPPER_STD siz
   plumed_cmd_cxx(plumed_global(),key,val,shape,error);
 }
 
-#define __PLUMED_WRAPPER_REDEFINE_GCMD ::PLMD::Plumed::plumed_gcmd_cxx
+#endif /*}*/
 
+#if __PLUMED_WRAPPER_CXX_BIND_C /*{*/
+
+#define __PLUMED_WRAPPER_REDEFINE_CMD ::PLMD::Plumed::plumed_cmd_cxx
+
+#if __PLUMED_WRAPPER_GLOBAL /*{*/
+#define __PLUMED_WRAPPER_REDEFINE_GCMD ::PLMD::Plumed::plumed_gcmd_cxx
 #endif /*}*/
 
 #endif /*}*/
