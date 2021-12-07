@@ -1873,7 +1873,7 @@ private:
   __PLUMED_WRAPPER_NOSTRING_EXCEPTION(bad_exception)
   __PLUMED_WRAPPER_NOSTRING_EXCEPTION(exception)
 
-public:
+private:
   /// Small class that wraps plumed_safeptr in order to make its initialization easier
   class SafePtr {
     /// non copyable (copy would require managing buffer, could be added in the future if needed)
@@ -2396,7 +2396,7 @@ Plumed(Plumed&&p)__PLUMED_WRAPPER_CXX_NOEXCEPT :
     return *this;
   }
 
-public:
+private:
 
   /**
     Private version of cmd. It is used here to avoid duplication of code between typesafe and not-typesafe versions
@@ -2561,6 +2561,101 @@ public:
 // the check is needed to avoid calling plumed_finalize on moved objects
     if(main.p) decref();
   }
+
+#if __PLUMED_WRAPPER_CXX_BIND_C /*{*/
+
+/**
+  \related Plumed
+  This function can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+  namely implement typechecks and rethrowing exception.
+  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+  Available as of PLUMED 2.8.
+*/
+static void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+#if __PLUMED_WRAPPER_CXX_TYPESAFE
+  PLMD::Plumed::SafePtr s;
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#else
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#endif
+}
+
+template<typename T>
+static void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+#if __PLUMED_WRAPPER_CXX_TYPESAFE
+  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#else
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
+#endif
+}
+
+template<typename T>
+static void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+#if __PLUMED_WRAPPER_CXX_TYPESAFE
+  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#else
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+#endif
+}
+
+template<typename T>
+static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+#if __PLUMED_WRAPPER_CXX_TYPESAFE
+  PLMD::Plumed::SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#else
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+#endif
+}
+
+template<typename T>
+static void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+#if __PLUMED_WRAPPER_CXX_TYPESAFE
+  PLMD::Plumed::SafePtr s(val,0,shape);
+  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+#else
+  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+#endif
+}
+
+#define __PLUMED_WRAPPER_REDEFINE_CMD ::PLMD::Plumed::plumed_cmd_cxx
+
+#if __PLUMED_WRAPPER_GLOBAL /*{*/
+/**
+  \related Plumed
+  This function can be used to make plumed_gcmd behave as the C++ wrapper PLMD::Plumed::gcmd,
+  namely implement typechecks and rethrowing exception.
+  To be used through the macro plumed_gcmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+  Available as of PLUMED 2.8.
+*/
+
+static void plumed_gcmd_cxx(const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  plumed_cmd_cxx(plumed_global(),key,error);
+}
+
+template<typename T>
+static void plumed_gcmd_cxx(const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  plumed_cmd_cxx(plumed_global(),key,val,error);
+}
+
+template<typename T>
+static void plumed_gcmd_cxx(const char*key,T val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  plumed_cmd_cxx(plumed_global(),key,val,nelem,error);
+}
+
+template<typename T>
+static void plumed_gcmd_cxx(const char*key,T val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  plumed_cmd_cxx(plumed_global(),key,val,shape,error);
+}
+
+#define __PLUMED_WRAPPER_REDEFINE_GCMD ::PLMD::Plumed::plumed_gcmd_cxx
+
+#endif /*}*/
+
+#endif /*}*/
+
 };
 
 /**
@@ -2620,106 +2715,6 @@ bool operator>(const Plumed&a,const Plumed&b) __PLUMED_WRAPPER_CXX_NOEXCEPT {
 __PLUMED_WRAPPER_ANONYMOUS_END /*}*/
 
 }
-
-#if __PLUMED_WRAPPER_CXX_BIND_C /*{*/
-
-__PLUMED_WRAPPER_ANONYMOUS_BEGIN /*{*/
-
-/**
-  \related Plumed
-  This function can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  Available as of PLUMED 2.8.
-*/
-inline void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s;
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#endif
-}
-
-template<typename T>
-void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
-#endif
-}
-
-template<typename T>
-void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
-#endif
-}
-
-template<typename T>
-void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
-#endif
-}
-
-template<typename T>
-void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-#if __PLUMED_WRAPPER_CXX_TYPESAFE
-  PLMD::Plumed::SafePtr s(val,0,shape);
-  PLMD::Plumed(p).cmd_priv(key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
-#else
-  PLMD::Plumed(p).cmd_priv(key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
-#endif
-}
-
-#define __PLUMED_WRAPPER_REDEFINE_CMD plumed_cmd_cxx
-
-#if __PLUMED_WRAPPER_GLOBAL /*{*/
-/**
-  \related Plumed
-  This function can be used to make plumed_gcmd behave as the C++ wrapper PLMD::Plumed::gcmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_gcmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  Available as of PLUMED 2.8.
-*/
-
-inline void plumed_gcmd_cxx(const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,error);
-}
-
-template<typename T>
-void plumed_gcmd_cxx(const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,error);
-}
-
-template<typename T>
-void plumed_gcmd_cxx(const char*key,T val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,nelem,error);
-}
-
-template<typename T>
-void plumed_gcmd_cxx(const char*key,T val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,shape,error);
-}
-
-#define __PLUMED_WRAPPER_REDEFINE_GCMD plumed_gcmd_cxx
-
-#endif /*}*/
-
-__PLUMED_WRAPPER_ANONYMOUS_END /*}*/
-
-#else
-
-#endif /*}*/
 
 #endif /*}*/
 
