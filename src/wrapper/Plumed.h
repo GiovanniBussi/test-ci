@@ -808,7 +808,7 @@ inline
 #endif
 static void plumed_error_finalize(plumed_error error) {
   if(!error.bad_exception)
-/** in C++ we use new/delete to allow having a const char* what */
+    /** in C++ we use new/delete to allow having a const char* what */
 #ifdef __cplusplus
     delete [] error.what;
 #else
@@ -2538,146 +2538,146 @@ public:
     if(main.p) decref();
   }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-static void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  static void plumed_cmd_cxx(plumed p,const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  SafePtr s;
-  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    SafePtr s;
+    cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #endif
-}
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+    cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
+    cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,&val,error);
 #endif
-}
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
-  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+    cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+    cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
-}
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
-  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+    cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+    cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
-}
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_cmd_cxx(plumed p,const char*key,T* val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
 #if __PLUMED_WRAPPER_CXX_TYPESAFE
-  SafePtr s(val,0,shape);
-  cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
+    SafePtr s(val,0,shape);
+    cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
 #else
-  cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
+    cmd_priv(p,key,__PLUMED_WRAPPER_CXX_NULLPTR,val,error);
 #endif
-}
+  }
 
 
 #if __PLUMED_WRAPPER_GLOBAL /*{*/
-/**
-  \related Plumed
-  This function can be used to make plumed_gcmd behave as the C++ wrapper PLMD::Plumed::gcmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_gcmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  Available as of PLUMED 2.8.
-*/
+  /**
+    \related Plumed
+    This function can be used to make plumed_gcmd behave as the C++ wrapper PLMD::Plumed::gcmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_gcmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    Available as of PLUMED 2.8.
+  */
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-static void plumed_gcmd_cxx(const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,error);
-}
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  static void plumed_gcmd_cxx(const char*key,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+    plumed_cmd_cxx(plumed_global(),key,error);
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_gcmd_cxx(const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,error);
-}
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_gcmd_cxx(const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+    plumed_cmd_cxx(plumed_global(),key,val,error);
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_gcmd_cxx(const char*key,T val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,nelem,error);
-}
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_gcmd_cxx(const char*key,T val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+    plumed_cmd_cxx(plumed_global(),key,val,nelem,error);
+  }
 
-/**
-  These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
-  namely implement typechecks and rethrowing exception.
-  To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
-  They are also used by the Plumed::cmd functions to avoid code duplication.
-  Available as of PLUMED 2.8.
-*/
-template<typename T>
-static void plumed_gcmd_cxx(const char*key,T val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-  plumed_cmd_cxx(plumed_global(),key,val,shape,error);
-}
+  /**
+    These functions can be used to make plumed_cmd behave as the C++ wrapper PLMD::Plumed::cmd,
+    namely implement typechecks and rethrowing exception.
+    To be used through the macro plumed_cmd (defined when __PLUMED_WRAPPER_CXX_BIND_C==1).
+    They are also used by the Plumed::cmd functions to avoid code duplication.
+    Available as of PLUMED 2.8.
+  */
+  template<typename T>
+  static void plumed_gcmd_cxx(const char*key,T val, const __PLUMED_WRAPPER_STD size_t* shape,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
+    plumed_cmd_cxx(plumed_global(),key,val,shape,error);
+  }
 
 #endif /*}*/
 
