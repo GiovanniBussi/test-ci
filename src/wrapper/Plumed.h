@@ -2413,10 +2413,12 @@ private:
     plumed_nothrow_handler nothrow;
     if(error) {
       plumed_error_init(error);
-      nothrow= {error,plumed_error_set};
+      nothrow.ptr=error;
+      nothrow.handler=plumed_error_set;
     } else {
       h.code=0;
-      nothrow= {&h,nothrow_handler};
+      nothrow.ptr=&h;
+      nothrow.handler=nothrow_handler;
     }
     try {
       if(safe) {
