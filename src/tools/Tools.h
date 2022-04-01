@@ -35,6 +35,7 @@
 #include <sstream>
 #include <memory>
 #include <cstddef>
+#include <queue>
 
 namespace PLMD {
 
@@ -249,6 +250,75 @@ public:
     unsigned s=vec.size();
     if(s==0) return;
     set_to_zero(&vec[0](0,0),s*n*m);
+  }
+
+
+  template<typename C>
+  struct merge_sorted_vectors_entry
+  {
+    typename C::const_iterator fwdIt,endIt;
+
+    merge_sorted_vectors_entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
+    bool IsAlive() const { return fwdIt != endIt; }
+    bool operator< (merge_sorted_vectors_entry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
+  };
+
+
+  template<class C>
+  static void merge_sorted_vectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result,bool priority_queue=true) {
+    if(priority_queue) {
+      std::priority_queue<merge_sorted_vectors_entry<C>> queue;
+      // note: queue does not have reserve() method
+
+      // first build a result vector large enough (probably too large)
+      // this is just to save multiple reallocations on push_back, perhaps we can use a cap
+      {
+        std::size_t maxsize=0;
+        for(unsigned i=0; i<vecs.size(); i++) {
+          if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
+          if(!vecs[i]->empty())queue.push(merge_sorted_vectors_entry<C>(*vecs[i]));
+        }
+        result.reserve(maxsize);
+      }
+
+      // first iteration:
+      if(queue.empty()) return;
+      auto tmp=queue.top();
+      queue.pop();
+      result.push_back(*tmp.fwdIt);
+      tmp.fwdIt++;
+      if(tmp.IsAlive()) queue.push(tmp);
+
+      while(!queue.empty()) {
+        auto tmp=queue.top();
+        queue.pop();
+        if(result.back() < *tmp.fwdIt) result.push_back(*tmp.fwdIt);
+        tmp.fwdIt++;
+        if(tmp.IsAlive()) queue.push(tmp);
+      }
+    } else {
+
+      std::vector<merge_sorted_vectors_entry<C>> entries;
+      entries.reserve(vecs.size());
+
+      {
+        std::size_t maxsize=0;
+        for(int i=0; i<vecs.size(); i++) {
+          if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
+          if(!vecs[i]->empty())entries.push_back(merge_sorted_vectors_entry<C>(*vecs[i]));
+        }
+        result.reserve(maxsize);
+      }
+
+      while(!entries.empty()) {
+        const auto minval=*std::min_element(entries.begin(),entries.end(),[](const merge_sorted_vectors_entry<C> &a,const merge_sorted_vectors_entry<C> &b) {return *a.fwdIt < *b.fwdIt;})->fwdIt;
+        result.push_back(minval);
+        for(auto & e : entries) while(e.fwdIt != e.endIt && *e.fwdIt==minval) ++e.fwdIt;
+        auto erase=std::remove_if(entries.begin(),entries.end(),[](const merge_sorted_vectors_entry<C> & e) {return e.fwdIt == e.endIt;});
+        entries.erase(erase,entries.end());
+      }
+    }
+
   }
 };
 
