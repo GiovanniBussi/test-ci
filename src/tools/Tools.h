@@ -234,7 +234,7 @@ public:
   make_unique(Args&&...) = delete;
 
   static void set_to_zero(double*ptr,unsigned n) {
-    for(unsigned i=0;i<n;i++) ptr[i]=0.0;
+    for(unsigned i=0; i<n; i++) ptr[i]=0.0;
   }
 
   template<unsigned n>
