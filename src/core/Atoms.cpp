@@ -36,6 +36,11 @@ namespace PLMD {
 /// Set this to false if you want to revert to the original (expensive) behavior
 static const bool shareMassAndChargeOnlyAtFirstStep=true;
 
+static bool getenvMergeVectorsPriorityQueue() noexcept {
+  static const auto* res=std::getenv("PLUMED_MERGE_VECTORS_PRIORITY_QUEUE");
+  return res;
+}
+
 class PlumedMain;
 
 Atoms::Atoms(PlumedMain&plumed):
@@ -144,15 +149,18 @@ void Atoms::share() {
   }
 
   if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+    std::vector<const std::vector<AtomNumber>*> vectors;
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
         if(!actions[i]->getUnique().empty()) {
           atomsNeeded=true;
           // unique are the local atoms
-          unique.insert(actions[i]->getUniqueLocal().begin(),actions[i]->getUniqueLocal().end());
+          vectors.push_back(&actions[i]->getUniqueLocal());
         }
       }
     }
+    unique.clear();
+    Tools::merge_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
   } else {
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
@@ -171,15 +179,15 @@ void Atoms::shareAll() {
   unique.clear();
   // keep in unique only those atoms that are local
   if(dd && shuffledAtoms>0) {
-    for(int i=0; i<natoms; i++) if(g2l[i]>=0) unique.insert(AtomNumber::index(i));
+    for(int i=0; i<natoms; i++) if(g2l[i]>=0) unique.push_back(AtomNumber::index(i)); // already sorted
   } else {
-    for(int i=0; i<natoms; i++) unique.insert(AtomNumber::index(i));
+    for(int i=0; i<natoms; i++) unique.push_back(AtomNumber::index(i));
   }
   atomsNeeded=true;
   share(unique);
 }
 
-void Atoms::share(const std::set<AtomNumber>& unique) {
+void Atoms::share(const std::vector<AtomNumber>& unique) {
   plumed_assert( positionsHaveBeenSet==3 && massesHaveBeenSet );
 
   virial.zero();
@@ -472,16 +480,19 @@ void Atoms::createFullList(const TypesafePtr & n) {
 // This is not very clear, and probably should be coded differently.
 // Hopefully this fix the longstanding issue with NAMD.
     unique.clear();
+    std::vector<const std::vector<AtomNumber>*> vectors;
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
         if(!actions[i]->getUnique().empty()) {
           atomsNeeded=true;
           // unique are the local atoms
-          unique.insert(actions[i]->getUnique().begin(),actions[i]->getUnique().end());
+          vectors.push_back(&actions[i]->getUnique());
         }
       }
     }
-    fullList.resize(0);
+    unique.clear();
+    Tools::merge_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
+    fullList.clear();
     fullList.reserve(unique.size());
     for(const auto & p : unique) fullList.push_back(p.index());
     n.set(int(fullList.size()));
