@@ -155,15 +155,16 @@ void Atoms::share() {
 
   if(getenvForceUnique() || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
+    vectors.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
         if(!actions[i]->getUnique().empty()) {
-          atomsNeeded=true;
           // unique are the local atoms
           vectors.push_back(&actions[i]->getUniqueLocal());
         }
       }
     }
+    if(!vectors.empty()) atomsNeeded=true;
     unique.clear();
     Tools::merge_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
   } else {
@@ -186,7 +187,8 @@ void Atoms::shareAll() {
   if(dd && shuffledAtoms>0) {
     for(int i=0; i<natoms; i++) if(g2l[i]>=0) unique.push_back(AtomNumber::index(i)); // already sorted
   } else {
-    for(int i=0; i<natoms; i++) unique.push_back(AtomNumber::index(i));
+    unique.resize(natoms);
+    for(int i=0; i<natoms; i++) unique[i]=AtomNumber::index(i);
   }
   atomsNeeded=true;
   share(unique);
@@ -196,7 +198,7 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
   plumed_assert( positionsHaveBeenSet==3 && massesHaveBeenSet );
 
   virial.zero();
-  if(zeroallforces || int(gatindex.size())==natoms) {
+  if(zeroallforces || (int(gatindex.size())==natoms && !getenvForceUnique())) {
     Tools::set_to_zero(forces);
   } else {
     for(const auto & p : unique) forces[p.index()].zero();
@@ -209,14 +211,12 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
   atomsNeeded=false;
 
   if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
-    uniq_index.clear();
-    uniq_index.reserve(unique.size());
-    for(const auto & p : unique) uniq_index.push_back(g2l[p.index()]);
+    uniq_index.resize(unique.size());
+    for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=g2l[unique[i].index()];
     mdatoms->getPositions(unique,uniq_index,positions);
   } else if(getenvForceUnique()) {
-    uniq_index.clear();
-    uniq_index.reserve(unique.size());
-    for(const auto & p : unique) uniq_index.push_back(p.index());
+    uniq_index.resize(unique.size());
+    for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=unique[i].index();
     mdatoms->getPositions(unique,uniq_index,positions);
   } else {
 // faster version, which retrieves all atoms
