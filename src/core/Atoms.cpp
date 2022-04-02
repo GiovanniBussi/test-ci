@@ -41,6 +41,11 @@ static bool getenvMergeVectorsPriorityQueue() noexcept {
   return res;
 }
 
+static bool getenvForceUnique() noexcept {
+  static const auto* res=std::getenv("PLUMED_FORCE_UNIQUE");
+  return res;
+}
+
 class PlumedMain;
 
 Atoms::Atoms(PlumedMain&plumed):
@@ -148,7 +153,7 @@ void Atoms::share() {
     return;
   }
 
-  if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+  if(getenvForceUnique() || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
@@ -203,16 +208,19 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
   if(!atomsNeeded) return;
   atomsNeeded=false;
 
-  if(int(gatindex.size())==natoms && shuffledAtoms==0) {
-// faster version, which retrieves all atoms
-    mdatoms->getPositions(0,natoms,positions);
-  } else {
+  if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     uniq_index.clear();
     uniq_index.reserve(unique.size());
-    if(shuffledAtoms>0) {
-      for(const auto & p : unique) uniq_index.push_back(g2l[p.index()]);
-    }
+    for(const auto & p : unique) uniq_index.push_back(g2l[p.index()]);
     mdatoms->getPositions(unique,uniq_index,positions);
+  } else if(getenvForceUnique()) {
+    uniq_index.clear();
+    uniq_index.reserve(unique.size());
+    for(const auto & p : unique) uniq_index.push_back(p.index());
+    mdatoms->getPositions(unique,uniq_index,positions);
+  } else {
+// faster version, which retrieves all atoms
+    mdatoms->getPositions(0,natoms,positions);
   }
 
 
@@ -327,7 +335,7 @@ void Atoms::updateForces() {
     mdatoms->rescaleForces(gatindex,alpha);
     mdatoms->updateForces(gatindex,forces);
   } else {
-    if(int(gatindex.size())==natoms && shuffledAtoms==0) mdatoms->updateForces(gatindex,forces);
+    if(!getenvForceUnique() && int(gatindex.size())==natoms && shuffledAtoms==0) mdatoms->updateForces(gatindex,forces);
     else mdatoms->updateForces(unique,uniq_index,forces);
   }
   if( !plumed.novirial && dd.Get_rank()==0 ) {
