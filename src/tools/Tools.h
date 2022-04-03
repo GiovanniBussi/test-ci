@@ -254,26 +254,29 @@ public:
 
 
   template<typename C>
-  struct merge_vectors_entry
+  struct merge_sorted_vectors_entry
   {
     typename C::const_iterator fwdIt,endIt;
 
-    merge_vectors_entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
+    merge_sorted_vectors_entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
     bool IsAlive() const { return fwdIt != endIt; }
-    bool operator< (merge_vectors_entry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
+    bool operator< (merge_sorted_vectors_entry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
   };
 
 
   template<class C>
-  static void merge_vectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result,bool priority_queue=true) {
+  static void merge_sorted_vectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result,bool priority_queue=true) {
     if(priority_queue) {
-      std::priority_queue<merge_vectors_entry<C>> queue;
+      std::priority_queue<merge_sorted_vectors_entry<C>> queue;
+      // note: queue does not have reserve() method
 
+      // first build a result vector large enough (probably too large)
+      // this is just to save multiple reallocations on push_back, perhaps we can use a cap
       {
         std::size_t maxsize=0;
         for(unsigned i=0; i<vecs.size(); i++) {
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
-          if(!vecs[i]->empty())queue.push(merge_vectors_entry<C>(*vecs[i]));
+          if(!vecs[i]->empty())queue.push(merge_sorted_vectors_entry<C>(*vecs[i]));
         }
         result.reserve(maxsize);
       }
@@ -295,26 +298,23 @@ public:
       }
     } else {
 
-      std::vector<merge_vectors_entry<C>> entries;
+      std::vector<merge_sorted_vectors_entry<C>> entries;
+      entries.reserve(vecs.size());
 
       {
         std::size_t maxsize=0;
         for(int i=0; i<vecs.size(); i++) {
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
-          if(!vecs[i]->empty())entries.push_back(merge_vectors_entry<C>(*vecs[i]));
+          if(!vecs[i]->empty())entries.push_back(merge_sorted_vectors_entry<C>(*vecs[i]));
         }
         result.reserve(maxsize);
       }
 
       while(!entries.empty()) {
-        typename C::value_type minval=*entries[0].fwdIt;
-        for(unsigned i=1; i<entries.size(); i++) {
-          const auto c=*entries[i].fwdIt;
-          if(c<minval) minval=c;
-        }
+        const auto minval=*std::min_element(entries.begin(),entries.end(),[](const merge_sorted_vectors_entry<C> &a,const merge_sorted_vectors_entry<C> &b) {return *a.fwdIt < *b.fwdIt;})->fwdIt;
         result.push_back(minval);
         for(auto & e : entries) while(e.fwdIt != e.endIt && *e.fwdIt==minval) ++e.fwdIt;
-        auto erase=std::remove_if(entries.begin(),entries.end(),[](const merge_vectors_entry<C> & e) {return e.fwdIt == e.endIt;});
+        auto erase=std::remove_if(entries.begin(),entries.end(),[](const merge_sorted_vectors_entry<C> & e) {return e.fwdIt == e.endIt;});
         entries.erase(erase,entries.end());
       }
     }

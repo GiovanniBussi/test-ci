@@ -166,7 +166,7 @@ void Atoms::share() {
     }
     if(!vectors.empty()) atomsNeeded=true;
     unique.clear();
-    Tools::merge_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
+    Tools::merge_sorted_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
   } else {
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
@@ -499,7 +499,7 @@ void Atoms::createFullList(const TypesafePtr & n) {
       }
     }
     unique.clear();
-    Tools::merge_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
+    Tools::merge_sorted_vectors(vectors,unique,getenvMergeVectorsPriorityQueue());
     fullList.clear();
     fullList.reserve(unique.size());
     for(const auto & p : unique) fullList.push_back(p.index());
