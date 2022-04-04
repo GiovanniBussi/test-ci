@@ -46,6 +46,11 @@ static bool getenvForceUnique() noexcept {
   return res;
 }
 
+static bool getenvMakeUnique() noexcept {
+  static const auto* res=std::getenv("PLUMED_MAKE_UNIQUE");
+  return res;
+}
+
 class PlumedMain;
 
 Atoms::Atoms(PlumedMain&plumed):
@@ -153,7 +158,7 @@ void Atoms::share() {
     return;
   }
 
-  if(getenvForceUnique() || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+  if(getenvMakeUnique() || getenvForceUnique() || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
     vectors.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
