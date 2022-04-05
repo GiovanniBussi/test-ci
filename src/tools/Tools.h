@@ -253,21 +253,22 @@ public:
   }
 
 
-  template<typename C>
-  struct MergeSortedVectorsEntry
-  {
-    typename C::const_iterator fwdIt,endIt;
-
-    MergeSortedVectorsEntry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
-    bool IsAlive() const { return fwdIt != endIt; }
-    bool operator< (MergeSortedVectorsEntry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
-  };
 
 
   template<class C>
   static void mergeSortedVectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result,bool priority_queue=false) {
+
+    struct Entry
+    {
+      typename C::const_iterator fwdIt,endIt;
+
+      Entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
+      bool IsAlive() const { return fwdIt != endIt; }
+      bool operator< (Entry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
+    };
+
     if(priority_queue) {
-      std::priority_queue<MergeSortedVectorsEntry<C>> queue;
+      std::priority_queue<Entry> queue;
       // note: queue does not have reserve() method
 
       // first build a result vector large enough (probably too large)
@@ -276,7 +277,7 @@ public:
         std::size_t maxsize=0;
         for(unsigned i=0; i<vecs.size(); i++) {
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
-          if(!vecs[i]->empty())queue.push(MergeSortedVectorsEntry<C>(*vecs[i]));
+          if(!vecs[i]->empty())queue.push(Entry(*vecs[i]));
         }
         result.reserve(maxsize);
       }
@@ -298,23 +299,23 @@ public:
       }
     } else {
 
-      std::vector<MergeSortedVectorsEntry<C>> entries;
+      std::vector<Entry> entries;
       entries.reserve(vecs.size());
 
       {
         std::size_t maxsize=0;
         for(int i=0; i<vecs.size(); i++) {
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
-          if(!vecs[i]->empty())entries.push_back(MergeSortedVectorsEntry<C>(*vecs[i]));
+          if(!vecs[i]->empty())entries.push_back(Entry(*vecs[i]));
         }
         result.reserve(maxsize);
       }
 
       while(!entries.empty()) {
-        const auto minval=*std::min_element(entries.begin(),entries.end(),[](const MergeSortedVectorsEntry<C> &a,const MergeSortedVectorsEntry<C> &b) {return *a.fwdIt < *b.fwdIt;})->fwdIt;
+        const auto minval=*std::min_element(entries.begin(),entries.end(),[](const Entry &a,const Entry &b) {return *a.fwdIt < *b.fwdIt;})->fwdIt;
         result.push_back(minval);
         for(auto & e : entries) while(e.fwdIt != e.endIt && *e.fwdIt==minval) ++e.fwdIt;
-        auto erase=std::remove_if(entries.begin(),entries.end(),[](const MergeSortedVectorsEntry<C> & e) {return e.fwdIt == e.endIt;});
+        auto erase=std::remove_if(entries.begin(),entries.end(),[](const Entry & e) {return e.fwdIt == e.endIt;});
         entries.erase(erase,entries.end());
       }
     }
