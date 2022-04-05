@@ -41,7 +41,7 @@ static bool getenvMergeVectorsPriorityQueue() noexcept {
   return res;
 }
 
-static bool getenvForceUnique() noexcept {
+static const char* getenvForceUnique() noexcept {
   static const auto* res=std::getenv("PLUMED_FORCE_UNIQUE");
   return res;
 }
@@ -158,7 +158,22 @@ void Atoms::share() {
     return;
   }
 
-  if(getenvMakeUnique() || getenvForceUnique() || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+  if(!getenvForceUnique()) {
+    unsigned largest=0;
+    for(unsigned i=0; i<actions.size(); i++) {
+      if(actions[i]->isActive()) {
+        auto l=actions[i]->getUnique().size();
+        if(l>largest) largest=l;
+      }
+    }
+    if(largest*2>natoms) unique_serial=true;
+    else unique_serial=false;
+  } else {
+    if(!std::strcmp(getenvForceUnique(),"yes")) unique_serial=true;
+    else unique_serial=false;
+  }
+
+  if(getenvMakeUnique() || unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
     vectors.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
@@ -203,7 +218,7 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
   plumed_assert( positionsHaveBeenSet==3 && massesHaveBeenSet );
 
   virial.zero();
-  if(zeroallforces || (int(gatindex.size())==natoms && !getenvForceUnique())) {
+  if(zeroallforces || (int(gatindex.size())==natoms && !unique_serial)) {
     Tools::set_to_zero(forces);
   } else {
     for(const auto & p : unique) forces[p.index()].zero();
@@ -219,7 +234,7 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
     uniq_index.resize(unique.size());
     for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=g2l[unique[i].index()];
     mdatoms->getPositions(unique,uniq_index,positions);
-  } else if(getenvForceUnique()) {
+  } else if(unique_serial) {
     uniq_index.resize(unique.size());
     for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=unique[i].index();
     mdatoms->getPositions(unique,uniq_index,positions);
@@ -340,7 +355,7 @@ void Atoms::updateForces() {
     mdatoms->rescaleForces(gatindex,alpha);
     mdatoms->updateForces(gatindex,forces);
   } else {
-    if(!getenvForceUnique() && int(gatindex.size())==natoms && shuffledAtoms==0) mdatoms->updateForces(gatindex,forces);
+    if(!unique_serial && int(gatindex.size())==natoms && shuffledAtoms==0) mdatoms->updateForces(gatindex,forces);
     else mdatoms->updateForces(unique,uniq_index,forces);
   }
   if( !plumed.novirial && dd.Get_rank()==0 ) {

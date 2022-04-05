@@ -49,6 +49,7 @@ class Atoms
   friend class ActionAtomistic;
   friend class ActionWithVirtualAtom;
   int natoms;
+  bool unique_serial=false; // use unique in serial mode
   std::vector<AtomNumber> unique;
   std::vector<unsigned> uniq_index;
 /// Map global indexes to local indexes
