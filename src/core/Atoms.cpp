@@ -166,7 +166,7 @@ void Atoms::share() {
         if(l>largest) largest=l;
       }
     }
-    if(largest*2>natoms) unique_serial=true;
+    if(largest*2<natoms) unique_serial=true;
     else unique_serial=false;
   } else {
     if(!std::strcmp(getenvForceUnique(),"yes")) unique_serial=true;
