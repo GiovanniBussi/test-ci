@@ -255,15 +255,24 @@ public:
 
 
 
+  /// Merge sorted vectors.
+  /// Takes a vector of pointers to containers and merge them.
+  /// Containers should be already sorted.
+  /// The content is appended to the result vector.
+  /// Optionally, uses a priority_queue implementation.
   template<class C>
   static void mergeSortedVectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result,bool priority_queue=false) {
 
+    /// local class storing the range of remaining objects to be pushed
     struct Entry
     {
       typename C::const_iterator fwdIt,endIt;
 
       Entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
-      bool IsAlive() const { return fwdIt != endIt; }
+      /// check if this vector still contains something to be pushed
+      explicit operator bool () const { return fwdIt != endIt; }
+      /// to allow using a priority_queu, which selects the highest element.
+      /// we here (counterintuitively) define < as >
       bool operator< (Entry const& rhs) const { return *fwdIt > *rhs.fwdIt; }
     };
 
@@ -271,31 +280,32 @@ public:
       std::priority_queue<Entry> queue;
       // note: queue does not have reserve() method
 
-      // first build a result vector large enough (probably too large)
-      // this is just to save multiple reallocations on push_back, perhaps we can use a cap
+      // add vectors to the queue
       {
         std::size_t maxsize=0;
         for(unsigned i=0; i<vecs.size(); i++) {
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
           if(!vecs[i]->empty())queue.push(Entry(*vecs[i]));
         }
+        // this is just to save multiple reallocations on push_back
         result.reserve(maxsize);
       }
 
-      // first iteration:
+      // first iteration (to avoid a if in the main loop)
       if(queue.empty()) return;
       auto tmp=queue.top();
       queue.pop();
       result.push_back(*tmp.fwdIt);
       tmp.fwdIt++;
-      if(tmp.IsAlive()) queue.push(tmp);
+      if(tmp) queue.push(tmp);
 
+      // main loop
       while(!queue.empty()) {
         auto tmp=queue.top();
         queue.pop();
         if(result.back() < *tmp.fwdIt) result.push_back(*tmp.fwdIt);
         tmp.fwdIt++;
-        if(tmp.IsAlive()) queue.push(tmp);
+        if(tmp) queue.push(tmp);
       }
     } else {
 
@@ -308,14 +318,23 @@ public:
           if(vecs[i]->size()>maxsize) maxsize=vecs[i]->size();
           if(!vecs[i]->empty())entries.push_back(Entry(*vecs[i]));
         }
+        // this is just to save multiple reallocations on push_back
         result.reserve(maxsize);
       }
 
       while(!entries.empty()) {
-        const auto minval=*std::min_element(entries.begin(),entries.end(),[](const Entry &a,const Entry &b) {return *a.fwdIt < *b.fwdIt;})->fwdIt;
+        // find smallest pending element
+        // we use max_element instead of min_element because we are defining < as > (see above)
+        const auto minval=*std::max_element(entries.begin(),entries.end())->fwdIt;
+
+        // push it
         result.push_back(minval);
-        for(auto & e : entries) while(e.fwdIt != e.endIt && *e.fwdIt==minval) ++e.fwdIt;
-        auto erase=std::remove_if(entries.begin(),entries.end(),[](const Entry & e) {return e.fwdIt == e.endIt;});
+
+        // fast forward vectors with elements equal to minval (to avoid duplicates)
+        for(auto & e : entries) while(e && *e.fwdIt==minval) ++e.fwdIt;
+
+        // remove from the entries vector all exhausted vectors
+        auto erase=std::remove_if(entries.begin(),entries.end(),[](const Entry & e) {return !e;});
         entries.erase(erase,entries.end());
       }
     }
