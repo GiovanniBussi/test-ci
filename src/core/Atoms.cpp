@@ -36,16 +36,34 @@ namespace PLMD {
 /// Set this to false if you want to revert to the original (expensive) behavior
 static const bool shareMassAndChargeOnlyAtFirstStep=true;
 
+/// Use a priority_queue to merge unique vectors.
+/// export PLUMED_MERGE_VECTORS_PRIORITY_QUEUE=yes to use a priority_queue.
+/// Might be faster with some settings, but appears to not be in practice.
+/// This option is for testing and might be removed.
 static bool getenvMergeVectorsPriorityQueue() noexcept {
   static const auto* res=std::getenv("PLUMED_MERGE_VECTORS_PRIORITY_QUEUE");
   return res;
 }
 
+/// Use unique list of atoms to manipulate forces and positions.
+/// A unique list of atoms is used to manipulate forces and positions in MPI parallel runs.
+/// In serial runs, this is done if convenient. The code currently contain
+/// some heuristic to decide if the unique list should be used or not.
+/// An env var can be used to override this decision.
+/// export PLUMED_FORCE_UNIQUE=yes # enforce using the unique list in serial runs
+/// export PLUMED_FORCE_UNIQUE=no  # enforce not using the unique list in serial runs
+/// default: choose heuristically
 static const char* getenvForceUnique() noexcept {
   static const auto* res=std::getenv("PLUMED_FORCE_UNIQUE");
   return res;
 }
 
+/// Force the construction of the unique list.
+/// Can be used for timing the construction of the unique list.
+/// export PLUMED_FORCE_UNIQUE=no
+/// export PLUMED_MAKE_UNIQUE=yes
+/// By setting *both*, plumed will construct the list but not use it.
+/// This option is for testing and might be removed.
 static bool getenvMakeUnique() noexcept {
   static const auto* res=std::getenv("PLUMED_MAKE_UNIQUE");
   return res;
