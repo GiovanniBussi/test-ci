@@ -33,6 +33,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <iosfwd>
 
 namespace PLMD {
 
@@ -137,7 +138,93 @@ class Atoms
     void enable(Communicator& c);
   };
 
+  template <class P,class T>
+  /// Class holding the action cache.
+  /// P should be the type of actions that are cached (e.g., ActionAtomistic).
+  /// T should be the type of cached object (e.g., a vector that is expensive to build).
+  /// I add it here but might be moved to Tools if needed.
+  /// It is actually general enough to be used for other tasks.
+  class ActiveActionCache {
+  public:
+    /// Constructor, with cache size
+    ActiveActionCache(std::size_t maxsize=10):
+      maxsize(maxsize)
+    {
+      if(maxsize>0) data.reserve(maxsize);
+    }
+    typedef std::vector<const P*> key;
+    /// Add an object to the cache
+    void add(const key& k,const T& cache) {
+      // cache is disabled in this case
+      if(maxsize==0) return;
+      // find existing entries with the same k
+      auto erase=std::remove_if(data.begin(),data.end(),[k](const Entry & e) {return e.k==k;});
+      // remove them (note: there should be at most one! maybe this could be optimized)
+      data.erase(erase,data.end());
+      // if needed, make space (should erase only one element! maybe this could be optimized)
+      while(data.size()+1>maxsize) data.erase(data.begin());
+      // add
+      data.emplace_back(Entry{k,cache});
+      // update statistics
+      max_usage=std::max(max_usage,data.size());
+    }
+    /// Retrieve object from the cache
+    /// If found: return address
+    /// If not found: return nullptr
+    const T* get(const key& k)const {
+      // search for an entry with the requested key
+      // comparison should be fast for non-matching keys since they are expected to have different length typically
+      // however, the matching key will be compared as whole vector
+      auto find=std::find_if(data.begin(),data.end(),[k](const Entry & e) {return e.k==k;});
+      if(find!=data.end()) {
+        // found
+        hit++;
+        return &find->cache;
+      } else {
+        // not found
+        miss++;
+        return nullptr;
+      }
+    }
+    /// Remove object(s) from the cache.
+    /// Remove all objects where key contains i.
+    /// Note: this is expensive since it requires scanning all the whole keys
+    void remove(const P* i) {
+      // find all keys containing pointer i
+      auto erase=std::remove_if(data.begin(),data.end(),[i](const Entry & e) {
+        return std::find_if(e.k.begin(),e.k.end(),[i](const P* p) {return p==i;})!=e.k.end();
+      });
+      // erase them
+      data.erase(erase,data.end());
+    }
+    /// Clear the whole cache
+    void clear() {
+      data.clear();
+    }
+    /// Write report
+    void report(std::ostream & os) const {
+      if(data.size()>0) os<<"Atom list cache - current: " <<data.size()<<" max: "<<max_usage<<" hits: "<<hit<<"/"<<(hit+miss)<<"\n";
+    }
+  private:
+    /// local class
+    struct Entry {
+      key k;
+      T cache;
+    };
+    /// maximum cache size, set in constructor
+    const std::size_t maxsize;
+    /// maximum cache usage
+    std::size_t max_usage=0;
+    /// number of hits, could be mutated while accessing cache
+    std::size_t mutable hit=0;
+    /// number of misses, could be mutated while accessing cache
+    std::size_t mutable miss=0;
+    /// this is the real cache
+    std::vector<Entry> data;
+  };
+
   DomainDecomposition dd;
+  ActiveActionCache<ActionAtomistic,std::vector<AtomNumber>> actionsCache;
   long int ddStep;  //last step in which dd happened
 
   void share(const std::vector<AtomNumber>&);
@@ -206,6 +293,8 @@ public:
   void add(ActionAtomistic*);
   void remove(ActionAtomistic*);
 
+  void updateRequestedAtoms(ActionAtomistic*);
+
   double getEnergy()const {plumed_assert(collectEnergy && energyHasBeenSet); return energy;}
 
   bool isEnergyNeeded()const {return collectEnergy;}
@@ -238,6 +327,7 @@ public:
   void setExtraCVForce(const std::string &name,const TypesafePtr & p);
   double getExtraCV(const std::string &name);
   void updateExtraCVForce(const std::string &name,double f);
+  std::string reportCache() const;
 };
 
 inline

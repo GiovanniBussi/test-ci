@@ -76,6 +76,9 @@ void ActionAtomistic::requestAtoms(const std::vector<AtomNumber> & a, const bool
   Tools::removeDuplicates(unique);
   updateUniqueLocal();
   atoms.unique.clear();
+// this is necessary to disable all the cached lists of requested atoms
+// that contain this specific action:
+  atoms.updateRequestedAtoms(this);
 }
 
 Vector ActionAtomistic::pbcDistance(const Vector &v1,const Vector &v2)const {

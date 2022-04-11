@@ -69,6 +69,21 @@ static bool getenvMakeUnique() noexcept {
   return res;
 }
 
+/// Set the size of the cache for lists of used atoms.
+/// If unset, cache size is set to 10.
+/// I don't use a static const variable since this is read once.
+/// Might throw is string is not properly formatted
+static std::size_t getenvActionsCache() {
+  auto env = std::getenv("PLUMED_ACTIONS_CACHE");
+  if(env) {
+    std::size_t size;
+    Tools::convert(env,size);
+    return size;
+  }
+  return 10; // default
+}
+
+
 class PlumedMain;
 
 Atoms::Atoms(PlumedMain&plumed):
@@ -96,6 +111,7 @@ Atoms::Atoms(PlumedMain&plumed):
   kbT(0.0),
   asyncSent(false),
   atomsNeeded(false),
+  actionsCache(getenvActionsCache()),
   ddStep(0)
 {
 }
@@ -176,7 +192,15 @@ void Atoms::share() {
     return;
   }
 
+  bool use_cache=false;
+
   if(!getenvForceUnique()) {
+    unique_serial=true;
+    use_cache=true;
+    // enable cache by default
+  } else if(!std::strcmp(getenvForceUnique(),"yes")) {
+    unique_serial=true;
+  } else if(!std::strcmp(getenvForceUnique(),"nocache")) {
     unsigned largest=0;
     for(unsigned i=0; i<actions.size(); i++) {
       if(actions[i]->isActive()) {
@@ -186,12 +210,34 @@ void Atoms::share() {
     }
     if(largest*2<natoms) unique_serial=true;
     else unique_serial=false;
-  } else {
-    if(!std::strcmp(getenvForceUnique(),"yes")) unique_serial=true;
-    else unique_serial=false;
-  }
+  } else unique_serial=false;
 
-  if(getenvMakeUnique() || unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+  if(use_cache) {
+    std::vector<const ActionAtomistic*> active_actions;
+    active_actions.reserve(actions.size());
+    for(unsigned i=0; i<actions.size(); i++) {
+      if(actions[i]->isActive()) {
+        if(!actions[i]->getUnique().empty()) {
+          active_actions.push_back(actions[i]);
+        }
+      }
+    }
+    if(!active_actions.empty()) atomsNeeded=true;
+    // list of pointers to active actions is used to identify the possibly cached atom list
+    auto u=actionsCache.get(active_actions);
+    if(u) {
+      // if the atom list is found, we copy it
+      unique=*u;
+    } else {
+      // otherwise, we compute it and store it in the cache
+      std::vector<const std::vector<AtomNumber>*> vectors;
+      vectors.reserve(active_actions.size());
+      for(unsigned i=0; i<active_actions.size(); i++) vectors.push_back(&active_actions[i]->getUniqueLocal());
+      unique.clear();
+      Tools::mergeSortedVectors(vectors,unique,getenvMergeVectorsPriorityQueue());
+      actionsCache.add(active_actions,unique);
+    }
+  } else if(getenvMakeUnique() || unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
     vectors.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
@@ -403,6 +449,10 @@ void Atoms::remove(ActionAtomistic*a) {
   actions.erase(f);
 }
 
+void Atoms::updateRequestedAtoms(ActionAtomistic*a) {
+  // an action changed its request, and thus all the cached lists involving that action should be removed
+  actionsCache.remove(a);
+}
 
 void Atoms::DomainDecomposition::enable(Communicator& c) {
   on=true;
@@ -459,6 +509,8 @@ void Atoms::setAtomsGatindex(const TypesafePtr & g,bool fortran) {
     // keep in unique only those atoms that are local
     actions[i]->updateUniqueLocal();
   }
+  // the list of local atoms changed, so the cached unique list should be invalidated
+  actionsCache.clear();
   unique.clear();
 }
 
@@ -472,6 +524,8 @@ void Atoms::setAtomsContiguous(int start) {
     // keep in unique only those atoms that are local
     actions[i]->updateUniqueLocal();
   }
+  // the list of local atoms changed, so the cached unique list should be invalidated
+  actionsCache.clear();
   unique.clear();
 }
 
@@ -658,6 +712,12 @@ double Atoms::getExtraCV(const std::string &name) {
 
 void Atoms::updateExtraCVForce(const std::string &name,double f) {
   mdatoms->updateExtraCVForce(name,f);
+}
+
+std::string Atoms::reportCache() const {
+  std::ostringstream oss;
+  actionsCache.report(oss);
+  return oss.str();
 }
 
 }

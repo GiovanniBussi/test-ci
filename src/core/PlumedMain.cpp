@@ -173,6 +173,7 @@ PlumedMain::PlumedMain():
 
 // destructor needed to delete forward declarated objects
 PlumedMain::~PlumedMain() {
+  log<<atoms.reportCache();
   myregister.remove(this);
 }
 
