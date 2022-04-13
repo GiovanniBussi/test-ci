@@ -181,27 +181,11 @@ void Atoms::share() {
     return;
   }
 
-  bool use_cache=false;
-
-  if(!getenvForceUnique()) {
-    unique_serial=true;
-    use_cache=true;
-    // enable cache by default
-  } else if(!std::strcmp(getenvForceUnique(),"yes")) {
-    unique_serial=true;
-  } else if(!std::strcmp(getenvForceUnique(),"nocache")) {
-    unsigned largest=0;
-    for(unsigned i=0; i<actions.size(); i++) {
-      if(actions[i]->isActive()) {
-        auto l=actions[i]->getUnique().size();
-        if(l>largest) largest=l;
-      }
-    }
-    if(largest*2<natoms) unique_serial=true;
-    else unique_serial=false;
-  } else unique_serial=false;
+  bool use_cache=actionsCache.capacity()>0;
 
   if(use_cache) {
+    // when using cache, unique is always generated
+    // we then decide to use it or not based on its size
     std::vector<const ActionAtomistic*> active_actions;
     active_actions.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
@@ -226,25 +210,69 @@ void Atoms::share() {
       Tools::mergeSortedVectors(vectors,unique,getenvMergeVectorsPriorityQueue());
       actionsCache.add(active_actions,unique);
     }
-  } else if(unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
-    std::vector<const std::vector<AtomNumber>*> vectors;
-    vectors.reserve(actions.size());
-    for(unsigned i=0; i<actions.size(); i++) {
-      if(actions[i]->isActive()) {
-        if(!actions[i]->getUnique().empty()) {
-          // unique are the local atoms
-          vectors.push_back(&actions[i]->getUniqueLocal());
+    if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+      // in parallel, we always use it
+      use_unique=true;
+    } if(!getenvForceUnique()) {
+      // by default, we choose based on its size
+      if(unique.size()==natoms) use_unique=false;
+      else use_unique=true;
+    } else if(!std::strcmp(getenvForceUnique(),"yes")) {
+      // we can enforce using it
+      use_unique=true;
+    } else if(!std::strcmp(getenvForceUnique(),"no")) {
+      // or enforce not using it
+      use_unique=false;
+    } else {
+      plumed_error() <<"unknown value of PLUMED_FORCE_UNIQUE: "<<getenvForceUnique();
+    }
+  } else {
+    // when not using cache, unique is only generated if needed
+    if(!(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+      // in parallel, we always use it
+      use_unique=true;
+    } else if(!getenvForceUnique()) {
+      // by default, we choose based on the size of the largest action
+      unsigned largest=0;
+      for(unsigned i=0; i<actions.size(); i++) {
+        if(actions[i]->isActive()) {
+          auto l=actions[i]->getUnique().size();
+          if(l>largest) largest=l;
         }
       }
+      if(largest*2<natoms) use_unique=true;
+      else use_unique=false;
+    } else if(!std::strcmp(getenvForceUnique(),"yes")) {
+      // we can enforce using it
+      use_unique=true;
+    } else if(!std::strcmp(getenvForceUnique(),"no")) {
+      // or enforce not using it
+      use_unique=false;
+    } else {
+      plumed_error() <<"unknown value of PLUMED_FORCE_UNIQUE: "<<getenvForceUnique();
     }
-    if(!vectors.empty()) atomsNeeded=true;
-    unique.clear();
-    Tools::mergeSortedVectors(vectors,unique,getenvMergeVectorsPriorityQueue());
-  } else {
-    for(unsigned i=0; i<actions.size(); i++) {
-      if(actions[i]->isActive()) {
-        if(!actions[i]->getUnique().empty()) {
-          atomsNeeded=true;
+    if(use_unique) {
+      // once the decision is taken, we build it
+      std::vector<const std::vector<AtomNumber>*> vectors;
+      vectors.reserve(actions.size());
+      for(unsigned i=0; i<actions.size(); i++) {
+        if(actions[i]->isActive()) {
+          if(!actions[i]->getUnique().empty()) {
+            // unique are the local atoms
+            vectors.push_back(&actions[i]->getUniqueLocal());
+          }
+        }
+      }
+      if(!vectors.empty()) atomsNeeded=true;
+      unique.clear();
+      Tools::mergeSortedVectors(vectors,unique,getenvMergeVectorsPriorityQueue());
+    } else {
+      // alternatively, we do not build it and just track if some atom is needed
+      for(unsigned i=0; i<actions.size(); i++) {
+        if(actions[i]->isActive()) {
+          if(!actions[i]->getUnique().empty()) {
+            atomsNeeded=true;
+          }
         }
       }
     }
@@ -271,7 +299,7 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
   plumed_assert( positionsHaveBeenSet==3 && massesHaveBeenSet );
 
   virial.zero();
-  if(zeroallforces || (int(gatindex.size())==natoms && !unique_serial)) {
+  if(zeroallforces || !use_unique) {
     Tools::set_to_zero(forces);
   } else {
     for(const auto & p : unique) forces[p.index()].zero();
@@ -287,7 +315,7 @@ void Atoms::share(const std::vector<AtomNumber>& unique) {
     uniq_index.resize(unique.size());
     for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=g2l[unique[i].index()];
     mdatoms->getPositions(unique,uniq_index,positions);
-  } else if(unique_serial) {
+  } else if(use_unique) {
     uniq_index.resize(unique.size());
     for(unsigned i=0; i<unique.size(); i++) uniq_index[i]=unique[i].index();
     mdatoms->getPositions(unique,uniq_index,positions);
@@ -406,10 +434,11 @@ void Atoms::updateForces() {
   if(forceOnEnergy*forceOnEnergy>epsilon) {
     double alpha=1.0-forceOnEnergy;
     mdatoms->rescaleForces(gatindex,alpha);
-    mdatoms->updateForces(gatindex,forces);
+  }
+  if(use_unique) {
+    mdatoms->updateForces(unique,uniq_index,forces);
   } else {
-    if(!unique_serial && int(gatindex.size())==natoms && shuffledAtoms==0) mdatoms->updateForces(gatindex,forces);
-    else mdatoms->updateForces(unique,uniq_index,forces);
+    mdatoms->updateForces(gatindex,forces);
   }
   if( !plumed.novirial && dd.Get_rank()==0 ) {
     plumed_assert( virialHasBeenSet );
