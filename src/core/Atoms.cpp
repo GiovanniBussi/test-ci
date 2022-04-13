@@ -58,17 +58,6 @@ static const char* getenvForceUnique() noexcept {
   return res;
 }
 
-/// Force the construction of the unique list.
-/// Can be used for timing the construction of the unique list.
-/// export PLUMED_FORCE_UNIQUE=no
-/// export PLUMED_MAKE_UNIQUE=yes
-/// By setting *both*, plumed will construct the list but not use it.
-/// This option is for testing and might be removed.
-static bool getenvMakeUnique() noexcept {
-  static const auto* res=std::getenv("PLUMED_MAKE_UNIQUE");
-  return res;
-}
-
 /// Set the size of the cache for lists of used atoms.
 /// If unset, cache size is set to 10.
 /// I don't use a static const variable since this is read once.
@@ -237,7 +226,7 @@ void Atoms::share() {
       Tools::mergeSortedVectors(vectors,unique,getenvMergeVectorsPriorityQueue());
       actionsCache.add(active_actions,unique);
     }
-  } else if(getenvMakeUnique() || unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
+  } else if(unique_serial || !(int(gatindex.size())==natoms && shuffledAtoms==0)) {
     std::vector<const std::vector<AtomNumber>*> vectors;
     vectors.reserve(actions.size());
     for(unsigned i=0; i<actions.size(); i++) {
