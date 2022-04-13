@@ -147,22 +147,22 @@ class Atoms
   class ActiveActionCache {
   public:
     /// Constructor, with cache size
-    ActiveActionCache(std::size_t maxsize=10):
-      maxsize(maxsize)
+    ActiveActionCache(std::size_t max_size=10):
+      max_size(max_size)
     {
-      if(maxsize>0) data.reserve(maxsize);
+      if(max_size>0) data.reserve(max_size);
     }
     typedef std::vector<const P*> key;
     /// Add an object to the cache
     void add(const key& k,const T& cache) {
       // cache is disabled in this case
-      if(maxsize==0) return;
+      if(max_size==0) return;
       // find existing entries with the same k
       auto erase=std::remove_if(data.begin(),data.end(),[k](const Entry & e) {return e.k==k;});
       // remove them (note: there should be at most one! maybe this could be optimized)
       data.erase(erase,data.end());
       // if needed, make space (should erase only one element! maybe this could be optimized)
-      while(data.size()+1>maxsize) data.erase(data.begin());
+      while(data.size()+1>max_size) data.erase(data.begin());
       // add
       data.emplace_back(Entry{k,cache});
       // update statistics
@@ -203,7 +203,16 @@ class Atoms
     }
     /// Write report
     void report(std::ostream & os) const {
-      if(data.size()>0) os<<"Atom list cache - current: " <<data.size()<<" max: "<<max_usage<<" hits: "<<hit<<"/"<<(hit+miss)<<"\n";
+      if(size()>0) os<<"Atom list cache - current: " <<size()<<" max: "<<max_usage<<" hits: "<<hit<<"/"<<(hit+miss)<<"\n";
+    }
+    /// Return current cache size
+    std::size_t size() const {
+      return data.size();
+    }
+    /// Return cache capacity.
+    /// Zero capacity implies the cache is disabled.
+    std::size_t capacity() const {
+      return max_size;
     }
   private:
     /// local class
@@ -212,7 +221,7 @@ class Atoms
       T cache;
     };
     /// maximum cache size, set in constructor
-    const std::size_t maxsize;
+    const std::size_t max_size;
     /// maximum cache usage
     std::size_t max_usage=0;
     /// number of hits, could be mutated while accessing cache
