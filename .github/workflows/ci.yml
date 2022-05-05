@@ -72,8 +72,10 @@ jobs:
         pip install --user pandas ;
         pip install --user mdtraj ;
         pip install --user MDAnalysis ;
+        pip install --user mpi4py ;
         python -c "import MDAnalysis" ;
         python -c "import mdtraj" ;
+        python -c "import mpi4py" ;
     - name: Install Libtorch
       if: ${{ ! contains( matrix.variant, '-debug-' ) }} # libtorch is not compiled with GLIBCXX_DEBUG
       run: |
@@ -132,7 +134,6 @@ jobs:
         echo "OMPI_MCA_btl_base_warn_component_unused=0" >> $GITHUB_ENV
         echo "OMPI_MCA_btl_base_verbose=0" >> $GITHUB_ENV
         echo "MPIEXEC=mpirun --oversubscribe" >> $GITHUB_ENV
-        pip install mpi4py
     - name: Build PLUMED
       run: |
         ccache -s -M 100M
