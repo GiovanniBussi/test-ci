@@ -10,7 +10,7 @@ RUN yum -y update \
  && pip3 install numpy \
  && pip3 install cython numpy pandas mdtraj \
  && pip3 install MDAnalysis \
- && pip3 install mpi4py
+ && CC=mpicc pip3 install mpi4py
 
 RUN useradd -ms /bin/bash plumed
 USER plumed
