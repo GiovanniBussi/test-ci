@@ -169,7 +169,7 @@ cdef class Plumed:
             cval = py_bytes
             self.c_plumed.cmd( ckey, <const char*>cval )
             return
-         if 'MDAnalysis' in sys.modules:
+         if 'mpi4py' in sys.modules:
             import mpi4py.MPI as MPI
             if isinstance(val, MPI.Comm):
               self.cmd_mpi(ckey, val)
