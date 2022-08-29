@@ -173,7 +173,7 @@ jobs:
         make -C docker centos7
 
   macports:
-    runs-on: macos-10.15
+    runs-on: macos-11
     strategy:
       fail-fast: false
       matrix:
@@ -214,7 +214,7 @@ jobs:
         #done
 
   macsimple:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
     - uses: actions/checkout@v2
     - name: Set paths
