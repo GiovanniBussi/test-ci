@@ -12,7 +12,7 @@ jobs:
     - name: Install generic packages
       run: |
         sudo apt-get install -y gawk
-        sudo apt-get install -y binutils-mingw-w64-x86_64 gcc-mingw-w64-x86_64 g++-mingw-w64-x86_64 wine
+        sudo apt-get install -y binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 wine
     - name: Build PLUMED
       run: |
         ./configure --host=x86_64-w64-mingw32
