@@ -148,8 +148,11 @@ class WrapAround:
   public ActionPilot,
   public ActionAtomistic
 {
-  std::vector<AtomNumber> atoms;
-  std::vector<AtomNumber> reference;
+/// List of atoms to be wrapped.
+/// This is named atoms_list to avoid confusions and cppcheck warnings with ActionAtomistic::atoms
+  std::vector<AtomNumber> atoms_list;
+/// List of reference atoms
+  std::vector<AtomNumber> reference_list;
   unsigned groupby;
   bool pair_;
 public:
@@ -179,34 +182,34 @@ WrapAround::WrapAround(const ActionOptions&ao):
   groupby(1),
   pair_(false)
 {
-  parseAtomList("ATOMS",atoms);
-  parseAtomList("AROUND",reference);
+  parseAtomList("ATOMS",atoms_list);
+  parseAtomList("AROUND",reference_list);
   parse("GROUPBY",groupby);
   parseFlag("PAIR", pair_);
 
   log.printf("  atoms in reference :");
-  for(unsigned j=0; j<reference.size(); ++j) log.printf(" %d",reference[j].serial() );
+  for(unsigned j=0; j<reference_list.size(); ++j) log.printf(" %d",reference_list[j].serial() );
   log.printf("\n");
   log.printf("  atoms to be wrapped :");
-  for(unsigned j=0; j<atoms.size(); ++j) log.printf(" %d",atoms[j].serial() );
+  for(unsigned j=0; j<atoms_list.size(); ++j) log.printf(" %d",atoms_list[j].serial() );
   log.printf("\n");
   if(groupby>1) log<<"  atoms will be grouped by "<<groupby<<"\n";
   if(pair_) log.printf("  pairing atoms and references\n");
 
-  if(atoms.size()%groupby!=0) error("number of atoms should be a multiple of groupby option");
+  if(atoms_list.size()%groupby!=0) error("number of atoms should be a multiple of groupby option");
   // additional checks with PAIR
-  if(pair_ && atoms.size()!=reference.size()*groupby) error("with PAIR you must have: #ATOMS = #AROUND * #GROUPBY");
+  if(pair_ && atoms_list.size()!=reference_list.size()*groupby) error("with PAIR you must have: #ATOMS = #AROUND * #GROUPBY");
 
   checkRead();
 
   // do not remove duplicates with pair
   if(!pair_) {
-    if(groupby<=1) Tools::removeDuplicates(atoms);
-    Tools::removeDuplicates(reference);
+    if(groupby<=1) Tools::removeDuplicates(atoms_list);
+    Tools::removeDuplicates(reference_list);
   }
 
-  std::vector<AtomNumber> merged(atoms.size()+reference.size());
-  merge(atoms.begin(),atoms.end(),reference.begin(),reference.end(),merged.begin());
+  std::vector<AtomNumber> merged(atoms_list.size()+reference_list.size());
+  merge(atoms_list.begin(),atoms_list.end(),reference_list.begin(),reference_list.end(),merged.begin());
   Tools::removeDuplicates(merged);
   requestAtoms(merged);
   doNotRetrieve();
@@ -214,15 +217,15 @@ WrapAround::WrapAround(const ActionOptions&ao):
 }
 
 void WrapAround::calculate() {
-  for(unsigned i=0; i<atoms.size(); i+=groupby) {
-    Vector & first (modifyGlobalPosition(atoms[i]));
+  for(unsigned i=0; i<atoms_list.size(); i+=groupby) {
+    Vector & first (modifyGlobalPosition(atoms_list[i]));
     double mindist2=std::numeric_limits<double>::max();
     int closest=-1;
     if(pair_) {
       closest = i/groupby;
     } else {
-      for(unsigned j=0; j<reference.size(); ++j) {
-        Vector & second (modifyGlobalPosition(reference[j]));
+      for(unsigned j=0; j<reference_list.size(); ++j) {
+        Vector & second (modifyGlobalPosition(reference_list[j]));
         Vector distance=pbcDistance(first,second);
         double distance2=modulo2(distance);
         if(distance2<mindist2) {
@@ -232,12 +235,12 @@ void WrapAround::calculate() {
       }
       plumed_massert(closest>=0,"closest not found");
     }
-    Vector & second (modifyGlobalPosition(reference[closest]));
+    Vector & second (modifyGlobalPosition(reference_list[closest]));
 // place first atom of the group
     first=second+pbcDistance(second,first);
 // then place other atoms close to the first of the group
     for(unsigned j=1; j<groupby; j++) {
-      Vector & second (modifyGlobalPosition(atoms[i+j]));
+      Vector & second (modifyGlobalPosition(atoms_list[i+j]));
       second=first+pbcDistance(first,second);
     }
   }
