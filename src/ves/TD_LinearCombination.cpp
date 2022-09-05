@@ -224,6 +224,7 @@ void TD_LinearCombination::updateGrid() {
       value += weights_[i]*grid_pntrs_[i]->getValue(l);
     }
     targetDistGrid().setValue(l,value);
+    // cppcheck-suppress invalidFunctionArg
     logTargetDistGrid().setValue(l,-std::log(value));
   }
   logTargetDistGrid().setMinToZero();
