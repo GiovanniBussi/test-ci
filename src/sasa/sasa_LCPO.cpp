@@ -138,7 +138,7 @@ private:
   unsigned nl_update;
   int firstStepFlag;
   double Ti;
-  std::vector<AtomNumber> atoms;
+  std::vector<AtomNumber> atoms_list;
   vector < vector < std::string > > AtomResidueName;
   vector < vector < double > > LCPOparam;
   unsigned natoms;
@@ -183,8 +183,8 @@ SASA_LCPO::SASA_LCPO(const ActionOptions&ao):
   rs = 0.14;
   parse("DELTAGFILE",DeltaGValues);
   parse("APPROACH", approach);
-  parseAtomList("ATOMS",atoms);
-  if(atoms.size()==0) error("no atoms specified");
+  parseAtomList("ATOMS",atoms_list);
+  if(atoms_list.size()==0) error("no atoms specified");
   std::string Type;
   parse("TYPE",Type);
   parse("NL_STRIDE", stride);
@@ -202,9 +202,9 @@ SASA_LCPO::SASA_LCPO(const ActionOptions&ao):
   }
 
   log.printf("  atoms involved : ");
-  for(unsigned i=0; i<atoms.size(); ++i) {
+  for(unsigned i=0; i<atoms_list.size(); ++i) {
     if(i%25==0) log<<"\n";
-    log.printf("%d ",atoms[i].serial());
+    log.printf("%d ",atoms_list[i].serial());
   }
   log.printf("\n");
 
@@ -216,7 +216,7 @@ SASA_LCPO::SASA_LCPO(const ActionOptions&ao):
 
 
   addValueWithDerivatives(); setNotPeriodic();
-  requestAtoms(atoms);
+  requestAtoms(atoms_list);
 
   natoms = getNumberOfAtoms();
   AtomResidueName.resize(2);
@@ -249,8 +249,8 @@ void SASA_LCPO::readPDB() {
   AtomResidueName[1].clear();
 
   for(unsigned i=0; i<natoms; i++) {
-    string Aname = moldat->getAtomName(atoms[i]);
-    string Rname = moldat->getResidueName(atoms[i]);
+    string Aname = moldat->getAtomName(atoms_list[i]);
+    string Rname = moldat->getResidueName(atoms_list[i]);
     AtomResidueName[0].push_back (Aname);
     AtomResidueName[1].push_back (Rname);
   }
