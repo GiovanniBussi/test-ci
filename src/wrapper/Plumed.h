@@ -795,14 +795,11 @@ typedef struct {
   /** code used for translating messages */
   int code;
   /** message */
-#ifdef __cplusplus
-  const
-#endif
-  char* what;
+  const char* what;
   /** error code for system_error */
   int error_code;
-  /** message could not be allocated */
-  int bad_alloc;
+  /** the buffer containing the message to be deallocated */
+  char* what_buffer;
 } plumed_error;
 
 /** Initialize error (for internal usage) */
@@ -811,18 +808,14 @@ __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_init(plumed_error* error) __PLU
   error->code=0;
   error->what=__PLUMED_WRAPPER_CXX_NULLPTR;
   error->error_code=0;
-  error->bad_alloc=0;
+  error->what_buffer=__PLUMED_WRAPPER_CXX_NULLPTR;
 }
 
 /** Finalize error - should be called when an error is raised to avoid leaks */
 __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_finalize(plumed_error error) __PLUMED_WRAPPER_CXX_NOEXCEPT {
-  if(error.what && !error.bad_alloc)
-    /** in C++ we use new/delete to allow having a const char* what */
-#ifdef __cplusplus
-    delete [] error.what;
-#else
-    free(error.what);
-#endif
+  if(error.what_buffer) {
+    __PLUMED_WRAPPER_STD free(error.what_buffer);
+  }
 }
 
 /** Callback (for internal usage) */
@@ -830,31 +823,21 @@ __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_set(void*ptr,int code,const cha
   plumed_error* error;
   __PLUMED_WRAPPER_STD size_t len;
   const void*const* options;
-  char* what_tmp;
 
   error=(plumed_error*) ptr;
 
   error->code=code;
   error->error_code=0;
   len=__PLUMED_WRAPPER_STD strlen(what);
-#ifdef __cplusplus
-  try {
-    what_tmp=new char[len+1]; // could throw
-  } catch(...) {
-    what_tmp=__PLUMED_WRAPPER_CXX_NULLPTR;
-  }
-#else
-  what_tmp=malloc(len+1);
-#endif
-  if(!what_tmp) {
+  error->what_buffer=(char*) __PLUMED_WRAPPER_STD malloc(len+1);
+  if(!error->what_buffer) {
     error->what="cannot allocate error object";
     error->code=11400;
-    error->bad_alloc=1;
     return;
   }
-  __PLUMED_WRAPPER_STD strncpy(what_tmp,what,len+1);
+  __PLUMED_WRAPPER_STD strncpy(error->what_buffer,what,len+1);
 
-  error->what=what_tmp;
+  error->what=error->what_buffer;
 
   /* interpret optional arguments */
   options=(const void*const*)opt;
