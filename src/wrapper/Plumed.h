@@ -732,7 +732,7 @@ typedef struct {
   /** Number of elements (in case pointing to an array) */
   __PLUMED_WRAPPER_STD size_t nelem;
   /** Shape (scanned up to a zero value is found) */
-  __PLUMED_WRAPPER_STD size_t* shape;
+  const __PLUMED_WRAPPER_STD size_t* shape;
   /**
     sum of:
     sizeof(pointed data), up to 0x10000 (65536). 0 means size not checked
@@ -759,7 +759,7 @@ typedef struct {
   */
   __PLUMED_WRAPPER_STD size_t flags;
   /** Optional information, not used yet  */
-  void* opt;
+  const void* opt;
 } plumed_safeptr;
 
 /**
@@ -829,7 +829,7 @@ __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_finalize(plumed_error error) __
 __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_set(void*ptr,int code,const char*what,const void* opt) __PLUMED_WRAPPER_CXX_NOEXCEPT {
   plumed_error* error;
   __PLUMED_WRAPPER_STD size_t len;
-  const void** options;
+  const void*const* options;
   char* what_tmp;
 
   error=(plumed_error*) ptr;
@@ -857,9 +857,9 @@ __PLUMED_WRAPPER_STATIC_INLINE void plumed_error_set(void*ptr,int code,const cha
   error->what=what_tmp;
 
   /* interpret optional arguments */
-  options=(const void**)opt;
+  options=(const void*const*)opt;
   if(options) while(*options) {
-      if(*((char*)*options)=='c') error->error_code=*((int*)*(options+1));
+      if(*((const char*)*options)=='c') error->error_code=*((const int*)*(options+1));
       options+=2;
     }
 }
@@ -1221,7 +1221,7 @@ __PLUMED_WRAPPER_C_END
     plumed_nothrow_handler nothrow; \
     safe.ptr=ptr; \
     safe.nelem=nelem; \
-    safe.shape=(size_t*)shape; \
+    safe.shape=(const size_t*)shape; \
     safe.flags=flags_; \
     safe.opt=NULL; \
     if(error) { \
