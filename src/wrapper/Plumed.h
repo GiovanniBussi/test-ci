@@ -1486,6 +1486,7 @@ __PLUMED_WRAPPER_EXTERN_C_END /*}*/
 #include <future> /* future_category */
 #include <memory> /* bad_weak_ptr */
 #include <functional> /* bad_function_call */
+#include <regex> /* regex_error */
 #endif
 
 #if __cplusplus > 199711L
@@ -1627,6 +1628,21 @@ class Plumed {
 #endif
         throw ::std::ios_base::failure(msg);
       }
+#if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
+      if(h.code==10240) throw Plumed::std_regex_error(std::regex_constants::error_collate,msg);
+      if(h.code==10241) throw Plumed::std_regex_error(std::regex_constants::error_ctype,msg);
+      if(h.code==10242) throw Plumed::std_regex_error(std::regex_constants::error_escape,msg);
+      if(h.code==10243) throw Plumed::std_regex_error(std::regex_constants::error_backref,msg);
+      if(h.code==10244) throw Plumed::std_regex_error(std::regex_constants::error_brack,msg);
+      if(h.code==10245) throw Plumed::std_regex_error(std::regex_constants::error_paren,msg);
+      if(h.code==10246) throw Plumed::std_regex_error(std::regex_constants::error_brace,msg);
+      if(h.code==10247) throw Plumed::std_regex_error(std::regex_constants::error_badbrace,msg);
+      if(h.code==10248) throw Plumed::std_regex_error(std::regex_constants::error_range,msg);
+      if(h.code==10249) throw Plumed::std_regex_error(std::regex_constants::error_space,msg);
+      if(h.code==10250) throw Plumed::std_regex_error(std::regex_constants::error_badrepeat,msg);
+      if(h.code==10251) throw Plumed::std_regex_error(std::regex_constants::error_complexity,msg);
+      if(h.code==10252) throw Plumed::std_regex_error(std::regex_constants::error_stack,msg);
+#endif
       throw ::std::runtime_error(msg);
     }
     /* "bad" errors */
@@ -1870,6 +1886,41 @@ private:
 #endif
   __PLUMED_WRAPPER_NOSTRING_EXCEPTION(bad_exception)
   __PLUMED_WRAPPER_NOSTRING_EXCEPTION(exception)
+
+
+  /*
+    This class is declared separately as it has a specific constructor argument
+  */
+#if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
+  class std_regex_error :
+    public ::std::regex_error
+  {
+    char msg[__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER];
+  public:
+  __PLUMED_WRAPPER_CXX_EXPLICIT std_regex_error(std::regex_constants::error_type ecode, const char * msg) __PLUMED_WRAPPER_CXX_NOEXCEPT :
+    ::std::regex_error(ecode)
+    {
+      this->msg[0]='\0';
+      __PLUMED_WRAPPER_STD strncat(this->msg,msg,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
+      if(PlumedGetenvExceptionsDebug() && __PLUMED_WRAPPER_STD strlen(msg) > __PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1) __PLUMED_WRAPPER_STD fprintf(stderr,"+++ WARNING: message will be truncated\n");
+    }
+  std_regex_error(const std_regex_error & other) __PLUMED_WRAPPER_CXX_NOEXCEPT :
+    ::std::regex_error(other.code())
+    {
+      msg[0]='\0';
+      __PLUMED_WRAPPER_STD strncat(msg,other.msg,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
+    }
+    std_regex_error & operator=(const std_regex_error & other) __PLUMED_WRAPPER_CXX_NOEXCEPT {
+      if(this==&other) return *this;
+      ::std::regex_error::operator=(other);
+      msg[0]='\0';
+      __PLUMED_WRAPPER_STD strncat(msg,other.msg,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
+      return *this;
+    }
+    const char* what() const __PLUMED_WRAPPER_CXX_NOEXCEPT __PLUMED_WRAPPER_CXX_OVERRIDE {return msg;}
+    ~std_regex_error() __PLUMED_WRAPPER_CXX_NOEXCEPT __PLUMED_WRAPPER_CXX_OVERRIDE {}
+  };
+#endif
 
 private:
   /// Small class that wraps plumed_safeptr in order to make its initialization easier

@@ -279,6 +279,7 @@ PLUMED_CONFIG_ENABLE([external-molfile-plugins],[search for external molfile_plu
 PLUMED_CONFIG_ENABLE([zlib],[search for zlib],[yes])
 PLUMED_CONFIG_ENABLE([readdir-r],[search for readdir_r (threadsafe)],[no])
 PLUMED_CONFIG_ENABLE([cregex],[search for C regular expression],[yes])
+PLUMED_CONFIG_ENABLE([cxxregex],[search for C++ regular expression],[yes])
 PLUMED_CONFIG_ENABLE([dlopen],[search for dlopen],[yes])
 PLUMED_CONFIG_ENABLE([rtld_default],[search for RTLD_DEFAULT macro],[yes])
 PLUMED_CONFIG_ENABLE([chdir],[search for chdir function],[yes])
@@ -725,12 +726,32 @@ if test $asmjit = true ; then
   fi
 fi
 
-
 if test $readdir_r = true ; then
   PLUMED_CHECK_PACKAGE([dirent.h],[readdir_r],[__PLUMED_HAS_READDIR_R])
 fi
 if test $cregex = true ; then
   PLUMED_CHECK_PACKAGE([regex.h],[regcomp],[__PLUMED_HAS_CREGEX])
+fi
+if test $cxxregex = true ; then
+  PLUMED_CHECK_CXX_PACKAGE([CXXREGEX],[
+#include <regex>
+#if __cplusplus >= 201103L &&                             \
+    (!defined(__GLIBCXX__) || (__cplusplus >= 201402L) || \
+        (defined(_GLIBCXX_REGEX_DFS_QUANTIFIERS_LIMIT) || \
+         defined(_GLIBCXX_REGEX_STATE_LIMIT)           || \
+             (defined(_GLIBCXX_RELEASE)                && \
+             _GLIBCXX_RELEASE > 4)))
+int main() {
+  return 0;
+}
+#else
+#error
+#endif
+  ], [__PLUMED_HAS_CXXREGEX])
+fi
+if test "$__PLUMED_HAS_CREGEX" = yes || test "$__PLUMED_HAS_CXXREGEX" = yes ; then
+  AC_MSG_NOTICE([Regular expressions will be enabled])
+  AC_DEFINE([__PLUMED_HAS_REGEX])
 fi
 if test $dlopen = true ; then
   PLUMED_CHECK_PACKAGE([dlfcn.h],[dlopen],[__PLUMED_HAS_DLOPEN])

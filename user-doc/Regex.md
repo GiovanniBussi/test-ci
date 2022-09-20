@@ -5,9 +5,16 @@ components of a few collective variables or also multiple collective variables,
 you might find it convenient to use [regular expressions](https://en.wikipedia.org/wiki/Regular_expression).
 
 Since version 2.1, plumed takes advantage of a configuration scripts that
-detects libraries installed on your system. If regex library is found,
+detects libraries installed on your system. If a regex library is found,
 then you will be able to use regular expressions to refer to collective variables
-or function names.
+or function names. In particular, the following two options are considered:
+
+- The availability of a working C++11 regex library. Notice that the std library shipped with
+  gcc 4.9 is not working correctly.
+- The availability of the regex.h header file. This is present in all Unix systems, but not on Windows.
+
+In case both are available, the C++11 regex library will be used. It is possible to switch back to the
+regex.h library by setting the environment variable `PLUMED_CREGEX=yes`.
 
 Regular expressions are enclosed in round braces and must not contain spaces (the components 
 names have no spaces indeed, so why use them?).

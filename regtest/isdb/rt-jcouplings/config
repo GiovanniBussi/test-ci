@@ -1,4 +1,4 @@
-plumed_needs="cregex"
+plumed_needs="regex"
 type=driver
 # this is to test a different name
 arg="--plumed plumed.dat --mf_pdb peptide.pdb"

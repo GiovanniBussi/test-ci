@@ -39,6 +39,7 @@
 #include <future>
 #include <memory>
 #include <functional>
+#include <regex>
 #endif
 #include "tools/TypesafePtr.h"
 
@@ -142,9 +143,24 @@ extern "C" {
       nothrow.handler(nothrow.ptr,11100,e.what(),nullptr);
     } catch(const std::bad_typeid & e) {
       nothrow.handler(nothrow.ptr,11000,e.what(),nullptr);
-      // not implemented yet: std::regex_error
-      // we do not allow regex yet due to portability problems with gcc 4.8
-      // as soon as we transition to using <regex> it should be straightforward to add
+#ifdef __PLUMED_LIBCXX11
+    } catch(const std::regex_error & e) {
+      if(e.code()==std::regex_constants::error_collate) nothrow.handler(nothrow.ptr,10240,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_ctype) nothrow.handler(nothrow.ptr,10241,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_escape) nothrow.handler(nothrow.ptr,10242,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_backref) nothrow.handler(nothrow.ptr,10243,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_brack) nothrow.handler(nothrow.ptr,10244,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_paren) nothrow.handler(nothrow.ptr,10245,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_brace) nothrow.handler(nothrow.ptr,10246,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_badbrace) nothrow.handler(nothrow.ptr,10247,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_range) nothrow.handler(nothrow.ptr,10248,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_space) nothrow.handler(nothrow.ptr,10249,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_badrepeat) nothrow.handler(nothrow.ptr,10250,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_complexity) nothrow.handler(nothrow.ptr,10251,e.what(),nullptr);
+      else if(e.code()==std::regex_constants::error_stack) nothrow.handler(nothrow.ptr,10252,e.what(),nullptr);
+      // fallback to generic runtime_error
+      else nothrow.handler(nothrow.ptr,10200,e.what(),nullptr);
+#endif
     } catch(const std::ios_base::failure & e) {
 #ifdef __PLUMED_LIBCXX11
       int value=e.code().value();
