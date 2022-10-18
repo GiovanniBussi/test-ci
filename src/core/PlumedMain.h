@@ -109,6 +109,8 @@ private:
 
   plumed_error_handler error_handler= {NULL,NULL};
 
+  bool nestedExceptions=false;
+
 /// Forward declaration.
   ForwardDecl<DLLoader> dlloader_fwd;
   DLLoader& dlloader=*dlloader_fwd;
@@ -420,6 +422,10 @@ public:
 /// Should only be called from \ref plumed_plumedmain_cmd().
 /// If the error handler was not set, returns false.
   bool callErrorHandler(int code,const char* msg)const;
+  void enableNestedExceptions();
+  bool getNestedExceptions()const {
+    return nestedExceptions;
+  }
 };
 
 /////

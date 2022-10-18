@@ -510,6 +510,12 @@ void PlumedMain::cmd(const std::string & word,const TypesafePtr & val) {
       case cmd_throw:
         CHECK_NOTNULL(val,word);
         testThrow(val.get<const char*>());
+      /* ADDED WITH API==8 */
+      case cmd_setNestedExceptions:
+        CHECK_NOTNULL(val,word);
+        if(val.get<int>()!=0) nestedExceptions=true;
+        else nestedExceptions=false;
+        break;
       /* STOP API */
       case cmd_setMDEngine:
         CHECK_NOTINIT(initialized,word);
