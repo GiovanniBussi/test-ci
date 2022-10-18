@@ -1548,135 +1548,148 @@ class Plumed {
   plumed main;
 
   /**
-    Error handler used to rethrow exceptions.
+    Small utility class to manage a plumed_error
   */
-
-  struct NothrowHandler {
-    /** code used for translating messages */
-    int code;
-    /** short message buffer for non-throwing exceptions */
-    char exception_buffer[__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER];
-    /** if exception_buffer='\0', message stored as an allocatable string */
-    ::std::string what;
-    /** error code for system_error */
-    int error_code;
+  class Error
+  {
+    plumed_error error;
+    Error(const Error &); // disabled (private)
+    Error& operator=(const Error &); // disabled (private)
+  public:
+    Error()
+    {
+      plumed_error_init(&error); // noexcept
+    }
+    plumed_error & get() {
+      return error;
+    }
+    const plumed_error & get() const {
+      return error;
+    }
+    __PLUMED_WRAPPER_CXX_NORETURN void rethrow() {
+      Plumed::rethrow(error);
+    }
+    ~Error() {
+      plumed_error_finalize(error);
+    }
   };
 
-  /**
-    Callback function that sets the error handler.
-
-    opt argument is interpreted as the pointer to a null terminated array of void*.
-    The number of non-null element is expected to be even, and there should be a null element
-    that follows. Every pair of pointers should point
-    to a char, identifying the type of argument passed, and an arbitrary object.
-    Currently used to (optionally) pass error_code.
-  */
-  static void nothrow_handler(void*ptr,int code,const char*what,const void* opt) __PLUMED_WRAPPER_CXX_NOEXCEPT {
-    NothrowHandler* h=static_cast<NothrowHandler*>(ptr);
-    h->code=code;
-    h->exception_buffer[0]='\0';
-    h->what.clear();
-    h->error_code=0;
-    /*
-       These codes correspond to exceptions that should not allocate a separate buffer but use the fixed one.
-       Notice that a mismatch between the exceptions using the stack buffer here and those implementing
-       the stack buffer would be in practice harmless. However, it makes sense to be consistent.
-    */
-    if(code==10000 || (code>=11000 && code<12000)) {
-      __PLUMED_WRAPPER_STD strncat(h->exception_buffer,what,__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
-    } else {
-      try {
-        h->what=what; // could throw
-      } catch(...) {
-        __PLUMED_WRAPPER_STD strncat(h->exception_buffer,"cannot allocate error object",__PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1);
-        h->code=11400; // bad_alloc
-      }
-    }
-
-    /* interpret optional arguments */
-    const void*const* options=(const void*const*)opt;
-    if(options) while(*options) {
-        if(*((const char*)*options)=='c') h->error_code=*((const int*)*(options+1));
-        options+=2;
-      }
-
-    if(PlumedGetenvExceptionsDebug()) {
-      __PLUMED_WRAPPER_STD fprintf(stderr,"+++ PLUMED_EXCEPTIONS_DEBUG\n");
-      __PLUMED_WRAPPER_STD fprintf(stderr,"+++ code: %d error_code: %d message:\n%s\n",h->code,h->error_code,what);
-      if(__PLUMED_WRAPPER_STD strlen(what) > __PLUMED_WRAPPER_CXX_EXCEPTION_BUFFER-1) __PLUMED_WRAPPER_STD fprintf(stderr,"+++ WARNING: message will be truncated\n");
-      __PLUMED_WRAPPER_STD fprintf(stderr,"+++ END PLUMED_EXCEPTIONS_DEBUG\n");
-    }
-
-  }
+private:
 
   /**
-    Rethrow the exception based on the information saved in the NothrowHandler.
-  */
+    This is an internal utility to dispatch exceptions based on the plumed_error object.
 
-  __PLUMED_WRAPPER_CXX_NORETURN static void rethrow(const NothrowHandler&h) {
-    /* The interpretation of the codes should be kept in sync with core/PlumedMainInitializer.cpp */
-    /* check if we are using a full string or a fixes size buffer */
-    const char* msg=(h.exception_buffer[0]?h.exception_buffer:h.what.c_str());
-    if(h.code==1) throw Plumed::Invalid(msg);
+    It takes information about the exception to be thrown by the passed h object
+    and use it to call function f() on the resulting exception. Notice that:
+    - this function does not consider if the error is nested.
+    - f should be a callable object, so that it can store information
+    - f operator() should be a template function so as to act based on the
+      type of its argument
+
+    New exceptions added here should be kept in sync with core/PlumedMainInitializer.cpp
+  */
+  template<typename F>
+  __PLUMED_WRAPPER_CXX_NORETURN static void exception_dispatch(const plumed_error&h,F f) {
+    const char* msg=plumed_error_what(h);
+    if(h.code==1) f(Plumed::Invalid(msg));
     /* logic errors */
     if(h.code>=10100 && h.code<10200) {
-      if(h.code>=10105 && h.code<10110) throw ::std::invalid_argument(msg);
-      if(h.code>=10110 && h.code<10115) throw ::std::domain_error(msg);
-      if(h.code>=10115 && h.code<10120) throw ::std::length_error(msg);
-      if(h.code>=10120 && h.code<10125) throw ::std::out_of_range(msg);
-      throw ::std::logic_error(msg);
+      if(h.code>=10105 && h.code<10110) f(::std::invalid_argument(msg));
+      if(h.code>=10110 && h.code<10115) f(::std::domain_error(msg));
+      if(h.code>=10115 && h.code<10120) f(::std::length_error(msg));
+      if(h.code>=10120 && h.code<10125) f(::std::out_of_range(msg));
+      f(::std::logic_error(msg));
     }
     /* runtime errors */
     if(h.code>=10200 && h.code<10300) {
-      if(h.code>=10205 && h.code<10210) throw ::std::range_error(msg);
-      if(h.code>=10210 && h.code<10215) throw ::std::overflow_error(msg);
-      if(h.code>=10215 && h.code<10220) throw ::std::underflow_error(msg);
+      if(h.code>=10205 && h.code<10210) f(::std::range_error(msg));
+      if(h.code>=10210 && h.code<10215) f(::std::overflow_error(msg));
+      if(h.code>=10215 && h.code<10220) f(::std::underflow_error(msg));
 #if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
-      if(h.code==10220) throw ::std::system_error(h.error_code,::std::generic_category(),msg);
-      if(h.code==10221) throw ::std::system_error(h.error_code,::std::system_category(),msg);
-      if(h.code==10222) throw ::std::system_error(h.error_code,::std::iostream_category(),msg);
-      if(h.code==10223) throw ::std::system_error(h.error_code,::std::future_category(),msg);
+      if(h.code==10220) f(::std::system_error(h.error_code,::std::generic_category(),msg));
+      if(h.code==10221) f(::std::system_error(h.error_code,::std::system_category(),msg));
+      if(h.code==10222) f(::std::system_error(h.error_code,::std::iostream_category(),msg));
+      if(h.code==10223) f(::std::system_error(h.error_code,::std::future_category(),msg));
 #endif
       if(h.code>=10230 && h.code<10240) {
 #if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
 // These cases are probably useless as it looks like this should always be std::iostream_category
-        if(h.code==10230) throw ::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::generic_category()));
-        if(h.code==10231) throw ::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::system_category()));
-        if(h.code==10232) throw ::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::iostream_category()));
-        if(h.code==10233) throw ::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::future_category()));
+        if(h.code==10230) f(::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::generic_category())));
+        if(h.code==10231) f(::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::system_category())));
+        if(h.code==10232) f(::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::iostream_category())));
+        if(h.code==10233) f(::std::ios_base::failure(msg,::std::error_code(h.error_code,::std::future_category())));
 #endif
-        throw ::std::ios_base::failure(msg);
+        f(::std::ios_base::failure(msg));
       }
-      throw ::std::runtime_error(msg);
+      f(::std::runtime_error(msg));
     }
     /* "bad" errors */
-    if(h.code>=11000 && h.code<11100) throw add_buffer_to< ::std::bad_typeid>(msg);
-    if(h.code>=11100 && h.code<11200) throw add_buffer_to< ::std::bad_cast>(msg);
+    /* "< ::" space required in C++ < 11 */
+    if(h.code>=11000 && h.code<11100) f(add_buffer_to< ::std::bad_typeid>(msg));
+    if(h.code>=11100 && h.code<11200) f(add_buffer_to< ::std::bad_cast>(msg));
 #if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
-    if(h.code>=11200 && h.code<11300) throw add_buffer_to< ::std::bad_weak_ptr>(msg);
-    if(h.code>=11300 && h.code<11400) throw add_buffer_to< ::std::bad_function_call>(msg);
+    if(h.code>=11200 && h.code<11300) f(add_buffer_to< ::std::bad_weak_ptr>(msg));
+    if(h.code>=11300 && h.code<11400) f(add_buffer_to< ::std::bad_function_call>(msg));
 #endif
     if(h.code>=11400 && h.code<11500) {
 #if __cplusplus > 199711L && __PLUMED_WRAPPER_LIBCXX11
-      if(h.code>=11410 && h.code<11420) throw add_buffer_to< ::std::bad_array_new_length>(msg);
+      if(h.code>=11410 && h.code<11420) f(add_buffer_to< ::std::bad_array_new_length>(msg));
 #endif
-      throw add_buffer_to< ::std::bad_alloc>(msg);
+      f(add_buffer_to< ::std::bad_alloc>(msg));
     }
-    if(h.code>=11500 && h.code<11600) throw add_buffer_to< ::std::bad_exception>(msg);
+    if(h.code>=11500 && h.code<11600) f(add_buffer_to< ::std::bad_exception>(msg));
     /* lepton error */
-    if(h.code>=19900 && h.code<20000) throw Plumed::LeptonException(msg);
+    if(h.code>=19900 && h.code<20000) f(Plumed::LeptonException(msg));
     /* plumed exceptions */
     if(h.code>=20000 && h.code<30000) {
       /* debug - only raised with debug options */
-      if(h.code>=20100 && h.code<20200) throw Plumed::ExceptionDebug(msg);
+      if(h.code>=20100 && h.code<20200) f(Plumed::ExceptionDebug(msg));
       /* error - runtime check */
-      if(h.code>=20200 && h.code<20300) throw Plumed::ExceptionError(msg);
+      if(h.code>=20200 && h.code<20300) f(Plumed::ExceptionError(msg));
       /* error - type error */
-      if(h.code>=20300 && h.code<20400) throw Plumed::ExceptionTypeError(msg);
-      throw Plumed::Exception(msg);
+      if(h.code>=20300 && h.code<20400) f(Plumed::ExceptionTypeError(msg));
+      f(Plumed::Exception(msg));
     }
     /* fallback for any other exception */
-    throw add_buffer_to< ::std::exception>(msg);
+    f(add_buffer_to< ::std::exception>(msg));
+  }
+
+#if __cplusplus > 199711L
+  class rethrow_nested {
+  public:
+    template<typename E>
+    __PLUMED_WRAPPER_CXX_NORETURN void operator()(const E&e) {
+      std::throw_with_nested(e);
+    }
+  };
+#endif
+
+  class rethrow_not_nested {
+  public:
+    template<typename E>
+    __PLUMED_WRAPPER_CXX_NORETURN void operator()(const E&e) {
+      throw e;
+    }
+  };
+
+  /**
+    Recursive function that rethrows an exception with all the nested ones.
+
+    In order to do so, we start throwing from the first exception that was originally thrown
+    and recursively throw the others using throw_with_nested.
+
+  */
+  __PLUMED_WRAPPER_CXX_NORETURN static void rethrow(const plumed_error&h) {
+#if __cplusplus > 199711L
+    if(h.nested) {
+      try {
+        rethrow(*h.nested); /* recursive throw */
+      } catch(...) {
+        exception_dispatch(h,rethrow_nested());
+      }
+    }
+#endif
+    exception_dispatch(h,rethrow_not_nested());
   }
 
   /**
@@ -2418,17 +2431,19 @@ private:
     Private version of cmd. It is used here to avoid duplication of code between typesafe and not-typesafe versions
   */
   static void cmd_priv(plumed main,const char*key, SafePtr*safe=__PLUMED_WRAPPER_CXX_NULLPTR, const void* unsafe=__PLUMED_WRAPPER_CXX_NULLPTR,plumed_error*error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-    NothrowHandler h;
+
+    /* We do not use plumed_error directly since it is error prone (should be explicitly finalized). */
+    Error error_cxx;
+
     plumed_nothrow_handler nothrow;
     if(error) {
       plumed_error_init(error);
       nothrow.ptr=error;
-      nothrow.handler=plumed_error_set;
     } else {
-      h.code=0;
-      nothrow.ptr=&h;
-      nothrow.handler=nothrow_handler;
+      nothrow.ptr=&error_cxx.get();
     }
+    nothrow.handler=plumed_error_set;
+
     try {
       if(safe) {
         plumed_cmd_safe_nothrow(main,key,safe->get_safeptr(),nothrow);
@@ -2443,7 +2458,7 @@ private:
       */
       rethrow();
     }
-    if(!error && h.code!=0) rethrow(h);
+    if(!error && error_cxx.get().code!=0) error_cxx.rethrow();
   }
 
 public:
