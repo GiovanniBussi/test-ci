@@ -152,11 +152,11 @@ static void translate_current(plumed_nothrow_handler_x nothrow,void**nested=null
     // we do not allow regex yet due to portability problems with gcc 4.8
     // as soon as we transition to using <regex> it should be straightforward to add
   } catch(const std::ios_base::failure & e) {
+    if(!msg) msg=e.what();
 #ifdef __PLUMED_LIBCXX11
     int value=e.code().value();
     opt[2]="c"; // "c" passes the error code.
     opt[3]=&value;
-    if(!msg) msg=e.what();
     if(e.code().category()==std::generic_category()) nothrow.handler(nothrow.ptr,10230,msg,opt);
     else if(e.code().category()==std::system_category()) nothrow.handler(nothrow.ptr,10231,msg,opt);
     else if(e.code().category()==std::iostream_category()) nothrow.handler(nothrow.ptr,10232,msg,opt);
@@ -167,10 +167,10 @@ static void translate_current(plumed_nothrow_handler_x nothrow,void**nested=null
       nothrow.handler(nothrow.ptr,10239,msg,opt);
 #ifdef __PLUMED_LIBCXX11
   } catch(const std::system_error & e) {
+    if(!msg) msg=e.what();
     int value=e.code().value();
     opt[2]="c"; // "c" passes the error code.
     opt[3]=&value;
-    if(!msg) msg=e.what();
     if(e.code().category()==std::generic_category()) nothrow.handler(nothrow.ptr,10220,msg,opt);
     else if(e.code().category()==std::system_category()) nothrow.handler(nothrow.ptr,10221,msg,opt);
     else if(e.code().category()==std::iostream_category()) nothrow.handler(nothrow.ptr,10222,msg,opt);
