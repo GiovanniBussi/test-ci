@@ -344,6 +344,10 @@ public:
     }
 
   }
+
+  /// Build a concatenated exception message.
+  /// Should be called with an in-flight exception.
+  static std::string concatenateExceptionMessages();
 };
 
 template <class T>
