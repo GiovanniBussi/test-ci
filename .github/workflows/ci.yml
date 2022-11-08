@@ -186,7 +186,7 @@ jobs:
          echo "$HOME/opt/bin" >> $GITHUB_PATH
     - name: Install requirements
       run: |
-        .ci/install.cppcheck 2.7
+        .ci/install.cppcheck 2.9
     - name: Build astyle
       run: |
         make -j 4 -C astyle
@@ -194,6 +194,9 @@ jobs:
       run: |
         # this is required so as to have all the include files in place
         # notice that this is done automatically in build
+        # make sure that dirslinks are generated for all modules
+        ./configure --enable-modules=all
+        # then generate the links
         make -C src/lib/ dirslinks
         make codecheck
 

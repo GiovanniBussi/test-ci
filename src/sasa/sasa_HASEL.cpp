@@ -139,7 +139,7 @@ private:
   unsigned nl_update;
   int firstStepFlag;
   double Ti;
-  std::vector<AtomNumber> atoms;
+  std::vector<AtomNumber> atoms_list;
   vector < vector < std::string > > AtomResidueName;
   vector < vector < double > > SASAparam;
   vector < vector < std::string > > CONNECTparam;
@@ -185,8 +185,8 @@ SASA_HASEL::SASA_HASEL(const ActionOptions&ao):
   rs = 0.14;
   parse("DELTAGFILE",DeltaGValues);
   parse("APPROACH", approach);
-  parseAtomList("ATOMS",atoms);
-  if(atoms.size()==0) error("no atoms specified");
+  parseAtomList("ATOMS",atoms_list);
+  if(atoms_list.size()==0) error("no atoms specified");
   std::string Type;
   parse("TYPE",Type);
   parse("NL_STRIDE", stride);
@@ -204,9 +204,9 @@ SASA_HASEL::SASA_HASEL(const ActionOptions&ao):
   }
 
   log.printf("  atoms involved : ");
-  for(unsigned i=0; i<atoms.size(); ++i) {
+  for(unsigned i=0; i<atoms_list.size(); ++i) {
     if(i%25==0) log<<"\n";
-    log.printf("%d ",atoms[i].serial());
+    log.printf("%d ",atoms_list[i].serial());
   }
   log.printf("\n");
 
@@ -218,7 +218,7 @@ SASA_HASEL::SASA_HASEL(const ActionOptions&ao):
 
 
   addValueWithDerivatives(); setNotPeriodic();
-  requestAtoms(atoms);
+  requestAtoms(atoms_list);
 
   natoms = getNumberOfAtoms();
   AtomResidueName.resize(2);
@@ -252,8 +252,8 @@ void SASA_HASEL::readPDB() {
   AtomResidueName[1].clear();
 
   for(unsigned i=0; i<natoms; i++) {
-    string Aname = moldat->getAtomName(atoms[i]);
-    string Rname = moldat->getResidueName(atoms[i]);
+    string Aname = moldat->getAtomName(atoms_list[i]);
+    string Rname = moldat->getResidueName(atoms_list[i]);
     AtomResidueName[0].push_back (Aname);
     AtomResidueName[1].push_back (Rname);
   }
@@ -824,12 +824,12 @@ void SASA_HASEL::calculate() {
         dAijt_di[0] = 0;
         dAijt_di[1] = 0;
         dAijt_di[2] = 0;
-        int NumRes_i = moldat->getResidueNumber(atoms[i]);
+        int NumRes_i = moldat->getResidueNumber(atoms_list[i]);
 
         for (unsigned j = 0; j < Nlist[i].size(); j++) {
           double pij = 0.3516;
 
-          int NumRes_j = moldat->getResidueNumber(atoms[Nlist[i][j]]);
+          int NumRes_j = moldat->getResidueNumber(atoms_list[Nlist[i][j]]);
           if (NumRes_i==NumRes_j) {
             if (CONNECTparam[i][0].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][1].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][2].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][3].compare(AtomResidueName[0][Nlist[i][j]])==0) {
               pij = 0.8875;
@@ -912,12 +912,12 @@ void SASA_HASEL::calculate() {
         dAijt_di[0] = 0;
         dAijt_di[1] = 0;
         dAijt_di[2] = 0;
-        int NumRes_i = moldat->getResidueNumber(atoms[i]);
+        int NumRes_i = moldat->getResidueNumber(atoms_list[i]);
 
         for (unsigned j = 0; j < Nlist[i].size(); j++) {
           double pij = 0.3516;
 
-          int NumRes_j = moldat->getResidueNumber(atoms[Nlist[i][j]]);
+          int NumRes_j = moldat->getResidueNumber(atoms_list[Nlist[i][j]]);
           if (NumRes_i==NumRes_j) {
             if (CONNECTparam[i][0].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][1].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][2].compare(AtomResidueName[0][Nlist[i][j]])==0 || CONNECTparam[i][3].compare(AtomResidueName[0][Nlist[i][j]])==0) {
               pij = 0.8875;
