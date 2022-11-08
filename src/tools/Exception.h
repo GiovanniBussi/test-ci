@@ -350,7 +350,8 @@ public:
 /// \relates PLMD::Exception
 /// Throw an exception with information about the position in the file.
 /// Messages can be inserted with `plumed_error()<<"message"`.
-#define plumed_error() throw PLMD::ExceptionError() << plumed_here
+// TEST: #define plumed_error() throw PLMD::ExceptionError() << plumed_here
+#define plumed_error() PLMD::Exception::Throw() <<= PLMD::ExceptionError() << plumed_here
 
 /// \relates PLMD::Exception
 /// Throw a nested exception with information about the position in the file.
