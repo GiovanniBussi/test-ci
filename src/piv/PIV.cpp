@@ -300,6 +300,10 @@ PIV::PIV(const ActionOptions&ao):
     // look for another PIV instance previously allocated
     auto* previous=plumed.getActionSet().selectLatest<PIV*>(this);
 
+    // this is forcing one separate object per instance of the PIV object.
+    // it should fail
+    previous=nullptr;
+
     if(!previous) {
       // if not found, allocate the shared data struct
       sharedData_unique=Tools::make_unique<SharedData>();
