@@ -220,14 +220,14 @@ jobs:
       run: |
         make -C docker fedora37
 
-  # We test on rockylinux8 as well
-  rocky8:
+  # We test on rockylinux9 as well
+  rocky9:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
     - name: Build and run tests
       run: |
-        make -C docker rocky8
+        make -C docker rocky9
 
   macports:
     runs-on: macos-11
