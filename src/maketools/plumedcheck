@@ -267,7 +267,7 @@ BEGINFILE{
 # DOC: Notice that Ubuntu 16 ships with an autoconf version that is not standard
 # DOC: (2.69 + some patch). This makes this test report a false positive.
 # DOC: This is thus changed to a style warning.
-    if(s!=0) style("autoconf","autoconf not satisfied")
+    if(s!=0) error("autoconf","autoconf not satisfied")
     system("rm " tempfile)
   }
 
