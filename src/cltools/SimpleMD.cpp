@@ -73,6 +73,11 @@ plumed simplemd --help
 */
 //+ENDPLUMEDOC
 
+// simple static function to close a file
+// defined once here since it's used in many places in this file
+// in addition, this seems the only way to use it in the write_statistics_fp_deleter member
+static void (*deleter)(FILE* f) = [](FILE* f) { if(f) std::fclose(f); };
+
 class SimpleMD:
   public PLMD::CLTool
 {
@@ -84,6 +89,7 @@ class SimpleMD:
   bool write_statistics_first;
   int write_statistics_last_time_reopened;
   FILE* write_statistics_fp;
+  std::unique_ptr<FILE,decltype(deleter)> write_statistics_fp_deleter{nullptr,deleter};
 
 
 public:
@@ -181,7 +187,6 @@ private:
     if(!fp) error(std::string("file ") + inputfile + std::string(" not found"));
 
 // call fclose when fp goes out of scope
-    auto deleter=[](FILE* f) { std::fclose(f); };
     std::unique_ptr<FILE,decltype(deleter)> fp_deleter(fp,deleter);
 
     int ret=std::fscanf(fp,"%1000d",&natoms);
@@ -194,7 +199,6 @@ private:
     FILE* fp=std::fopen(inputfile.c_str(),"r");
     if(!fp) error(std::string("file ") + inputfile + std::string(" not found"));
 // call fclose when fp goes out of scope
-    auto deleter=[](FILE* f) { std::fclose(f); };
     std::unique_ptr<FILE,decltype(deleter)> fp_deleter(fp,deleter);
 
     char buffer[256];
@@ -333,7 +337,6 @@ private:
     }
     plumed_assert(fp);
 // call fclose when fp goes out of scope
-    auto deleter=[](FILE* f) { std::fclose(f); };
     std::unique_ptr<FILE,decltype(deleter)> fp_deleter(fp,deleter);
     std::fprintf(fp,"%d\n",natoms);
     std::fprintf(fp,"%f %f %f\n",cell[0],cell[1],cell[2]);
@@ -354,7 +357,6 @@ private:
     fp=std::fopen(outputfile.c_str(),"w");
     plumed_assert(fp);
 // call fclose when fp goes out of scope
-    auto deleter=[](FILE* f) { std::fclose(f); };
     std::unique_ptr<FILE,decltype(deleter)> fp_deleter(fp,deleter);
     std::fprintf(fp,"%d\n",natoms);
     std::fprintf(fp,"%f %f %f\n",cell[0],cell[1],cell[2]);
@@ -374,13 +376,14 @@ private:
     if(write_statistics_first) {
 // first time this routine is called, open the file
       write_statistics_fp=std::fopen(statfile.c_str(),"w");
+      write_statistics_fp_deleter.reset(write_statistics_fp);
       write_statistics_first=false;
     }
     if(istep-write_statistics_last_time_reopened>100) {
 // every 100 steps, reopen the file to flush the buffer
-      std::fclose(write_statistics_fp);
-      // no exception between these two statements
+      write_statistics_fp_deleter.reset(nullptr); // close file
       write_statistics_fp=std::fopen(statfile.c_str(),"a");
+      write_statistics_fp_deleter.reset(write_statistics_fp);
       write_statistics_last_time_reopened=istep;
     }
     std::fprintf(write_statistics_fp,"%d %f %f %f %f %f\n",istep,istep*tstep,2.0*engkin/double(ndim*natoms),engconf,engkin+engconf,engkin+engconf+engint);
@@ -588,9 +591,6 @@ private:
 
 // write final positions
     write_final_positions(outputfile,natoms,positions,cell,wrapatoms);
-
-// close the statistic file if it was open:
-    if(write_statistics_fp) std::fclose(write_statistics_fp);
 
     return 0;
   }
