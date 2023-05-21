@@ -85,7 +85,7 @@ if test -z "$mpi" ; then
 fi
 mpi="$mpi -np $mpiprocs"
 
-if ! $plumed config -q has mpi
+if ! $plumed --no-mpi config -q has mpi
 then
     if [ "$TRAVIS" = true ] || [ "$GITHUB_ACTIONS" = true ] ; then
       if [ -z "$PLUMED_ALLOW_SKIP_ON_TRAVIS" ] ; then
