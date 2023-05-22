@@ -1,10 +1,9 @@
-FROM rockylinux/rockylinux:8.7
-# Fixing version 
+FROM rockylinux/rockylinux
 
 # NOTE: numpy==1.19 is the last version compatible with python 3.6
 # NOTE: pillow==8.4.0 leads to an error while installing on centos7
-# NOTE: skipping "yum -y update"
-RUN yum -y install dnf-plugins-core \
+RUN yum -y update \
+ && yum -y install dnf-plugins-core \
  && dnf config-manager --set-enabled powertools \
  && yum -y group install "Development Tools" \
  && yum -y install environment-modules gawk vim wget \
@@ -27,6 +26,7 @@ COPY plumed2.tgz /home/plumed
 RUN . /etc/bashrc \
  && module load mpi \
  && export OMPI_MCA_btl_base_warn_component_unused=0 \
+ && export OMPI_MCA_pml=ob1 \
  && export MPIEXEC="mpirun --oversubscribe" \
  && export PATH=$HOME/opt/bin:$PATH \
  && export CPATH=$HOME/opt/include:$CPATH \
