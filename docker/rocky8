@@ -1,4 +1,5 @@
-FROM rockylinux/rockylinux:8
+FROM rockylinux/rockylinux:8.7
+# Fixing version 
 
 # NOTE: numpy==1.19 is the last version compatible with python 3.6
 # NOTE: pillow==8.4.0 leads to an error while installing on centos7
