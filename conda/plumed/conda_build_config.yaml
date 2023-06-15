@@ -4,3 +4,7 @@ libblas:
 - 3.8 *netlib
 liblapack:
 - 3.8.0 *netlib
+c_compiler_version:
+  - 12.2.0 # [linux]
+cxx_compiler_version:
+  - 12.2.0 # [linux]
