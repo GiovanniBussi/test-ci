@@ -1,7 +1,5 @@
 FROM rockylinux/rockylinux:8
 
-# NOTE: numpy==1.19 is the last version compatible with python 3.6
-# NOTE: pillow==8.4.0 leads to an error while installing on centos7
 RUN yum -y update \
  && yum -y install dnf-plugins-core \
  && dnf config-manager --set-enabled powertools \
@@ -9,6 +7,7 @@ RUN yum -y update \
  && yum -y install environment-modules gawk vim wget \
                    lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel boost-devel \
                    python39 python39-devel python39-pip \
+ && . /etc/bashrc \
  && module load python39 \
  && pip3 install cython numpy pandas mdtraj \
  && pip3 install MDAnalysis
