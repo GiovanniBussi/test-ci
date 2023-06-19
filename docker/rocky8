@@ -21,7 +21,6 @@ COPY plumed2.tgz /home/plumed
 # build and test plumed (no install)
 RUN . /etc/bashrc \
  && module load mpi \
- && module load python39 \
  && export OMPI_MCA_btl_base_warn_component_unused=0 \
  && export OMPI_MCA_btl_base_verbose=0 \
  && export OMPI_MCA_plm=isolated \
