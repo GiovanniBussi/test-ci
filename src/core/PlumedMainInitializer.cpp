@@ -209,28 +209,31 @@ static void translate_current(plumed_nothrow_handler_x nothrow,void**nested=null
     else if(e.code().category()==std::future_category()) opt[5]=&future_category;
     else opt[5]=nullptr;
 
+    // local class, just needed to propely pass path information
+    // path is stored as a span of bytes.
+    // in theory, could be wchar type (on Windows, not tested),
+    // so we explicitly store the number of bytes
     struct Path {
       std::size_t numbytes=0;
       const void* ptr=nullptr;
+      Path(const std::filesystem::path & path):
+        numbytes(sizeof(std::filesystem::path::value_type)*path.native().length()),
+        ptr(path.c_str())
+      {}
+      Path() = default;
     };
 
     opt[6]="p"; // path1
-    Path path1;
-    std::filesystem::path::string_type path1_string;
+    Path path1; // declared here since it should survive till the end of this function
     if(!e.path1().empty()) {
-      path1_string=e.path1().native();
-      path1.numbytes=sizeof(std::filesystem::path::value_type)*path1_string.length();
-      path1.ptr=path1_string.c_str();
+      path1=Path(e.path1());
       opt[7]=&path1;
     }
 
     opt[8]="q"; // path2
-    Path path2;
-    std::filesystem::path::string_type path2_string;
+    Path path2; // declared here since it should survive till the end of this function
     if(!e.path2().empty()) {
-      path2_string=e.path2().native();
-      path2.numbytes=sizeof(std::filesystem::path::value_type)*path2_string.length();
-      path2.ptr=path2_string.c_str();
+      path2=Path(e.path2());
       opt[9]=&path2;
     }
 
