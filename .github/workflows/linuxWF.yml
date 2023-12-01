@@ -26,7 +26,8 @@ jobs:
         - -debug-mpi-
 # temporarily commented out
 # see https://github.com/plumed/plumed2/issues/976
-        - -intel-
+        - -intel-icpx-
+        - -intel-icpc-
     steps:
     - uses: actions/checkout@v4
     - uses: actions/cache@v3
@@ -125,9 +126,18 @@ jobs:
         sudo apt-get install intel-basekit intel-hpckit 
         source /opt/intel/oneapi/setvars.sh
         printenv >> $GITHUB_ENV
+    - name: Configure icpx
+      if: contains( matrix.variant, '-intel-icpx-' )
+      run: |
         echo "CXX=icpx" >> $GITHUB_ENV
         echo "CC=icx" >> $GITHUB_ENV
         echo "FC=ifx" >> $GITHUB_ENV
+    - name: Configure icpc
+      if: contains( matrix.variant, '-intel-icpc-' )
+      run: |
+        echo "CXX=icpc" >> $GITHUB_ENV
+        echo "CC=icc" >> $GITHUB_ENV
+        echo "FC=ifort" >> $GITHUB_ENV
     - name: Install MPI
       # install MPI at last since it modifies CC and CXX
       if: contains( matrix.variant, '-mpi-' )
