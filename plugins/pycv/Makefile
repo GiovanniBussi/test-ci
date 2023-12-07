@@ -7,7 +7,7 @@ SRC=PythonCVInterface.cpp ActionWithPython.cpp PythonFunction.cpp PlumedPythonEm
 all: PythonCVInterface.$(SOEXT)
 
 PythonCVInterface.$(SOEXT): $(SRC)
-	plumed_program_name=$(program_name) python_bin=$(python_bin) ./standaloneCompile.sh
+	python_bin=$(python_bin) ./standaloneCompile.sh
 
 clean:
 	rm -f $(OBJS) PythonCVInterface.$(SOEXT)

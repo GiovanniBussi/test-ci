@@ -2,7 +2,7 @@
 # The workaround is to -L appropriately. Will be fixed here.
 
 if test -z "$python_bin"; then
-  python_bin=python3
+  python_bin=python
 fi
 
 if test -z "$plumed_program_name"; then
