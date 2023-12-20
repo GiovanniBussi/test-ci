@@ -411,8 +411,9 @@
   plumed object is instantiated. So, you might even use it to load different plumed versions
   simultaneously, although the preferred way to do this is using the function \ref plumed_create_dlopen.
   Notice that if you want to load multiple versions simultaneously you should load them in a local namespace.
-  \ref plumed_create_dlopen does it automatically, whereas loading through env var `PLUMED_KERNEL` only does it if
-  you also set env var `PLUMED_NAMESPACE=LOCAL`.
+  \ref plumed_create_dlopen does it automatically, whereas loading through env var `PLUMED_KERNEL` does it
+  by default (the default can be overridden with `export PLUMED_NAMESPACE=GLOBAL`).
+  Notice that the default has changed in PLUMED v2.10.
 
   Finally, a few functions have been added, namely:
   - Functions to find if a plumed object is valid
@@ -3683,12 +3684,12 @@ void plumed_retrieve_functions(plumed_plumedmain_function_holder* functions, plu
     __PLUMED_FPRINTF(stderr,"+++ PLUMED_KERNEL=\"%s\" +++\n",path);
     if(debug) __PLUMED_FPRINTF(stderr,"+++ Loading with mode RTLD_NOW");
     dlopenmode=RTLD_NOW;
-    if(__PLUMED_GETENV("PLUMED_LOAD_NAMESPACE") && !__PLUMED_WRAPPER_STD strcmp(__PLUMED_GETENV("PLUMED_LOAD_NAMESPACE"),"LOCAL")) {
-      dlopenmode=dlopenmode|RTLD_LOCAL;
-      if(debug) __PLUMED_FPRINTF(stderr,"|RTLD_LOCAL");
-    } else {
+    if(__PLUMED_GETENV("PLUMED_LOAD_NAMESPACE") && !__PLUMED_WRAPPER_STD strcmp(__PLUMED_GETENV("PLUMED_LOAD_NAMESPACE"),"GLOBAL")) {
       dlopenmode=dlopenmode|RTLD_GLOBAL;
       if(debug) __PLUMED_FPRINTF(stderr,"|RTLD_GLOBAL");
+    } else {
+      dlopenmode=dlopenmode|RTLD_LOCAL;
+      if(debug) __PLUMED_FPRINTF(stderr,"|RTLD_LOCAL");
     }
 #ifdef RTLD_DEEPBIND
 #if __PLUMED_WRAPPER_ENABLE_RTLD_DEEPBIND
