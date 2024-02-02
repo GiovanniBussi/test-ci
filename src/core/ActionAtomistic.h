@@ -31,7 +31,6 @@
 
 namespace PLMD {
 
-class Pbc;
 class PDB;
 
 /// \ingroup MULTIINHERIT
@@ -54,8 +53,10 @@ class ActionAtomistic :
   std::vector<Vector>   positions;       // positions of the needed atoms
   double                energy;
   Value*                boxValue;
-  ForwardDecl<Pbc>      pbc_fwd;
-  Pbc&                  pbc=*pbc_fwd;
+/// pointer to pbc data (owned another class), to avoid copy
+  const Pbc*            pbc;
+/// local copy to implement copy-on-write
+  std::unique_ptr<Pbc>  modified_pbc;
   std::vector<double>   masses;
   std::vector<double>   charges;
 
@@ -219,7 +220,7 @@ const double & ActionAtomistic::getEnergy()const {
 
 inline
 const Tensor & ActionAtomistic::getBox()const {
-  return pbc.getBox();
+  return pbc->getBox();
 }
 
 inline
@@ -229,7 +230,7 @@ double & ActionAtomistic::modifyForceOnEnergy() {
 
 inline
 const Pbc & ActionAtomistic::getPbc() const {
-  return pbc;
+  return *pbc;
 }
 
 inline

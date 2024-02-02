@@ -113,11 +113,11 @@ void ActionAtomistic::requestAtoms(const std::vector<AtomNumber> & a, const bool
 }
 
 Vector ActionAtomistic::pbcDistance(const Vector &v1,const Vector &v2)const {
-  return pbc.distance(v1,v2);
+  return pbc->distance(v1,v2);
 }
 
 void ActionAtomistic::pbcApply(std::vector<Vector>& dlist, unsigned max_index)const {
-  pbc.apply(dlist, max_index);
+  pbc->apply(dlist, max_index);
 }
 
 void ActionAtomistic::calculateNumericalDerivatives( ActionWithValue* a ) {
@@ -125,7 +125,12 @@ void ActionAtomistic::calculateNumericalDerivatives( ActionWithValue* a ) {
 }
 
 void ActionAtomistic::changeBox( const Tensor& newbox ) {
-  pbc.setBox( newbox );
+  // copy on write: if we do not have a local copy we make it now
+  if(!modified_pbc) {
+    modified_pbc=std::make_unique<Pbc>(*pbc);
+    pbc=modified_pbc.get();
+  }
+  modified_pbc->setBox(newbox);
 }
 
 void ActionAtomistic::calculateAtomicNumericalDerivatives( ActionWithValue* a, const unsigned& startnum ) {
@@ -150,16 +155,23 @@ void ActionAtomistic::calculateAtomicNumericalDerivatives( ActionWithValue* a, c
         value[j*natoms+i][k]=a->getOutputQuantity(j);
       }
     }
-  Tensor box(pbc.getBox());
+  Tensor box(pbc->getBox());
+  
+  // copy on write: if we do not have a local copy we make it now
+  if(!modified_pbc) {
+    modified_pbc=std::make_unique<Pbc>(*pbc);
+    pbc=modified_pbc.get();
+  }
+
   for(int i=0; i<3; i++) for(int k=0; k<3; k++) {
       double arg0=box(i,k);
-      for(int j=0; j<natoms; j++) positions[j]=pbc.realToScaled(positions[j]);
+      for(int j=0; j<natoms; j++) positions[j]=modified_pbc->realToScaled(positions[j]);
       box(i,k)=box(i,k)+delta;
-      pbc.setBox(box);
-      for(int j=0; j<natoms; j++) positions[j]=pbc.scaledToReal(positions[j]);
+      modified_pbc->setBox(box);
+      for(int j=0; j<natoms; j++) positions[j]=modified_pbc->scaledToReal(positions[j]);
       a->calculate();
       box(i,k)=arg0;
-      pbc.setBox(box);
+      modified_pbc->setBox(box);
       for(int j=0; j<natoms; j++) positions[j]=savedPositions[j];
       for(int j=0; j<nval; j++) valuebox[j](i,k)=a->getOutputQuantity(j);
     }
@@ -269,7 +281,9 @@ std::pair<std::size_t, std::size_t> ActionAtomistic::getValueIndices( const Atom
 void ActionAtomistic::retrieveAtoms() {
   if( boxValue ) {
     PbcAction* pbca = boxValue->getPntrToAction()->castToPbcAction();
-    plumed_assert( pbca ); pbc=pbca->pbc;
+    plumed_assert( pbca );
+    pbc=&pbca->pbc;
+    modified_pbc.reset();
   }
   if( donotretrieve || indexes.size()==0 ) return;
   ActionToPutData* cv = chargev[0]->getPntrToAction()->castToActionToPutData();
