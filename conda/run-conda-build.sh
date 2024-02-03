@@ -15,6 +15,8 @@ export CPU_COUNT=4
 conda-build -c conda-forge plumed
 conda-build -c conda-forge py-plumed
 
-ls -l $CONDA_PREFIX/conda-bld/
-ls -l $CONDA_PREFIX/conda-bld/$OS_NAME-64
+# ls -l $CONDA_PREFIX/conda-bld/
+# ls -l $CONDA_PREFIX/conda-bld/$OS_NAME-64
+
+tree -L 3 $CONDA_PREFIX || true
 
