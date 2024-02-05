@@ -34,11 +34,30 @@ if [ $do_cppcheck == true ] ; then
   else
     files="$(echo */*.{h,cpp})"
   fi
+  # we provide below a reasonable set of hardcoded defines for small_vector corresponding to c++17
+  # to make sure the number of configurations tested by cppcheck does not explode.
+  # this is necessary given the large number of source files in which this header gets included
+  # the set of defines might need revisions when updating small_vector or if later
+  # we upgrade to c++20
   cppcheck --std=c++17 -j 4 --platform=unix64 --language=c++ \
   -U__GNUG__ -U__PLUMED_HAS_EXTERNAL_LAPACK -U__PLUMED_HAS_EXTERNAL_BLAS \
   -UGMX_CYGWIN  -UF77_NO_UNDERSCORE -U_GLIBCXX_DEBUG -DNDEBUG -U__PLUMED_PBC_WHILE  \
   -U__PLUMED_HAS_ASMJIT \
   -D__PLUMED_WRAPPER_CXX_EXPLICIT=explicit \
+  -UPLUMED_GCH_CONCEPTS \
+  -DPLUMED_GCH_CTAD_SUPPORT \
+  -DPLUMED_GCH_EXCEPTIONS \
+  -UPLUMED_GCH_IMPL_THREE_WAY_COMPARISON \
+  -UPLUMED_GCH_LIB_CONCEPTS \
+  -DPLUMED_GCH_LIB_IS_ALWAYS_EQUAL \
+  -UPLUMED_GCH_LIB_IS_CONSTANT_EVALUATED \
+  -DPLUMED_GCH_LIB_IS_FINAL \
+  -DPLUMED_GCH_LIB_IS_SWAPPABLE \
+  -DPLUMED_GCH_LIB_LAUNDER \
+  -UPLUMED_GCH_LIB_THREE_WAY_COMPARISON \
+  -UPLUMED_GCH_NO_STRONG_EXCEPTION_GUARANTEES \
+  -UPLUMED_GCH_STDLIB_INTEROP \
+  -DPLUMED_GCH_VARIABLE_TEMPLATES \
   --template='[{file}:{line}] ({severity}) :{id}: {message}' --enable=all --inline-suppr --force \
   $files
 fi
