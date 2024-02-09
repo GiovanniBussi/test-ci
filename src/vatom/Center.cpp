@@ -120,6 +120,7 @@ class Center:
   public ActionWithVirtualAtom
 {
   std::vector<double> weights;
+  std::vector<Tensor> deriv;
   std::vector<Tensor> dcenter_sin;
   std::vector<Tensor> dcenter_cos;
   bool isChargeSet_;
@@ -244,7 +245,7 @@ void Center::calculate() {
     }
   }
 
-  std::vector<Tensor> deriv(getNumberOfAtoms());
+  deriv.resize(getNumberOfAtoms());
 
   if(dophases) {
     dcenter_sin.resize(getNumberOfAtoms());

@@ -88,6 +88,7 @@ class FixedAtom:
   Vector coord;
   double mass,charge;
   bool scaled_components;
+  std::vector<Tensor> deriv;
 public:
   explicit FixedAtom(const ActionOptions&ao);
   void calculate() override;
@@ -131,7 +132,7 @@ FixedAtom::FixedAtom(const ActionOptions&ao):
 }
 
 void FixedAtom::calculate() {
-  std::vector<Tensor> deriv(getNumberOfAtoms());
+  deriv.resize(getNumberOfAtoms());
   if(scaled_components) {
     setPosition(getPbc().scaledToReal(coord));
   } else {
