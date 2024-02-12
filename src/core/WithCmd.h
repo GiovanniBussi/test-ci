@@ -32,31 +32,16 @@ namespace PLMD {
 /// This is an abstract base class for classes with
 /// cmd() method.
 class WithCmd {
-  bool check_recursion=false;
 public:
-  /// This is the preferred method as it avoid allocations of temporaries
+  /// This is the preferred method as it avoid allocations of temporaries.
+  /// If this is not overridded, it will call the legacy method.
   virtual void cmd(std::string_view key,const TypesafePtr & val=nullptr) {
-    plumed_assert(!check_recursion) << "recursion detected, you forgot to override cmd";
-    check_recursion=true;
-    // makes sure check_recursion is set to false in case of an exception
-    auto deleter=[](auto f) {*f=false; };
-    std::unique_ptr<bool,decltype(deleter)> scope_deleter(&check_recursion,deleter);
     cmd(std::string(key),val);
   }
-  /// This is the method we used in older plumed versions, so it is still possible.
+  /// This is the legacy method we used in older plumed versions, so it is still possible.
+  /// If this is not overridden, it will call the preferred method
   virtual void cmd(const std::string& key,const TypesafePtr & val=nullptr) {
-    plumed_assert(!check_recursion) << "recursion detected, you forgot to override cmd";
-    check_recursion=true;
-    // makes sure check_recursion is set to false in case of an exception
-    auto deleter=[](auto f) {*f=false; };
-    std::unique_ptr<bool,decltype(deleter)> scope_deleter(&check_recursion,deleter);
     cmd(std::string_view(key),val);
-  }
-  void cmd(const std::string& key,const TypesafePtr & val,const std::size_t* shape) {
-    cmd(std::string_view(key),TypesafePtr::setNelemAndShape(val,0,shape));
-  }
-  void cmd(const std::string& key,const TypesafePtr & val,std::size_t nelem, const std::size_t* shape=nullptr) {
-    cmd(std::string_view(key),TypesafePtr::setNelemAndShape(val,nelem,shape));
   }
   void cmd(std::string_view key,const TypesafePtr & val,const std::size_t* shape) {
     cmd(key,TypesafePtr::setNelemAndShape(val,0,shape));
@@ -64,14 +49,9 @@ public:
   void cmd(std::string_view key,const TypesafePtr & val,std::size_t nelem, const std::size_t* shape=nullptr) {
     cmd(key,TypesafePtr::setNelemAndShape(val,nelem,shape));
   }
+  /// This is needed to avoid ambiguities
   void cmd(const char* key,const TypesafePtr & val=nullptr) {
     cmd(std::string_view(key),val);
-  }
-  void cmd(const char* key,const TypesafePtr & val,const std::size_t* shape) {
-    cmd(std::string_view(key),TypesafePtr::setNelemAndShape(val,0,shape));
-  }
-  void cmd(const char* key,const TypesafePtr & val,std::size_t nelem, const std::size_t* shape=nullptr) {
-    cmd(std::string_view(key),TypesafePtr::setNelemAndShape(val,nelem,shape));
   }
   virtual ~WithCmd();
 };
