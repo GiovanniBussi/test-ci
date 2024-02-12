@@ -76,6 +76,7 @@ class UWalls : public Bias {
   std::vector<double> exp;
   std::vector<double> eps;
   std::vector<double> offset;
+  Value* valueForce2=nullptr;
 public:
   explicit UWalls(const ActionOptions&);
   void calculate() override;
@@ -128,6 +129,7 @@ UWalls::UWalls(const ActionOptions&ao):
   log.printf("\n");
 
   addComponent("force2"); componentIsNotPeriodic("force2");
+  valueForce2=getPntrToComponent("force2");
 }
 
 void UWalls::calculate() {
@@ -150,7 +152,7 @@ void UWalls::calculate() {
     setOutputForce(i,f);
   }
   setBias(ene);
-  getPntrToComponent("force2")->set(totf2);
+  valueForce2->set(totf2);
 }
 
 }

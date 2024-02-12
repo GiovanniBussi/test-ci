@@ -135,7 +135,10 @@ class MaxEnt : public Bias {
   double avg_counter;
   int learn_replica;
   Value* valueForce2;
-  Value* valueWork;
+  Value* valueTotWork;
+  std::vector<Value*> valueError;
+  std::vector<Value*> valueWork;
+  std::vector<Value*> valueCoupling;
   OFile lagmultOfile_;
   IFile ifile;
   std::string lagmultfname;
@@ -290,17 +293,20 @@ MaxEnt::MaxEnt(const ActionOptions&ao):
   addComponent("force2"); componentIsNotPeriodic("force2");
   addComponent("work"); componentIsNotPeriodic("work");
   valueForce2=getPntrToComponent("force2");
-  valueWork=getPntrToComponent("work");
+  valueTotWork=getPntrToComponent("work");
 
   std::string comp;
   for(unsigned i=0; i< getNumberOfArguments() ; i++) {
     comp=getPntrToArgument(i)->getName()+"_coupling";
     addComponent(comp); componentIsNotPeriodic(comp);
+    valueCoupling.push_back(getPntrToComponent(comp));
     comp=getPntrToArgument(i)->getName()+"_work";
     addComponent(comp); componentIsNotPeriodic(comp);
+    valueWork.push_back(getPntrToComponent(comp));
     work.push_back(0.); // initialize the work value
     comp=getPntrToArgument(i)->getName()+"_error";
     addComponent(comp); componentIsNotPeriodic(comp);
+    valueError.push_back(getPntrToComponent(comp));
   }
   std::string fname;
   fname=lagmultfname;
@@ -451,10 +457,10 @@ void MaxEnt::calculate() {
   double ene=0.0;
   double KbT=simtemp;
   for(unsigned i=0; i<getNumberOfArguments(); ++i) {
-    getPntrToComponent(getPntrToArgument(i)->getName()+"_error")->set(expected_eps[i]);
-    getPntrToComponent(getPntrToArgument(i)->getName()+"_work")->set(work[i]);
-    valueWork->set(totalWork);
-    getPntrToComponent(getPntrToArgument(i)->getName()+"_coupling")->set(lambda[i]);
+    valueError[i]->set(expected_eps[i]);
+    valueWork[i]->set(work[i]);
+    valueTotWork->set(totalWork);
+    valueCoupling[i]->set(lambda[i]);
     const double f=-KbT*convert_lambda(type,lambda[i])*apply_weights[myrep];
     totf2+=f*f;
     ene+=KbT*convert_lambda(type,lambda[i])*getArgument(i)*apply_weights[myrep];

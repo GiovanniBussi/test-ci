@@ -172,6 +172,9 @@ class FuncPathMSD : public Function {
   std::vector< std::pair<Value *,double> > neighpair;
   std::map<Value *,double > indexmap; // use double to allow isomaps
   std::vector <Value*> allArguments;
+  Value* val_s_path=nullptr;
+  Value* val_z_path=nullptr;
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // this below is useful when one wants to sort a vector of double and have back the order
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -262,6 +265,8 @@ FuncPathMSD::FuncPathMSD(const ActionOptions&ao):
 
   addComponentWithDerivatives("s"); componentIsNotPeriodic("s");
   addComponentWithDerivatives("z"); componentIsNotPeriodic("z");
+  val_s_path=getPntrToComponent("s");
+  val_z_path=getPntrToComponent("z");
 
   // now backup the arguments
   for(unsigned i=0; i<getNumberOfArguments(); i++)allArguments.push_back(getPntrToArgument(i));
@@ -280,9 +285,6 @@ void FuncPathMSD::calculate() {
     neighpair.resize(allArguments.size());
     for(unsigned i=0; i<allArguments.size(); i++)neighpair[i].first=allArguments[i];
   }
-
-  Value* val_s_path=getPntrToComponent("s");
-  Value* val_z_path=getPntrToComponent("z");
 
   for(auto & it : neighpair) {
     it.second=std::exp(-lambda*(it.first->get()));

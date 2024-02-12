@@ -86,6 +86,7 @@ class ABMD : public Bias {
   std::vector<double> temp;
   std::vector<int> seed;
   std::vector<Random> random;
+  Value* valueForce2=nullptr;
 public:
   explicit ABMD(const ActionOptions&);
   void calculate() override;
@@ -144,6 +145,7 @@ ABMD::ABMD(const ActionOptions&ao):
   }
   for(unsigned i=0; i<getNumberOfArguments(); i++) {random[i].setSeed(-seed[i]);}
   addComponent("force2"); componentIsNotPeriodic("force2");
+  valueForce2=getPntrToComponent("force2");
 }
 
 
@@ -177,7 +179,7 @@ void ABMD::calculate() {
     getPntrToComponent(i+1)->set(min[i]);
   }
   setBias(ene);
-  getPntrToComponent("force2")->set(totf2);
+  valueForce2->set(totf2);
 }
 
 }

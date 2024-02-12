@@ -61,6 +61,11 @@ class Ensemble :
   double   kbt;
   double   moment;
   double   power;
+  std::vector<double> bias;
+  std::vector<double> mean;
+  std::vector<double> dmean;
+  std::vector<double> v_moment;
+  std::vector<double> dv_moment;
 public:
   explicit Ensemble(const ActionOptions&);
   void     calculate() override;
@@ -153,7 +158,6 @@ void Ensemble::calculate() {
 
   // calculate the weights either from BIAS
   if(do_reweight) {
-    std::vector<double> bias;
     bias.resize(ens_dim);
     if(master) {
       bias[my_repl] = getArgument(narg);
@@ -174,8 +178,8 @@ void Ensemble::calculate() {
 
   const double fact_kbt = fact/kbt;
 
-  std::vector<double> mean(narg);
-  std::vector<double> dmean(narg,fact);
+  mean.resize(narg);
+  dmean.assign(narg,fact);
   // calculate the mean
   if(master) {
     for(unsigned i=0; i<narg; ++i) mean[i] = fact*getArgument(i);
@@ -183,7 +187,6 @@ void Ensemble::calculate() {
   }
   comm.Sum(&mean[0], narg);
 
-  std::vector<double> v_moment, dv_moment;
   // calculate other moments
   if(do_moments) {
     v_moment.resize(narg);

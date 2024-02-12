@@ -110,6 +110,8 @@ class External : public Bias {
 
 private:
   std::unique_ptr<GridBase> BiasGrid_;
+  std::vector<double> cv;
+  std::vector<double> der;
   double scale_;
 
 public:
@@ -162,7 +164,8 @@ External::External(const ActionOptions& ao):
 void External::calculate()
 {
   unsigned ncv=getNumberOfArguments();
-  std::vector<double> cv(ncv), der(ncv);
+  cv.resize(ncv);
+  der.resize(ncv);
 
   for(unsigned i=0; i<ncv; ++i) {cv[i]=getArgument(i);}
 

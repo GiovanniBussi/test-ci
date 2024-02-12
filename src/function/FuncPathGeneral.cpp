@@ -89,6 +89,9 @@ class FuncPathGeneral : public Function {
   std::vector<double> coefficients;
   std::vector< std::vector<double> > path_cv_values;
 
+  Value* val_s_path=nullptr;
+  Value* val_z_path=nullptr;
+
   // For faster calculation
   std::vector<double> expdists;
 
@@ -208,6 +211,9 @@ FuncPathGeneral::FuncPathGeneral(const ActionOptions&ao):
   addComponentWithDerivatives("s"); componentIsNotPeriodic("s");
   addComponentWithDerivatives("z"); componentIsNotPeriodic("z");
 
+  val_s_path=getPntrToComponent("s");
+  val_z_path=getPntrToComponent("z");
+
   // Initialise vectors
   std::vector<double> temp (coefficients.size());
   for (unsigned i = 0; i < path_cv_values.size(); ++i) {
@@ -252,9 +258,6 @@ void FuncPathGeneral::calculate() {
     for (unsigned i = 0; i < path_cv_values.size(); ++i)
       neighpair[i].first = i;
   }
-
-  Value* val_s_path=getPntrToComponent("s");
-  Value* val_z_path=getPntrToComponent("z");
 
   for(unsigned j = 0; j < allArguments.size(); ++j) {
     value = allArguments[j]->get();

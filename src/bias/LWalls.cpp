@@ -77,6 +77,7 @@ class LWalls : public Bias {
   std::vector<double> exp;
   std::vector<double> eps;
   std::vector<double> offset;
+  Value* valueForce2=nullptr;
 public:
   explicit LWalls(const ActionOptions&);
   void calculate() override;
@@ -129,6 +130,7 @@ LWalls::LWalls(const ActionOptions&ao):
   log.printf("\n");
 
   addComponent("force2"); componentIsNotPeriodic("force2");
+  valueForce2=getPntrToComponent("force2");
 }
 
 void LWalls::calculate() {
@@ -151,7 +153,7 @@ void LWalls::calculate() {
     setOutputForce(i,f);
   }
   setBias(ene);
-  getPntrToComponent("force2")->set(totf2);
+  valueForce2->set(totf2);
 }
 
 }
