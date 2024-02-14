@@ -406,7 +406,9 @@ void DomainDecomposition::reset() {
   if( !unique_serial && int(gatindex.size())==getNumberOfAtoms() && shuffledAtoms==0 ) return;
   // This is an optimisation to ensure that we don't call std::fill over the whole forces
   // array if there are a small number of atoms passed between the MD code and PLUMED
-  getAllActiveAtoms( unique ); for(const auto & ip : inputs) (ip->copyOutput(0))->clearInputForce( unique );
+  // we here assume that unique is already up to date:
+  // getAllActiveAtoms( unique );
+  for(const auto & ip : inputs) (ip->copyOutput(0))->clearInputForce( unique );
 }
 
 void DomainDecomposition::writeBinary(std::ostream&o) {
