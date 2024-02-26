@@ -28,6 +28,7 @@
 #include "KernelFunctions.h"
 #include "RootFindingBase.h"
 #include "Communicator.h"
+#include "small_vector/small_vector.h"
 
 #include <vector>
 #include <cmath>
@@ -159,8 +160,7 @@ unsigned GridBase::getDimension() const {
 }
 
 // we are flattening arrays using a column-major order
-GridBase::index_t GridBase::getIndex(const std::vector<unsigned> & indices) const {
-  plumed_dbg_assert(indices.size()==dimension_);
+GridBase::index_t GridBase::getIndex(const unsigned* indices,std::size_t indices_size) const {
   for(unsigned int i=0; i<dimension_; i++)
     if(indices[i]>=nbin_[i]) {
       std::string is;
@@ -174,14 +174,27 @@ GridBase::index_t GridBase::getIndex(const std::vector<unsigned> & indices) cons
   return index;
 }
 
+GridBase::index_t GridBase::getIndex(const std::vector<unsigned> & indices) const {
+  plumed_dbg_assert(indices.size()==dimension_);
+  return getIndex(indices.data(),indices.size());
+}
+
 GridBase::index_t GridBase::getIndex(const std::vector<double> & x) const {
   plumed_dbg_assert(x.size()==dimension_);
-  return getIndex(getIndices(x));
+  std::array<unsigned,maxdim> indices;
+  getIndices(x,indices.data(),dimension_);
+  return getIndex(indices.data(),dimension_);
+}
+
+std::vector<unsigned> GridBase::getIndices(index_t index) const {
+  std::vector<unsigned> indices(dimension_);
+  getIndices(index,indices.data(),indices.size());
+  return indices;
 }
 
 // we are flattening arrays using a column-major order
-std::vector<unsigned> GridBase::getIndices(index_t index) const {
-  std::vector<unsigned> indices(dimension_);
+void GridBase::getIndices(index_t index, unsigned* indices, std::size_t indices_size) const {
+  plumed_assert(indices_size==dimension_);
   index_t kk=index;
   indices[0]=(index%nbin_[0]);
   for(unsigned int i=1; i<dimension_-1; ++i) {
@@ -191,36 +204,30 @@ std::vector<unsigned> GridBase::getIndices(index_t index) const {
   if(dimension_>=2) {
     indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
   }
-  return indices;
 }
 
 void GridBase::getIndices(index_t index, std::vector<unsigned>& indices) const {
   if (indices.size()!=dimension_) indices.resize(dimension_);
-  index_t kk=index;
-  indices[0]=(index%nbin_[0]);
-  for(unsigned int i=1; i<dimension_-1; ++i) {
-    kk=(kk-indices[i-1])/nbin_[i-1];
-    indices[i]=(kk%nbin_[i]);
-  }
-  if(dimension_>=2) {
-    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
-  }
+  getIndices(index,indices.data(),indices.size());
 }
 
 std::vector<unsigned> GridBase::getIndices(const std::vector<double> & x) const {
   plumed_dbg_assert(x.size()==dimension_);
   std::vector<unsigned> indices(dimension_);
-  for(unsigned int i=0; i<dimension_; ++i) {
-    indices[i] = unsigned(std::floor((x[i]-min_[i])/dx_[i]));
-  }
+  getIndices(x,indices);
   return indices;
 }
 
 void GridBase::getIndices(const std::vector<double> & x, std::vector<unsigned>& indices) const {
+  indices.resize(dimension_);
+  getIndices(x,indices.data(),indices.size());
+}
+
+void GridBase::getIndices(const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size) const {
   plumed_dbg_assert(x.size()==dimension_);
-  if (indices.size()!=dimension_) indices.resize(dimension_);
+  plumed_dbg_assert(rindex_size==dimension_);
   for(unsigned int i=0; i<dimension_; ++i) {
-    indices[i] = unsigned(std::floor((x[i]-min_[i])/dx_[i]));
+    rindex_data[i] = unsigned(std::floor((x[i]-min_[i])/dx_[i]));
   }
 }
 
@@ -235,22 +242,44 @@ std::vector<double> GridBase::getPoint(const std::vector<unsigned> & indices) co
 
 std::vector<double> GridBase::getPoint(index_t index) const {
   plumed_dbg_assert(index<maxsize_);
-  return getPoint(getIndices(index));
+  std::vector<double> x(dimension_);
+  std::array<unsigned,maxdim> indices;
+  getIndices(index,indices.data(),dimension_);
+  getPoint(indices.data(),dimension_,x);
+  return x;
 }
 
 std::vector<double> GridBase::getPoint(const std::vector<double> & x) const {
   plumed_dbg_assert(x.size()==dimension_);
-  return getPoint(getIndices(x));
+  std::vector<double> r(dimension_);
+  std::array<unsigned,maxdim> indices;
+  getIndices(x,indices.data(),dimension_);
+  getPoint(indices.data(),dimension_,r);
+  return r;
 }
 
 void GridBase::getPoint(index_t index,std::vector<double> & point) const {
   plumed_dbg_assert(index<maxsize_);
-  getPoint(getIndices(index),point);
+  std::array<unsigned,maxdim> indices;
+  getIndices(index,indices.data(),dimension_);
+  getPoint(indices.data(),dimension_,point);
 }
 
 void GridBase::getPoint(const std::vector<unsigned> & indices,std::vector<double> & point) const {
   plumed_dbg_assert(indices.size()==dimension_);
   plumed_dbg_assert(point.size()==dimension_);
+  getPoint(indices.data(),indices.size(),point);
+}
+
+void GridBase::getPoint(const unsigned* indices_data,std::size_t indices_size,std::vector<double> & point) const {
+  plumed_dbg_assert(indices_size==dimension_);
+  plumed_dbg_assert(point.size()==dimension_);
+  getPoint(indices_data,indices_size,point.data(),point.size());
+}
+
+void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const {
+  plumed_dbg_assert(indices_size==dimension_);
+  plumed_dbg_assert(point_size==dimension_);
   for(unsigned int i=0; i<dimension_; ++i) {
     point[i]=min_[i]+(double)(indices[i])*dx_[i];
   }
@@ -265,18 +294,18 @@ std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<unsigned
   plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
 
   std::vector<index_t> neighbors;
-  std::vector<unsigned> small_bin(dimension_);
+  std::array<unsigned,maxdim> small_bin;
+  std::array<unsigned,maxdim> small_indices;
+  std::array<unsigned,maxdim> tmp_indices;
 
   unsigned small_nbin=1;
   for(unsigned j=0; j<dimension_; ++j) {
     small_bin[j]=(2*nneigh[j]+1);
     small_nbin*=small_bin[j];
   }
+  neighbors.reserve(small_nbin);
 
-  std::vector<unsigned> small_indices(dimension_);
-  std::vector<unsigned> tmp_indices;
   for(unsigned index=0; index<small_nbin; ++index) {
-    tmp_indices.resize(dimension_);
     unsigned kk=index;
     small_indices[0]=(index%small_bin[0]);
     for(unsigned i=1; i<dimension_-1; ++i) {
@@ -296,8 +325,7 @@ std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<unsigned
       tmp_indices[ll]=static_cast<unsigned>(i0);
       ll++;
     }
-    tmp_indices.resize(ll);
-    if(tmp_indices.size()==dimension_) {neighbors.push_back(getIndex(tmp_indices));}
+    if(ll==dimension_) {neighbors.push_back(getIndex(&tmp_indices[0],dimension_));}
   }
   return neighbors;
 }
@@ -312,13 +340,15 @@ std::vector<GridBase::index_t> GridBase::getNeighbors(index_t index,const std::v
   return getNeighbors(getIndices(index),nneigh);
 }
 
-void GridBase::getSplineNeighbors(const std::vector<unsigned> & indices, std::vector<GridBase::index_t>& neighbors, unsigned& nneighbors)const {
-  plumed_dbg_assert(indices.size()==dimension_);
-  unsigned nneigh=unsigned(std::pow(2.0,int(dimension_)));
-  if (neighbors.size()!=nneigh) neighbors.resize(nneigh);
+unsigned GridBase::getSplineNeighbors(const unsigned* indices, std::size_t indices_size, index_t* neighbors, std::size_t neighbors_size)const {
+  plumed_assert(indices_size==dimension_);
+  unsigned nneigh=1<<dimension_; // same as unsigned(pow(2.0,dimension_));
+  plumed_assert(neighbors_size==nneigh);
 
-  std::vector<unsigned> nindices(dimension_);
-  unsigned inind; nneighbors = 0;
+  unsigned nneighbors = 0;
+
+  std::array<unsigned,maxdim> nindices;
+  unsigned inind;
   for(unsigned int i=0; i<nneigh; ++i) {
     unsigned tmp=i; inind=0;
     for(unsigned int j=0; j<dimension_; ++j) {
@@ -328,8 +358,9 @@ void GridBase::getSplineNeighbors(const std::vector<unsigned> & indices, std::ve
       if( pbc_[j] && i0==nbin_[j]) i0=0;
       nindices[inind++]=i0;
     }
-    if(inind==dimension_) neighbors[nneighbors++]=getIndex(nindices);
+    if(inind==dimension_) neighbors[nneighbors++]=getIndex(nindices.data(),dimension_);
   }
+  return nneighbors;
 }
 
 std::vector<GridBase::index_t> GridBase::getNearestNeighbors(const index_t index) const {
@@ -401,6 +432,12 @@ double GridBase::getValue(const std::vector<double> & x) const {
   }
 }
 
+double GridBase::getValueAndDerivatives(index_t index, std::vector<double>& der) const {
+  plumed_dbg_assert(index<maxsize_ && usederiv_ && der.size()==dimension_);
+  der.resize(dimension_);
+  return getValueAndDerivatives(index,der.data(),der.size());
+}
+
 double GridBase::getValueAndDerivatives(const std::vector<unsigned> & indices, std::vector<double>& der) const {
   return getValueAndDerivatives(getIndex(indices),der);
 }
@@ -411,22 +448,23 @@ double GridBase::getValueAndDerivatives(const std::vector<double> & x, std::vect
   if(dospline_) {
     double X,X2,X3,value;
     std::array<double,maxdim> fd, C, D;
-    std::vector<double> dder(dimension_);
+    std::array<double,maxdim> dder;
 // reset
     value=0.0;
     for(unsigned int i=0; i<dimension_; ++i) der[i]=0.0;
 
-    std::vector<unsigned> indices(dimension_);
-    getIndices(x, indices);
-    std::vector<double> xfloor(dimension_);
-    getPoint(indices, xfloor);
-    std::vector<index_t> neigh; unsigned nneigh; getSplineNeighbors(indices, neigh, nneigh);
+    std::array<unsigned,maxdim> indices;
+    getIndices(x, indices.data(),dimension_);
+    std::array<double,maxdim> xfloor;
+    getPoint(indices.data(), indices.size(), xfloor.data(),dimension_);
+    gch::small_vector<index_t> neigh(1<<dimension_); // pow(2,dimension_);
+    auto nneigh = getSplineNeighbors(indices.data(),dimension_, neigh.data(), neigh.size());
 
 // loop over neighbors
-    std::vector<unsigned> nindices;
+    std::array<unsigned,maxdim> nindices;
     for(unsigned int ipoint=0; ipoint<nneigh; ++ipoint) {
-      double grid=getValueAndDerivatives(neigh[ipoint],dder);
-      getIndices(neigh[ipoint], nindices);
+      double grid=getValueAndDerivatives(neigh[ipoint],dder.data(),dimension_);
+      getIndices(neigh[ipoint], nindices.data(), dimension_);
       double ff=1.0;
 
       for(unsigned j=0; j<dimension_; ++j) {
@@ -725,9 +763,8 @@ double Grid::getValue(index_t index) const {
   return grid_[index];
 }
 
-double Grid::getValueAndDerivatives(index_t index, std::vector<double>& der) const {
-  plumed_dbg_assert(index<maxsize_ && usederiv_ && der.size()==dimension_);
-  der.resize(dimension_);
+double Grid::getValueAndDerivatives(index_t index, double* der,std::size_t der_size) const {
+  plumed_dbg_assert(index<maxsize_ && usederiv_ && der_size==dimension_);
   for(unsigned i=0; i<dimension_; i++) der[i]=der_[dimension_*index+i];
   return grid_[index];
 }
@@ -770,14 +807,17 @@ double SparseGrid::getValue(index_t index)const {
   return value;
 }
 
-double SparseGrid::getValueAndDerivatives(index_t index, std::vector<double>& der)const {
-  plumed_assert(index<maxsize_ && usederiv_ && der.size()==dimension_);
+double SparseGrid::getValueAndDerivatives(index_t index, double* der, std::size_t der_size)const {
+  plumed_assert(index<maxsize_ && usederiv_ && der_size==dimension_);
   double value=0.0;
   for(unsigned int i=0; i<dimension_; ++i) der[i]=0.0;
   const auto it=map_.find(index);
   if(it!=map_.end()) value=it->second;
   const auto itder=der_.find(index);
-  if(itder!=der_.end()) der=itder->second;
+  if(itder!=der_.end()) {
+    const auto & second(itder->second);
+    for(unsigned i=0; i<second.size(); i++) der[i]=itder->second[i];
+  }
   return value;
 }
 

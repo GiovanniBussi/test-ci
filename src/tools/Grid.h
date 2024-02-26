@@ -109,7 +109,7 @@ protected:
   bool dospline_, usederiv_;
   std::string fmt_; // format for output
 /// get "neighbors" for spline
-  void getSplineNeighbors(const std::vector<unsigned> & indices, std::vector<index_t>& neigh, unsigned& nneigh )const;
+  unsigned getSplineNeighbors(const unsigned* indices, std::size_t indices_size, index_t* neighbors, std::size_t neighbors_size)const;
 // std::vector<index_t> getSplineNeighbors(const std::vector<unsigned> & indices)const;
 
 
@@ -149,9 +149,12 @@ public:
 
 /// methods to handle grid indices
   void getIndices(index_t index, std::vector<unsigned>& rindex) const;
+  void getIndices(index_t index, unsigned* rindex_data, std::size_t rindex_size) const;
   void getIndices(const std::vector<double> & x, std::vector<unsigned>& rindex) const;
+  void getIndices(const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size) const;
   std::vector<unsigned> getIndices(index_t index) const;
   std::vector<unsigned> getIndices(const std::vector<double> & x) const;
+  index_t getIndex(const unsigned* indices,std::size_t indices_size) const;
   index_t getIndex(const std::vector<unsigned> & indices) const;
   index_t getIndex(const std::vector<double> & x) const;
   std::vector<double> getPoint(index_t index) const;
@@ -161,6 +164,8 @@ public:
   void getPoint(index_t index,std::vector<double> & point) const;
   void getPoint(const std::vector<unsigned> & indices,std::vector<double> & point) const;
   void getPoint(const std::vector<double> & x,std::vector<double> & point) const;
+  void getPoint(const unsigned* indices_data,std::size_t indices_size,std::vector<double> & point) const;
+  void getPoint(const unsigned* indices_data,std::size_t indices_size,double* point,std::size_t point_size) const;
 
 /// get neighbors
   std::vector<index_t> getNeighbors(index_t index,const std::vector<unsigned> & neigh) const;
@@ -186,7 +191,8 @@ public:
   double getValue(const std::vector<unsigned> & indices) const;
   double getValue(const std::vector<double> & x) const;
 /// get grid value and derivatives
-  virtual double getValueAndDerivatives(index_t index, std::vector<double>& der) const=0;
+  virtual double getValueAndDerivatives(index_t index, double* der, std::size_t der_size) const=0;
+  double getValueAndDerivatives(index_t index, std::vector<double>& der) const;
   double getValueAndDerivatives(const std::vector<unsigned> & indices, std::vector<double>& der) const;
   double getValueAndDerivatives(const std::vector<double> & x, std::vector<double>& der) const;
 
@@ -262,8 +268,7 @@ public:
 /// get grid value
   double getValue(index_t index) const override;
 /// get grid value and derivatives
-  double getValueAndDerivatives(index_t index, std::vector<double>& der) const override;
-
+  double getValueAndDerivatives(index_t index, double* der, std::size_t der_size) const override;
 /// set grid value
   void setValue(index_t index, double value) override;
 /// set grid value and derivatives
@@ -330,7 +335,7 @@ public:
 /// get grid value
   double getValue(index_t index) const override;
 /// get grid value and derivatives
-  double getValueAndDerivatives(index_t index, std::vector<double>& der) const override;
+  double getValueAndDerivatives(index_t index, double* der, std::size_t der_size) const override;
 
 /// set grid value
   void setValue(index_t index, double value) override;
