@@ -104,7 +104,7 @@ public:
     static std::unique_ptr<AcceleratorBase> create(unsigned dim);
     virtual ~AcceleratorBase() = default;
     virtual unsigned getDimension() const=0;
-    virtual std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh) const=0;
+    virtual std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const unsigned* indices,std::size_t indices_size, const std::vector<unsigned> &nneigh) const=0;
     virtual GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_, const unsigned* indices,std::size_t indices_size) const=0;
     virtual void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const=0;
     virtual void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const=0;

@@ -53,8 +53,8 @@ public:
     return dimension_;
   }
 
-  std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const override {
-    plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
+  std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const unsigned* indices,std::size_t indices_size,const std::vector<unsigned> &nneigh)const override {
+    plumed_dbg_assert(indices_size==dimension_ && nneigh.size()==dimension_);
 
     std::vector<Grid::index_t> neighbors;
     std::array<unsigned,dimension_> small_bin;
@@ -333,8 +333,6 @@ void GridBase::getIndices(const std::vector<double> & x, unsigned* rindex_data,s
   accelerator.ptr->getIndices(min_,dx_,x,rindex_data,rindex_size);
 }
 
-// this is the actual implementation
-// all other implementations refer to this one
 void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const {
   plumed_dbg_assert(indices_size==dimension_);
   plumed_dbg_assert(point_size==dimension_);
@@ -345,25 +343,21 @@ void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double*
 std::vector<double> GridBase::getPoint(const std::vector<unsigned> & indices) const {
   plumed_dbg_assert(indices.size()==dimension_);
   std::vector<double> x(dimension_);
-  getPoint(indices.data(),indices.size(),x.data(),x.size());
+  getPoint(indices,x);
   return x;
 }
 
 std::vector<double> GridBase::getPoint(index_t index) const {
   plumed_dbg_assert(index<maxsize_);
   std::vector<double> x(dimension_);
-  std::array<unsigned,maxdim> indices;
-  getIndices(index,indices.data(),dimension_);
-  getPoint(indices.data(),dimension_,x);
+  getPoint(index,x);
   return x;
 }
 
 std::vector<double> GridBase::getPoint(const std::vector<double> & x) const {
   plumed_dbg_assert(x.size()==dimension_);
   std::vector<double> r(dimension_);
-  std::array<unsigned,maxdim> indices;
-  getIndices(x,indices.data(),dimension_);
-  getPoint(indices.data(),dimension_,r);
+  getPoint(x,r);
   return r;
 }
 
@@ -377,7 +371,7 @@ void GridBase::getPoint(index_t index,std::vector<double> & point) const {
 void GridBase::getPoint(const std::vector<unsigned> & indices,std::vector<double> & point) const {
   plumed_dbg_assert(indices.size()==dimension_);
   plumed_dbg_assert(point.size()==dimension_);
-  getPoint(indices.data(),indices.size(),point);
+  getPoint(indices.data(),indices.size(),point.data(),point.size());
 }
 
 void GridBase::getPoint(const unsigned* indices_data,std::size_t indices_size,std::vector<double> & point) const {
@@ -388,24 +382,30 @@ void GridBase::getPoint(const unsigned* indices_data,std::size_t indices_size,st
 
 void GridBase::getPoint(const std::vector<double> & x,std::vector<double> & point) const {
   plumed_dbg_assert(x.size()==dimension_);
-  getPoint(getIndices(x),point);
+  std::array<unsigned,maxdim> indices;
+  getIndices(x,indices.data(),dimension_);
+  getPoint(indices.data(),dimension_,point.data(),point.size());
 }
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const {
   plumed_dbg_assert(accelerator.ptr);
-  //std::array<unsigned,maxdim> indices;
-  //getIndices(min_,const std::vector<double> & dx_, const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size
-  return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices,nneigh);
+  return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices.data(),indices.size(),nneigh);
 }
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<double> & x,const std::vector<unsigned> & nneigh)const {
   plumed_dbg_assert(x.size()==dimension_ && nneigh.size()==dimension_);
-  return getNeighbors(getIndices(x),nneigh);
+  std::array<unsigned,maxdim> indices;
+  plumed_dbg_assert(accelerator.ptr);
+  accelerator.ptr->getIndices(min_,dx_,x,indices.data(),dimension_);
+  return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices.data(),dimension_,nneigh);
 }
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(index_t index,const std::vector<unsigned> & nneigh)const {
   plumed_dbg_assert(index<maxsize_ && nneigh.size()==dimension_);
-  return getNeighbors(getIndices(index),nneigh);
+  std::array<unsigned,maxdim> indices;
+  plumed_dbg_assert(accelerator.ptr);
+  accelerator.ptr->getIndices(nbin_,index,indices.data(),dimension_);
+  return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices.data(),dimension_,nneigh);
 }
 
 unsigned GridBase::getSplineNeighbors(const unsigned* indices, std::size_t indices_size, index_t* neighbors, std::size_t neighbors_size)const {
