@@ -522,7 +522,7 @@ double GridBase::getValueAndDerivatives(const std::vector<double> & x, std::vect
     getIndices(x, indices.data(),dimension_);
     std::array<double,maxdim> xfloor;
     getPoint(indices.data(), dimension_, xfloor.data(),dimension_);
-    gch::small_vector<index_t> neigh(1<<dimension_); // pow(2,dimension_);
+    gch::small_vector<index_t,16> neigh(1<<dimension_); // pow(2,dimension_); up to dimension 4 will stay on stack
     auto nneigh = getSplineNeighbors(indices.data(),dimension_, neigh.data(), neigh.size());
 
 // loop over neighbors
