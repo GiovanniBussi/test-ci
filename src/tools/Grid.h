@@ -114,7 +114,7 @@ public:
   public:
     std::unique_ptr<AcceleratorBase> ptr;
     AcceleratorHandler(const AcceleratorHandler& other):
-     ptr((other.ptr?AcceleratorBase::create(other.ptr->getDimension()):nullptr))
+      ptr((other.ptr?AcceleratorBase::create(other.ptr->getDimension()):nullptr))
     {}
     AcceleratorHandler & operator=(const AcceleratorHandler & other) {
       if(this!=&other) {

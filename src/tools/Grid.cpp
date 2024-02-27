@@ -44,94 +44,93 @@ constexpr std::size_t GridBase::maxdim;
 
 template<unsigned dimension_>
 class Accelerator :
-public Grid::AcceleratorBase
+  public Grid::AcceleratorBase
 {
 
 public:
 
-unsigned getDimension() const override {
-  return dimension_;
-}
-
-std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const override{
-  plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
-
-  std::vector<Grid::index_t> neighbors;
-  std::array<unsigned,dimension_> small_bin;
-  std::array<unsigned,dimension_> small_indices;
-  std::array<unsigned,dimension_> tmp_indices;
-  
-  unsigned small_nbin=1;
-  for(unsigned j=0; j<dimension_; ++j) {
-    small_bin[j]=(2*nneigh[j]+1);
-    small_nbin*=small_bin[j];
+  unsigned getDimension() const override {
+    return dimension_;
   }
-  neighbors.reserve(small_nbin);
-  
-  for(unsigned index=0; index<small_nbin; ++index) {
-    unsigned kk=index;
-    small_indices[0]=(index%small_bin[0]);
-    for(unsigned i=1; i<dimension_-1; ++i) {
-      kk=(kk-small_indices[i-1])/small_bin[i-1];
-      small_indices[i]=(kk%small_bin[i]);
+
+  std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const override {
+    plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
+
+    std::vector<Grid::index_t> neighbors;
+    std::array<unsigned,dimension_> small_bin;
+    std::array<unsigned,dimension_> small_indices;
+    std::array<unsigned,dimension_> tmp_indices;
+
+    unsigned small_nbin=1;
+    for(unsigned j=0; j<dimension_; ++j) {
+      small_bin[j]=(2*nneigh[j]+1);
+      small_nbin*=small_bin[j];
     }
-    if(dimension_>=2) {
-      small_indices[dimension_-1]=((kk-small_indices[dimension_-2])/small_bin[dimension_-2]);
+    neighbors.reserve(small_nbin);
+
+    for(unsigned j=0; j<dimension_; j++) small_indices[j]=0;
+
+    for(unsigned index=0; index<small_nbin; ++index) {
+      unsigned ll=0;
+      for(unsigned i=0; i<dimension_; ++i) {
+        int i0=small_indices[i]-nneigh[i]+indices[i];
+        if(!pbc_[i] && i0<0)         continue;
+        if(!pbc_[i] && i0>=static_cast<int>(nbin_[i])) continue;
+        if( pbc_[i] && i0<0)         i0=nbin_[i]-(-i0)%nbin_[i];
+        if( pbc_[i] && i0>=static_cast<int>(nbin_[i])) i0%=nbin_[i];
+        tmp_indices[ll]=static_cast<unsigned>(i0);
+        ll++;
+      }
+      if(ll==dimension_) {neighbors.push_back(getIndex(grid,nbin_,&tmp_indices[0],dimension_));}
+
+      small_indices[0]++;
+      for(unsigned j=0; j<dimension_-1; j++) if(small_indices[j]==small_bin[j]) {
+          small_indices[j]=0;
+          small_indices[j+1]++;
+        }
     }
-    unsigned ll=0;
-    for(unsigned i=0; i<dimension_; ++i) {
-      int i0=small_indices[i]-nneigh[i]+indices[i];
-      if(!pbc_[i] && i0<0)         continue;
-      if(!pbc_[i] && i0>=static_cast<int>(nbin_[i])) continue;
-      if( pbc_[i] && i0<0)         i0=nbin_[i]-(-i0)%nbin_[i];
-      if( pbc_[i] && i0>=static_cast<int>(nbin_[i])) i0%=nbin_[i];
-      tmp_indices[ll]=static_cast<unsigned>(i0);
-      ll++;
+    return neighbors;
+  }
+
+  GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_,const unsigned* indices,std::size_t indices_size) const override {
+    for(unsigned int i=0; i<dimension_; i++)
+      if(indices[i]>=nbin_[i]) {
+        std::string is;
+        Tools::convert(i,is);
+        plumed_error() << "Looking for a value outside the grid along the " << is << " dimension (arg name: "<<grid.getArgNames()[i]<<")";
+      }
+    auto index=indices[dimension_-1];
+    for(unsigned int i=dimension_-1; i>0; --i) {
+      index=index*nbin_[i-1]+indices[i-1];
     }
-    if(ll==dimension_) {neighbors.push_back(getIndex(grid,nbin_,&tmp_indices[0],dimension_));}
+    return index;
   }
-  return neighbors;
-}
 
-GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_,const unsigned* indices,std::size_t indices_size) const override {
-  for(unsigned int i=0; i<dimension_; i++)
-    if(indices[i]>=nbin_[i]) {     
-      std::string is;
-      Tools::convert(i,is);        
-      plumed_error() << "Looking for a value outside the grid along the " << is << " dimension (arg name: "<<grid.getArgNames()[i]<<")";
-    } 
-  auto index=indices[dimension_-1];
-  for(unsigned int i=dimension_-1; i>0; --i) {
-    index=index*nbin_[i-1]+indices[i-1];
+  void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const override {
+    for(unsigned int i=0; i<dimension_; ++i) {
+      point[i]=min_[i]+(double)(indices[i])*dx_[i];
+    }
   }
-  return index;
-}
 
-void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const override {
-  for(unsigned int i=0; i<dimension_; ++i) {
-    point[i]=min_[i]+(double)(indices[i])*dx_[i];
+  void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const override {
+    plumed_assert(indices_size==dimension_)<<indices_size;
+    for(unsigned int i=0; i<dimension_-1; ++i) {
+      indices[i]=index%nbin_[i];
+      index/=nbin_[i];
+    }
+    indices[dimension_-1]=index;
+    // I leave here the previous implementation as a check
+    // The one above is slighlty faster and I think cleaner
+    //  auto kk=index;
+    //  indices[0]=(index%nbin_[0]);
+    //  for(unsigned int i=1; i<dimension_-1; ++i) {
+    //    kk=(kk-indices[i-1])/nbin_[i-1];
+    //    indices[i]=(kk%nbin_[i]);
+    //  }
+    //  if(dimension_>=2) {
+    //    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
+    //  }
   }
-}
-
-void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const override {
-  plumed_assert(indices_size==dimension_)<<indices_size;
-  for(unsigned int i=0; i<dimension_-1; ++i) {
-    indices[i]=index%nbin_[i];
-    index/=nbin_[i];
-  }
-  indices[dimension_-1]=index;
-  // I leave here the previous implementation as a check
-  // The one above is slighlty faster and I think cleaner
-  //  auto kk=index;
-  //  indices[0]=(index%nbin_[0]);
-  //  for(unsigned int i=1; i<dimension_-1; ++i) {
-  //    kk=(kk-indices[i-1])/nbin_[i-1];
-  //    indices[i]=(kk%nbin_[i]);
-  //  }
-  //  if(dimension_>=2) {
-  //    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
-  //  }
-}
 
 };
 
