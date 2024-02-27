@@ -231,12 +231,20 @@ void GridBase::getIndices(const std::vector<double> & x, unsigned* rindex_data,s
   }
 }
 
+// this is the actual implementation
+// all other implementations refer to this one
+void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const {
+  plumed_dbg_assert(indices_size==dimension_);
+  plumed_dbg_assert(point_size==dimension_);
+  for(unsigned int i=0; i<dimension_; ++i) {
+    point[i]=min_[i]+(double)(indices[i])*dx_[i];
+  }
+}
+
 std::vector<double> GridBase::getPoint(const std::vector<unsigned> & indices) const {
   plumed_dbg_assert(indices.size()==dimension_);
   std::vector<double> x(dimension_);
-  for(unsigned int i=0; i<dimension_; ++i) {
-    x[i]=min_[i]+(double)(indices[i])*dx_[i];
-  }
+  getPoint(indices.data(),indices.size(),x.data(),x.size());
   return x;
 }
 
@@ -275,14 +283,6 @@ void GridBase::getPoint(const unsigned* indices_data,std::size_t indices_size,st
   plumed_dbg_assert(indices_size==dimension_);
   plumed_dbg_assert(point.size()==dimension_);
   getPoint(indices_data,indices_size,point.data(),point.size());
-}
-
-void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const {
-  plumed_dbg_assert(indices_size==dimension_);
-  plumed_dbg_assert(point_size==dimension_);
-  for(unsigned int i=0; i<dimension_; ++i) {
-    point[i]=min_[i]+(double)(indices[i])*dx_[i];
-  }
 }
 
 void GridBase::getPoint(const std::vector<double> & x,std::vector<double> & point) const {
