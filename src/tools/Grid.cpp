@@ -456,7 +456,7 @@ double GridBase::getValueAndDerivatives(const std::vector<double> & x, std::vect
     std::array<unsigned,maxdim> indices;
     getIndices(x, indices.data(),dimension_);
     std::array<double,maxdim> xfloor;
-    getPoint(indices.data(), indices.size(), xfloor.data(),dimension_);
+    getPoint(indices.data(), dimension_, xfloor.data(),dimension_);
     gch::small_vector<index_t> neigh(1<<dimension_); // pow(2,dimension_);
     auto nneigh = getSplineNeighbors(indices.data(),dimension_, neigh.data(), neigh.size());
 
