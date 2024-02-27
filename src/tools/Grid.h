@@ -96,8 +96,41 @@ public:
 // typedef unsigned index_t;
 /// Maximum dimension (exaggerated value).
 /// Can be used to replace local std::vectors with std::arrays (allocated on stack).
-  static constexpr std::size_t maxdim=64;
+  static constexpr std::size_t maxdim=16;
+
+
+  class AcceleratorBase {
+  public:
+    static std::unique_ptr<AcceleratorBase> create(unsigned dim);
+    virtual ~AcceleratorBase() = default;
+    virtual unsigned getDimension() const=0;
+    virtual std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh) const=0;
+    virtual GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_, const unsigned* indices,std::size_t indices_size) const=0;
+    virtual void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const=0;
+    virtual void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const=0;
+  };
+
+  class AcceleratorHandler {
+  public:
+    std::unique_ptr<AcceleratorBase> ptr;
+    AcceleratorHandler(const AcceleratorHandler& other):
+     ptr((other.ptr?AcceleratorBase::create(other.ptr->getDimension()):nullptr))
+    {}
+    AcceleratorHandler & operator=(const AcceleratorHandler & other) {
+      if(this!=&other) {
+        ptr.reset();
+        if(other.ptr) ptr=AcceleratorBase::create(other.ptr->getDimension());
+      }
+      return *this;
+    }
+    AcceleratorHandler() = default;
+    AcceleratorHandler(unsigned dimension):
+      ptr(AcceleratorBase::create(dimension))
+    {}
+  };
+
 protected:
+  AcceleratorHandler accelerator;
   std::string funcname;
   std::vector<std::string> argnames;
   std::vector<std::string> str_min_, str_max_;
@@ -221,7 +254,7 @@ public:
 /// dump grid to gaussian cube file
   void writeCubeFile(OFile&, const double& lunit);
 
-  virtual ~GridBase() {}
+  virtual ~GridBase() = default;
 
 /// set output format
   void setOutputFmt(const std::string & ss) {fmt_=ss;}
@@ -353,7 +386,7 @@ public:
 /// dump grid on file
   void writeToFile(OFile&) override;
 
-  virtual ~SparseGrid() {}
+  virtual ~SparseGrid() = default;
 };
 }
 

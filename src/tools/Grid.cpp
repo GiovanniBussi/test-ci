@@ -42,6 +42,113 @@ namespace PLMD {
 
 constexpr std::size_t GridBase::maxdim;
 
+template<unsigned dimension_>
+class Accelerator :
+public Grid::AcceleratorBase
+{
+
+public:
+
+unsigned getDimension() const override {
+  return dimension_;
+}
+
+std::vector<GridBase::index_t> getNeighbors(const GridBase& grid, const std::vector<unsigned> & nbin_,const std::vector<bool> & pbc_,const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const override{
+  plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
+
+  std::vector<Grid::index_t> neighbors;
+  std::array<unsigned,dimension_> small_bin;
+  std::array<unsigned,dimension_> small_indices;
+  std::array<unsigned,dimension_> tmp_indices;
+  
+  unsigned small_nbin=1;
+  for(unsigned j=0; j<dimension_; ++j) {
+    small_bin[j]=(2*nneigh[j]+1);
+    small_nbin*=small_bin[j];
+  }
+  neighbors.reserve(small_nbin);
+  
+  for(unsigned index=0; index<small_nbin; ++index) {
+    unsigned kk=index;
+    small_indices[0]=(index%small_bin[0]);
+    for(unsigned i=1; i<dimension_-1; ++i) {
+      kk=(kk-small_indices[i-1])/small_bin[i-1];
+      small_indices[i]=(kk%small_bin[i]);
+    }
+    if(dimension_>=2) {
+      small_indices[dimension_-1]=((kk-small_indices[dimension_-2])/small_bin[dimension_-2]);
+    }
+    unsigned ll=0;
+    for(unsigned i=0; i<dimension_; ++i) {
+      int i0=small_indices[i]-nneigh[i]+indices[i];
+      if(!pbc_[i] && i0<0)         continue;
+      if(!pbc_[i] && i0>=static_cast<int>(nbin_[i])) continue;
+      if( pbc_[i] && i0<0)         i0=nbin_[i]-(-i0)%nbin_[i];
+      if( pbc_[i] && i0>=static_cast<int>(nbin_[i])) i0%=nbin_[i];
+      tmp_indices[ll]=static_cast<unsigned>(i0);
+      ll++;
+    }
+    if(ll==dimension_) {neighbors.push_back(getIndex(grid,nbin_,&tmp_indices[0],dimension_));}
+  }
+  return neighbors;
+}
+
+GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_,const unsigned* indices,std::size_t indices_size) const override {
+  for(unsigned int i=0; i<dimension_; i++)
+    if(indices[i]>=nbin_[i]) {     
+      std::string is;
+      Tools::convert(i,is);        
+      plumed_error() << "Looking for a value outside the grid along the " << is << " dimension (arg name: "<<grid.getArgNames()[i]<<")";
+    } 
+  auto index=indices[dimension_-1];
+  for(unsigned int i=dimension_-1; i>0; --i) {
+    index=index*nbin_[i-1]+indices[i-1];
+  }
+  return index;
+}
+
+void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const override {
+  for(unsigned int i=0; i<dimension_; ++i) {
+    point[i]=min_[i]+(double)(indices[i])*dx_[i];
+  }
+}
+
+void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const override {
+  plumed_assert(indices_size==dimension_)<<indices_size;
+  auto kk=index;
+  indices[0]=(index%nbin_[0]);
+  for(unsigned int i=1; i<dimension_-1; ++i) {
+    kk=(kk-indices[i-1])/nbin_[i-1];
+    indices[i]=(kk%nbin_[i]);
+  }
+  if(dimension_>=2) {
+    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
+  }
+}
+
+};
+
+inline
+std::unique_ptr<Grid::AcceleratorBase> Grid::AcceleratorBase::create(unsigned dim) {
+  if(dim==1) return std::make_unique<Accelerator<1>>();
+  if(dim==2) return std::make_unique<Accelerator<2>>();
+  if(dim==3) return std::make_unique<Accelerator<3>>();
+  if(dim==4) return std::make_unique<Accelerator<4>>();
+  if(dim==5) return std::make_unique<Accelerator<5>>();
+  if(dim==6) return std::make_unique<Accelerator<6>>();
+  if(dim==7) return std::make_unique<Accelerator<7>>();
+  if(dim==8) return std::make_unique<Accelerator<8>>();
+  if(dim==9) return std::make_unique<Accelerator<9>>();
+  if(dim==10) return std::make_unique<Accelerator<10>>();
+  if(dim==11) return std::make_unique<Accelerator<11>>();
+  if(dim==12) return std::make_unique<Accelerator<12>>();
+  if(dim==13) return std::make_unique<Accelerator<13>>();
+  if(dim==14) return std::make_unique<Accelerator<14>>();
+  if(dim==15) return std::make_unique<Accelerator<15>>();
+  if(dim==16) return std::make_unique<Accelerator<16>>();
+  plumed_error();
+}
+
 GridBase::GridBase(const std::string& funcl, const std::vector<Value*> & args, const std::vector<std::string> & gmin,
                    const std::vector<std::string> & gmax, const std::vector<unsigned> & nbin, bool dospline, bool usederiv) {
 // various checks
@@ -89,6 +196,7 @@ void GridBase::Init(const std::string& funcl, const std::vector<std::string> &na
   plumed_massert(names.size()==nbin.size(),"grid dimensions in input do not match number of arguments");
   plumed_massert(names.size()==gmax.size(),"grid dimensions in input do not match number of arguments");
   dimension_=gmax.size();
+  accelerator=AcceleratorHandler(dimension_);
   str_min_=gmin; str_max_=gmax;
   argnames.resize( dimension_ );
   min_.resize( dimension_ );
@@ -195,15 +303,8 @@ std::vector<unsigned> GridBase::getIndices(index_t index) const {
 // we are flattening arrays using a column-major order
 void GridBase::getIndices(index_t index, unsigned* indices, std::size_t indices_size) const {
   plumed_assert(indices_size==dimension_);
-  index_t kk=index;
-  indices[0]=(index%nbin_[0]);
-  for(unsigned int i=1; i<dimension_-1; ++i) {
-    kk=(kk-indices[i-1])/nbin_[i-1];
-    indices[i]=(kk%nbin_[i]);
-  }
-  if(dimension_>=2) {
-    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
-  }
+  plumed_assert(accelerator.ptr);
+  accelerator.ptr->getIndices(nbin_,index,indices,dimension_);
 }
 
 void GridBase::getIndices(index_t index, std::vector<unsigned>& indices) const {
@@ -236,9 +337,8 @@ void GridBase::getIndices(const std::vector<double> & x, unsigned* rindex_data,s
 void GridBase::getPoint(const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const {
   plumed_dbg_assert(indices_size==dimension_);
   plumed_dbg_assert(point_size==dimension_);
-  for(unsigned int i=0; i<dimension_; ++i) {
-    point[i]=min_[i]+(double)(indices[i])*dx_[i];
-  }
+  plumed_dbg_assert(accelerator.ptr);
+  accelerator.ptr->getPoint(min_,dx_,indices,indices_size,point,point_size);
 }
 
 std::vector<double> GridBase::getPoint(const std::vector<unsigned> & indices) const {
@@ -291,43 +391,8 @@ void GridBase::getPoint(const std::vector<double> & x,std::vector<double> & poin
 }
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const {
-  plumed_dbg_assert(indices.size()==dimension_ && nneigh.size()==dimension_);
-
-  std::vector<index_t> neighbors;
-  std::array<unsigned,maxdim> small_bin;
-  std::array<unsigned,maxdim> small_indices;
-  std::array<unsigned,maxdim> tmp_indices;
-
-  unsigned small_nbin=1;
-  for(unsigned j=0; j<dimension_; ++j) {
-    small_bin[j]=(2*nneigh[j]+1);
-    small_nbin*=small_bin[j];
-  }
-  neighbors.reserve(small_nbin);
-
-  for(unsigned index=0; index<small_nbin; ++index) {
-    unsigned kk=index;
-    small_indices[0]=(index%small_bin[0]);
-    for(unsigned i=1; i<dimension_-1; ++i) {
-      kk=(kk-small_indices[i-1])/small_bin[i-1];
-      small_indices[i]=(kk%small_bin[i]);
-    }
-    if(dimension_>=2) {
-      small_indices[dimension_-1]=((kk-small_indices[dimension_-2])/small_bin[dimension_-2]);
-    }
-    unsigned ll=0;
-    for(unsigned i=0; i<dimension_; ++i) {
-      int i0=small_indices[i]-nneigh[i]+indices[i];
-      if(!pbc_[i] && i0<0)         continue;
-      if(!pbc_[i] && i0>=static_cast<int>(nbin_[i])) continue;
-      if( pbc_[i] && i0<0)         i0=nbin_[i]-(-i0)%nbin_[i];
-      if( pbc_[i] && i0>=static_cast<int>(nbin_[i])) i0%=nbin_[i];
-      tmp_indices[ll]=static_cast<unsigned>(i0);
-      ll++;
-    }
-    if(ll==dimension_) {neighbors.push_back(getIndex(&tmp_indices[0],dimension_));}
-  }
-  return neighbors;
+  plumed_dbg_assert(accelerator.ptr);
+  return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices,nneigh);
 }
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<double> & x,const std::vector<unsigned> & nneigh)const {
