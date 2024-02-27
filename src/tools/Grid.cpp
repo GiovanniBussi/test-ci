@@ -135,7 +135,6 @@ void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, un
 
 };
 
-inline
 std::unique_ptr<Grid::AcceleratorBase> Grid::AcceleratorBase::create(unsigned dim) {
   if(dim==1) return std::make_unique<Accelerator<1>>();
   if(dim==2) return std::make_unique<Accelerator<2>>();
