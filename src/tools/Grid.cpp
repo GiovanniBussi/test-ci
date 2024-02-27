@@ -115,15 +115,22 @@ void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, 
 
 void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const override {
   plumed_assert(indices_size==dimension_)<<indices_size;
-  auto kk=index;
-  indices[0]=(index%nbin_[0]);
-  for(unsigned int i=1; i<dimension_-1; ++i) {
-    kk=(kk-indices[i-1])/nbin_[i-1];
-    indices[i]=(kk%nbin_[i]);
+  for(unsigned int i=0; i<dimension_-1; ++i) {
+    indices[i]=index%nbin_[i];
+    index/=nbin_[i];
   }
-  if(dimension_>=2) {
-    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
-  }
+  indices[dimension_-1]=index;
+  // I leave here the previous implementation as a check
+  // The one above is slighlty faster and I think cleaner
+  //  auto kk=index;
+  //  indices[0]=(index%nbin_[0]);
+  //  for(unsigned int i=1; i<dimension_-1; ++i) {
+  //    kk=(kk-indices[i-1])/nbin_[i-1];
+  //    indices[i]=(kk%nbin_[i]);
+  //  }
+  //  if(dimension_>=2) {
+  //    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
+  //  }
 }
 
 };
