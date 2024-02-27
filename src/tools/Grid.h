@@ -108,6 +108,7 @@ public:
     virtual GridBase::index_t getIndex(const GridBase& grid, const std::vector<unsigned> & nbin_, const unsigned* indices,std::size_t indices_size) const=0;
     virtual void getPoint(const std::vector<double> & min_,const std::vector<double> & dx_, const unsigned* indices,std::size_t indices_size,double* point,std::size_t point_size) const=0;
     virtual void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const=0;
+    virtual void getIndices(const std::vector<double> & min_,const std::vector<double> & dx_, const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size) const=0;
   };
 
   class AcceleratorHandler {

@@ -112,6 +112,15 @@ public:
     }
   }
 
+  void getIndices(const std::vector<double> & min_,const std::vector<double> & dx_, const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size) const override {
+    plumed_dbg_assert(x.size()==dimension_);
+    plumed_dbg_assert(rindex_size==dimension_);
+    for(unsigned int i=0; i<dimension_; ++i) {
+      rindex_data[i] = unsigned(std::floor((x[i]-min_[i])/dx_[i]));
+    }
+  }
+
+
   void getIndices(const std::vector<unsigned> & nbin_, GridBase::index_t index, unsigned* indices, std::size_t indices_size) const override {
     plumed_assert(indices_size==dimension_)<<indices_size;
     for(unsigned int i=0; i<dimension_-1; ++i) {
@@ -119,17 +128,6 @@ public:
       index/=nbin_[i];
     }
     indices[dimension_-1]=index;
-    // I leave here the previous implementation as a check
-    // The one above is slighlty faster and I think cleaner
-    //  auto kk=index;
-    //  indices[0]=(index%nbin_[0]);
-    //  for(unsigned int i=1; i<dimension_-1; ++i) {
-    //    kk=(kk-indices[i-1])/nbin_[i-1];
-    //    indices[i]=(kk%nbin_[i]);
-    //  }
-    //  if(dimension_>=2) {
-    //    indices[dimension_-1]=((kk-indices[dimension_-2])/nbin_[dimension_-2]);
-    //  }
   }
 
 };
@@ -332,9 +330,7 @@ void GridBase::getIndices(const std::vector<double> & x, std::vector<unsigned>& 
 void GridBase::getIndices(const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size) const {
   plumed_dbg_assert(x.size()==dimension_);
   plumed_dbg_assert(rindex_size==dimension_);
-  for(unsigned int i=0; i<dimension_; ++i) {
-    rindex_data[i] = unsigned(std::floor((x[i]-min_[i])/dx_[i]));
-  }
+  accelerator.ptr->getIndices(min_,dx_,x,rindex_data,rindex_size);
 }
 
 // this is the actual implementation
@@ -397,6 +393,8 @@ void GridBase::getPoint(const std::vector<double> & x,std::vector<double> & poin
 
 std::vector<GridBase::index_t> GridBase::getNeighbors(const std::vector<unsigned> &indices,const std::vector<unsigned> &nneigh)const {
   plumed_dbg_assert(accelerator.ptr);
+  //std::array<unsigned,maxdim> indices;
+  //getIndices(min_,const std::vector<double> & dx_, const std::vector<double> & x, unsigned* rindex_data,std::size_t rindex_size
   return accelerator.ptr->getNeighbors(*this,nbin_,pbc_,indices,nneigh);
 }
 
