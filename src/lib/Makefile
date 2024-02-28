@@ -499,7 +499,7 @@ $(PLUMED_MAIN_SHARED): $(OBJ_MAIN) $(OBJ_WRAPPER) $(PLUMED_KERNEL)
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS) $(LD_MAIN_RUNPATH)
 ifeq ($(use_loader_path),yes)
 ifeq ($(PLUMED_INSTALL),Install)
-	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/../$(notdir $(libdir))/$(notdir $(PLUMED_KERNEL))" $@
+	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/../$(notdir $(PLUMED_KERNEL))" $@
 else
 	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/$(notdir $(PLUMED_KERNEL))" $@
 endif
@@ -510,7 +510,7 @@ $(PLUMED_MAIN_RUNTIME): $(OBJ_MAIN) $(OBJ_DYNAMIC_WRAPPER)
 ifeq ($(PLUMED_INSTALL),Install)
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS) $(LD_MAIN_RUNPATH)
 ifeq ($(use_loader_path),yes)
-	install_name_tool -add_rpath "@loader_path/.." $@
+	install_name_tool -add_rpath "@loader_path/../$(notdir $(libdir))" $@
 endif
 else
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
