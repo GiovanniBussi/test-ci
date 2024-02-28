@@ -39,7 +39,7 @@ test:
     - plumed info --long-version
     - plumed-patch -h
     - plumed config has external_blas external_lapack fftw gsl zlib
-    - $PREFIX/lib/plumed/plumed-runtime -h
+    - $PREFIX/lib/plumed/plumed-shared -h
     - test -f $PREFIX/lib/libplumed$SHLIB_EXT
     - test -f $PREFIX/lib/libplumedWrapper.a
     - test -f $PREFIX/lib/libplumedKernel$SHLIB_EXT

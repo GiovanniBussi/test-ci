@@ -90,8 +90,8 @@ PLUMED_SCRIPTS_EXE := $(addprefix $(PLUMED_LIBDIR)plumed-,$(PLUMED_SCRIPTS))
 # use shared executable by default when possible
 ifdef SOEXT
   PLUMED_MAIN_STATIC := $(PLUMED_LIBDIR)$(PLUMED_NAME)-static
-  PLUMED_MAIN_SHARED := $(PLUMED_LIBDIR)$(PLUMED_NAME)
-  PLUMED_MAIN_RUNTIME := $(PLUMED_LIBDIR)$(PLUMED_NAME)-runtime
+  PLUMED_MAIN_SHARED := $(PLUMED_LIBDIR)$(PLUMED_NAME)-shared
+  PLUMED_MAIN_RUNTIME := $(PLUMED_LIBDIR)$(PLUMED_NAME)
 else
   PLUMED_MAIN_STATIC := $(PLUMED_LIBDIR)$(PLUMED_NAME)
   PLUMED_MAIN_SHARED :=
@@ -291,7 +291,7 @@ endif
 ifdef SOEXT
 	cp install/lib"$(program_name)".$(SOEXT) "$(DESTDIR)$(libdir)/"
 	cp install/lib"$(program_name)"Kernel.$(SOEXT) "$(DESTDIR)$(libdir)/"
-	if test -e install/"$(program_name)"-runtime ; then cp install/"$(program_name)"-runtime "$(DESTDIR)$(libdir)/$(program_name)/plumed-runtime" ; fi
+	if test -e install/"$(program_name)"-shared ; then cp install/"$(program_name)"-shared "$(DESTDIR)$(libdir)/$(program_name)/plumed-shared" ; fi
 ifdef AR_CR
 	cp install/lib$(program_name)Wrapper.a "$(DESTDIR)$(libdir)/"
 endif
@@ -499,7 +499,7 @@ $(PLUMED_MAIN_SHARED): $(OBJ_MAIN) $(OBJ_WRAPPER) $(PLUMED_KERNEL)
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS) $(LD_MAIN_RUNPATH)
 ifeq ($(use_loader_path),yes)
 ifeq ($(PLUMED_INSTALL),Install)
-	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/../$(notdir $(libdir))/$(notdir $(PLUMED_KERNEL))" $@
+	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/../$(notdir $(PLUMED_KERNEL))" $@
 else
 	install_name_tool -change "$(SONAME_INSTALL_PATH)$(notdir $(PLUMED_KERNEL))" "@loader_path/$(notdir $(PLUMED_KERNEL))" $@
 endif
@@ -510,7 +510,7 @@ $(PLUMED_MAIN_RUNTIME): $(OBJ_MAIN) $(OBJ_DYNAMIC_WRAPPER)
 ifeq ($(PLUMED_INSTALL),Install)
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS) $(LD_MAIN_RUNPATH)
 ifeq ($(use_loader_path),yes)
-	install_name_tool -add_rpath "@loader_path/.." $@
+	install_name_tool -add_rpath "@loader_path/../$(notdir $(libdir))" $@
 endif
 else
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
