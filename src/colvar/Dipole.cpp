@@ -59,9 +59,15 @@ on the position) is computed on the geometric center of the group.
 //+ENDPLUMEDOC
 
 class Dipole : public Colvar {
+  bool first=true;
   std::vector<AtomNumber> ga_lista;
+  double ctot=0.;
+  std::vector<double> charges;
   bool components;
   bool nopbc;
+  Value* valuex=nullptr;
+  Value* valuey=nullptr;
+  Value* valuez=nullptr;
 public:
   explicit Dipole(const ActionOptions&);
   void calculate() override;
@@ -89,8 +95,11 @@ Dipole::Dipole(const ActionOptions&ao):
   checkRead();
   if(components) {
     addComponentWithDerivatives("x"); componentIsNotPeriodic("x");
+    valuex=getPntrToComponent("x");
     addComponentWithDerivatives("y"); componentIsNotPeriodic("y");
+    valuey=getPntrToComponent("y");
     addComponentWithDerivatives("z"); componentIsNotPeriodic("z");
+    valuez=getPntrToComponent("z");
   } else {
     addValueWithDerivatives(); setNotPeriodic();
   }
@@ -104,25 +113,33 @@ Dipole::Dipole(const ActionOptions&ao):
   else      log.printf("  using periodic boundary conditions\n");
 
   requestAtoms(ga_lista);
+  charges.resize(getNumberOfAtoms());
 }
 
 // calculator
 void Dipole::calculate()
 {
-  if(!nopbc) makeWhole();
-  double ctot=0.;
+
   unsigned N=getNumberOfAtoms();
-  std::vector<double> charges(N);
+
+  if(first) {
+    ctot=0.0;
+    for(unsigned i=0; i<N; ++i) {
+      charges[i]=getCharge(i);
+      ctot+=charges[i];
+    }
+    ctot/=(double)N;
+    for(unsigned i=0; i<N; ++i) {
+      charges[i]-=ctot;
+    }
+    first=false;
+  }
+
+  if(!nopbc) makeWhole();
+
   Vector dipje;
 
   for(unsigned i=0; i<N; ++i) {
-    charges[i]=getCharge(i);
-    ctot+=charges[i];
-  }
-  ctot/=(double)N;
-
-  for(unsigned i=0; i<N; ++i) {
-    charges[i]-=ctot;
     dipje += charges[i]*getPosition(i);
   }
 
@@ -137,9 +154,6 @@ void Dipole::calculate()
     setBoxDerivativesNoPbc();
     setValue(dipole);
   } else {
-    Value* valuex=getPntrToComponent("x");
-    Value* valuey=getPntrToComponent("y");
-    Value* valuez=getPntrToComponent("z");
     for(unsigned i=0; i<N; i++) {
       setAtomsDerivatives(valuex,i,charges[i]*Vector(1.0,0.0,0.0));
       setAtomsDerivatives(valuey,i,charges[i]*Vector(0.0,1.0,0.0));
