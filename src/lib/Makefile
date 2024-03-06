@@ -514,6 +514,9 @@ ifeq ($(use_loader_path),yes)
 endif
 else
 	$(LD) $(LDFLAGS) $^ -o $@ $(LIBS)
+ifeq ($(use_loader_path),yes)
+	install_name_tool -add_rpath "@loader_path" $@
+endif
 endif
 
 ifeq ($(PLUMED_INSTALL),Install)
