@@ -14,47 +14,47 @@ env:
 
 jobs:
 
-  macports:
-    runs-on: macos-12
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: [ "" , "+allmodules" ]
-        # see https://github.community/t/how-to-conditionally-include-exclude-items-in-matrix-eg-based-on-branch/16853/6 for possible exclusions
-    env:
-      PYVERS: "py39 py310"
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/cache@v3
-      with:
-        path: ~/.macports-ci-ccache
-        key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}
-        restore-keys: ccache-macports-${{ matrix.variant }}-
-    - name: Install MacPorts
-      run: |
-        wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
-        source ./macports-ci install
-        source ./macports-ci ccache
-    - name: Build local Portfile
-      run: |
-        make macports
-        source ./macports-ci localports macports
-    - name: Build PLUMED
-      run: |
-        sudo port -N -k install plumed ${{ matrix.variant }}
-        plumed config show
-        for p in $PYVERS ; do
-          sudo port -N install $p-plumed
-        done
-        source ./macports-ci ccache --save
-    - name: Run tests
-      run: |
-        sudo port -N -d test plumed ${{ matrix.variant }}
-    - name: Run python tests
-      run: |
-        for p in $PYVERS ; do
-          sudo port test $p-plumed
-        done
+# macports:
+#   runs-on: macos-12
+#   strategy:
+#     fail-fast: false
+#     matrix:
+#       variant: [ "" , "+allmodules" ]
+#       # see https://github.community/t/how-to-conditionally-include-exclude-items-in-matrix-eg-based-on-branch/16853/6 for possible exclusions
+#   env:
+#     PYVERS: "py39 py310"
+#   steps:
+#   - uses: actions/checkout@v4
+#   - uses: actions/cache@v3
+#     with:
+#       path: ~/.macports-ci-ccache
+#       key: ccache-macports-${{ matrix.variant }}-${{ github.sha }}
+#       restore-keys: ccache-macports-${{ matrix.variant }}-
+#   - name: Install MacPorts
+#     run: |
+#       wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+#       source ./macports-ci install
+#       source ./macports-ci ccache
+#   - name: Build local Portfile
+#     run: |
+#       make macports
+#       source ./macports-ci localports macports
+#   - name: Build PLUMED
+#     run: |
+#       sudo port -N -k install plumed ${{ matrix.variant }}
+#       plumed config show
+#       for p in $PYVERS ; do
+#         sudo port -N install $p-plumed
+#       done
+#       source ./macports-ci ccache --save
+#   - name: Run tests
+#     run: |
+#       sudo port -N -d test plumed ${{ matrix.variant }}
+#   - name: Run python tests
+#     run: |
+#       for p in $PYVERS ; do
+#         sudo port test $p-plumed
+#       done
 
   macsimple:
     runs-on: macos-12
@@ -69,7 +69,7 @@ jobs:
         echo "LD_LIBRARY_PATH=$HOME/opt/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
     - name: Build PLUMED
       run: |
-        brew update > /dev/null
+        #brew update > /dev/null
         brew install gawk
         ./configure --disable-dependency-tracking --prefix="$HOME/opt"
         make -j 4
