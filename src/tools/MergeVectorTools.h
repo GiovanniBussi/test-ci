@@ -26,123 +26,137 @@
 #include <vector>
 #include <algorithm>
 
+#include <iostream>
+
 namespace PLMD {
 
 namespace mergeVectorTools {
 
-  template<class C,class Entry>
-  static void mergeSortedVectorsImpl(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
+  namespace detail {
 
-    // start
-    // heap containing the ranges to be pushed
-    // avoid allocations when it's small
-    gch::small_vector<Entry,32> heap;
-    {
+    template<class C,class Entry>
+    static void mergeSortedVectorsImpl(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
+
+      // heap containing the ranges to be pushed
+      // avoid allocations when it's small
+      gch::small_vector<Entry,32> heap;
+
       for(unsigned i=0; i<size; i++) {
         if(!vecs[i]->empty()) {
           // add entry at the end of the array
           heap.emplace_back(Entry(*vecs[i]));
         }
       }
-      // make a sorted heap
+      // make it a sorted heap
       std::make_heap(std::begin(heap),std::end(heap));
+
+      // first iteration, to avoid an extra "if" in main iteration
+      {
+        // move entry with the smallest element to the back of the array
+        std::pop_heap(std::begin(heap), std::end(heap));
+        // entry
+        auto & tmp=heap.back();
+        // element
+        const auto val=tmp.top();
+        // this is the first iteration, so we do not check result.back() value
+        // and directly push this element
+        result.push_back(val);
+        // move forward the used entry
+        tmp.next();
+        // if this entry is exhausted, remove it from the array
+        if(tmp.empty()) heap.pop_back();
+        // otherwise, sort again the heap
+        else std::push_heap(std::begin(heap), std::end(heap));
+      }
+
+      while(!heap.empty()) {
+        // move entry with the smallest element to the back of the array
+        std::pop_heap(std::begin(heap), std::end(heap));
+        // entry
+        auto & tmp=heap.back();
+        // element
+        const auto val=tmp.top();
+        // if the element is larger than the current largest element,
+        // push it to result
+        if(val > result.back()) result.push_back(val);
+        // move forward the used entry
+        tmp.next();
+        // if this entry is exhausted, remove it from the array
+        if(tmp.empty()) heap.pop_back();
+        // otherwise, sort again the heap
+        else std::push_heap(std::begin(heap), std::end(heap));
+      }
     }
 
-    // first iteration, to avoid an extra "if" in main iteration
-    // explanations are below
+    /// utility class storing the range of remaining objects to be pushed
+    template<class C,typename NElem>
+    class Entry
     {
-      std::pop_heap(std::begin(heap), std::end(heap));
-      auto & tmp=heap.back();
-      const auto val=tmp.top();
-      // here, we append inconditionally
-      result.push_back(val);
-      tmp.next();
-      if(tmp.empty()) heap.pop_back();
-      else std::push_heap(std::begin(heap), std::end(heap));
-    }
+      // Since vector.size() is size_t, there could be more than 2^32 elements.
+      // This is currently impossible with AtomNumer, but the code is general
+      // in case we use this tool in other contexts
+      // For the standard settings, the size of this object is 8+4+4=16 bytes
+      // which should guarantee fast and aligned access.
 
-    while(!heap.empty()) {
-      // move entry with the smallest element to the back of the array
-      std::pop_heap(std::begin(heap), std::end(heap));
-      // entry
-      auto & tmp=heap.back();
-      // element
-      const auto val=tmp.top();
-      // if the element is larger than the current largest element,
-      // push it to result
-      if(val > result.back()) result.push_back(val);
-      // move forward the used entry
-      tmp.next();
-      // if this entry is exhausted, remove it from the array
-      if(tmp.empty()) heap.pop_back();
-      // otherwise, sort again the array
-      else std::push_heap(std::begin(heap), std::end(heap));
-    }
-  }
+      typename C::const_iterator fwdIt; // 8 bytes (pointer)
+      NElem nelem; // 4 or 8 bytes
+      typename C::value_type next_elem; // 4 bytes for AtomNumber
 
-  /// local class storing the range of remaining objects to be pushed
-  template<class C>
-  class Entry
-  {
-    typename C::const_iterator fwdIt,endIt;
+    public:
+      template<class V>
+      explicit Entry(V const& v) :
+        fwdIt(v.begin()), nelem(v.size()) {
+        if(v.data()) next_elem=v[0];
+      }
+      /// check if this vector still contains something to be pushed
+      bool empty() const { return nelem == 0; }
+      /// to allow using a max heap, which selects the highest element.
+      /// we here (counterintuitively) define < as >
+      bool operator< (Entry const& rhs) const { return top() > rhs.top(); }
+      /// get the value of the smallest element in this entry
+      const auto top() const { return next_elem; }
+      /// advance this entry
+      void next() {
+        fwdIt++;
+        nelem--;
+        if(nelem!=0) next_elem=*fwdIt;
+      };
+    };
 
-  public:
-    explicit Entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
-    /// check if this vector still contains something to be pushed
-    bool empty() const { return fwdIt == endIt; }
-    /// to allow using a priority_queu, which selects the highest element.
-    /// we here (counterintuitively) define < as >
-    bool operator< (Entry const& rhs) const { return top() > rhs.top(); }
-    const auto & top() const { return *fwdIt; }
-    void next() { fwdIt++;};
-  };
-
-  /// local class storing the range of remaining objects to be pushed
-  template<class C>
-  class EntrySmall
-  {
-    typename C::const_iterator fwdIt;
-    std::size_t nelem;
-    typename C::value_type next_elem;
-
-  public:
-    template<class V>
-    explicit EntrySmall(V const& v) : fwdIt(v.begin()), nelem(v.size()) {
-      if(v.data()) next_elem=v[0];
-    }
-    /// check if this vector still contains something to be pushed
-    bool empty() const { return nelem == 0; }
-    /// to allow using a priority_queu, which selects the highest element.
-    /// we here (counterintuitively) define < as >
-    bool operator< (EntrySmall const& rhs) const { return top() > rhs.top(); }
-    const auto top() const { return next_elem; }
-    void next() { fwdIt++; nelem--;};
-  };
+  } // detail
 
   /// Merge sorted vectors.
   /// Takes a vector of pointers to containers and merge them.
   /// Containers should be already sorted.
   /// The content is appended to the result vector.
-  /// Optionally, uses a priority_queue implementation.
   template<class C>
   static void mergeSortedVectors(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
 
     // preprocessing
     std::size_t maxsize=0;
-    {
-      for(unsigned i=0; i<size; i++) {
-        // find the largest
-        maxsize=std::max(maxsize,vecs[i]->size());
-      }
-      // this is just to decrease the number of reallocations on push_back
-      result.reserve(maxsize);
-      // if vectors are empty we are done
-      if(maxsize==0) return;
-    }
 
-    mergeSortedVectorsImpl<C,EntrySmall<C>>(vecs, size, result);
+    for(unsigned i=0; i<size; i++) {
+      // find the largest
+      maxsize=std::max(maxsize,vecs[i]->size());
+    }
+    // if vectors are empty we are done
+    if(maxsize==0) return;
+
+    // this is to decrease the number of reallocations on push_back
+    result.reserve(result.size()+maxsize);
+
+    // this is here for future extensibility
+    // with the current use, a pre-sorted vector of AtomNumber cannot
+    // contain more than unsigned::max() elements, so that
+    // only the first implementation will be used
+    if(maxsize<=std::numeric_limits<unsigned>::max()) {
+      detail::mergeSortedVectorsImpl<C,detail::Entry<C,unsigned>>(vecs, size, result);
+    } else {
+      detail::mergeSortedVectorsImpl<C,detail::Entry<C,std::size_t>>(vecs, size, result);
+    }
   }
 
+  /// Utility function taking a std::vector argument rather than a span-like pair of arguments
   template<class C>
   static void mergeSortedVectors(const std::vector<C*> & vecs, std::vector<typename C::value_type> & result) {
     mergeSortedVectors(vecs.data(),vecs.size(),result);
