@@ -30,48 +30,13 @@ namespace PLMD {
 
 namespace mergeVectorTools {
 
-  /// Merge sorted vectors.
-  /// Takes a vector of pointers to containers and merge them.
-  /// Containers should be already sorted.
-  /// The content is appended to the result vector.
-  /// Optionally, uses a priority_queue implementation.
-  template<class C>
-  static void mergeSortedVectors(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
-
-    /// local class storing the range of remaining objects to be pushed
-    class Entry
-    {
-      typename C::const_iterator fwdIt,endIt;
-
-    public:
-      explicit Entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
-      /// check if this vector still contains something to be pushed
-      bool empty() const { return fwdIt == endIt; }
-      /// to allow using a priority_queu, which selects the highest element.
-      /// we here (counterintuitively) define < as >
-      bool operator< (Entry const& rhs) const { return top() > rhs.top(); }
-      const auto & top() const { return *fwdIt; }
-      void next() { fwdIt++;};
-    };
-
-    // preprocessing
-    {
-      std::size_t maxsize=0;
-      for(unsigned i=0; i<size; i++) {
-        // find the largest
-        maxsize=std::max(maxsize,vecs[i]->size());
-      }
-      // this is just to decrease the number of reallocations on push_back
-      result.reserve(maxsize);
-      // if vectors are empty we are done
-      if(maxsize==0) return;
-    }
+  template<class C,class Entry>
+  static void mergeSortedVectorsImpl(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
 
     // start
     // heap containing the ranges to be pushed
     // avoid allocations when it's small
     gch::small_vector<Entry,32> heap;
-
     {
       for(unsigned i=0; i<size; i++) {
         if(!vecs[i]->empty()) {
@@ -113,6 +78,69 @@ namespace mergeVectorTools {
       // otherwise, sort again the array
       else std::push_heap(std::begin(heap), std::end(heap));
     }
+  }
+
+  /// local class storing the range of remaining objects to be pushed
+  template<class C>
+  class Entry
+  {
+    typename C::const_iterator fwdIt,endIt;
+
+  public:
+    explicit Entry(C const& v) : fwdIt(v.begin()), endIt(v.end()) {}
+    /// check if this vector still contains something to be pushed
+    bool empty() const { return fwdIt == endIt; }
+    /// to allow using a priority_queu, which selects the highest element.
+    /// we here (counterintuitively) define < as >
+    bool operator< (Entry const& rhs) const { return top() > rhs.top(); }
+    const auto & top() const { return *fwdIt; }
+    void next() { fwdIt++;};
+  };
+
+  /// local class storing the range of remaining objects to be pushed
+  template<class C>
+  class EntrySmall
+  {
+    typename C::const_iterator fwdIt;
+    std::size_t nelem;
+    typename C::value_type next_elem;
+
+  public:
+    template<class V>
+    explicit EntrySmall(V const& v) : fwdIt(v.begin()), nelem(v.size()) {
+      if(v.data()) next_elem=v[0];
+    }
+    /// check if this vector still contains something to be pushed
+    bool empty() const { return nelem == 0; }
+    /// to allow using a priority_queu, which selects the highest element.
+    /// we here (counterintuitively) define < as >
+    bool operator< (EntrySmall const& rhs) const { return top() > rhs.top(); }
+    const auto top() const { return next_elem; }
+    void next() { fwdIt++; nelem--;};
+  };
+
+  /// Merge sorted vectors.
+  /// Takes a vector of pointers to containers and merge them.
+  /// Containers should be already sorted.
+  /// The content is appended to the result vector.
+  /// Optionally, uses a priority_queue implementation.
+  template<class C>
+  static void mergeSortedVectors(const C* const* vecs, std::size_t size, std::vector<typename C::value_type> & result) {
+
+    // preprocessing
+    std::size_t maxsize=0;
+    {
+      for(unsigned i=0; i<size; i++) {
+        // find the largest
+        maxsize=std::max(maxsize,vecs[i]->size());
+      }
+      // this is just to decrease the number of reallocations on push_back
+      result.reserve(maxsize);
+      // if vectors are empty we are done
+      if(maxsize==0) return;
+    }
+
+    mergeSortedVectorsImpl<C,EntrySmall<C>>(vecs, size, result);
   }
 
   template<class C>
