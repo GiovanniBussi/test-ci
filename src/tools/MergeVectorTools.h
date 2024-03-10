@@ -56,13 +56,12 @@ namespace mergeVectorTools {
         std::pop_heap(std::begin(heap), std::end(heap));
         // entry
         auto & tmp=heap.back();
+        // move forward the used entry and get previous value
         // element
-        const auto val=tmp.top();
+        const auto val=tmp.next();
         // this is the first iteration, so we do not check result.back() value
         // and directly push this element
         result.push_back(val);
-        // move forward the used entry
-        tmp.next();
         // if this entry is exhausted, remove it from the array
         if(tmp.empty()) heap.pop_back();
         // otherwise, sort again the heap
@@ -75,12 +74,10 @@ namespace mergeVectorTools {
         // entry
         auto & tmp=heap.back();
         // element
-        const auto val=tmp.top();
+        const auto val=tmp.next();
         // if the element is larger than the current largest element,
         // push it to result
         if(val > result.back()) result.push_back(val);
-        // move forward the used entry
-        tmp.next();
         // if this entry is exhausted, remove it from the array
         if(tmp.empty()) heap.pop_back();
         // otherwise, sort again the heap
@@ -114,12 +111,14 @@ namespace mergeVectorTools {
       /// we here (counterintuitively) define < as >
       bool operator< (Entry const& rhs) const { return top() > rhs.top(); }
       /// get the value of the smallest element in this entry
-      const auto top() const { return next_elem; }
+      auto top() const { return next_elem; }
       /// advance this entry
-      void next() {
+      auto next() {
+        auto result=*fwdIt;
         fwdIt++;
         nelem--;
         if(nelem!=0) next_elem=*fwdIt;
+        return result;
       };
     };
 
