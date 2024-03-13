@@ -289,15 +289,34 @@ void ActionAtomistic::retrieveAtoms( const bool& force ) {
   ActionToPutData* cv = chargev[0]->getPntrToAction()->castToActionToPutData();
   if(cv) chargesWereSet=cv->hasBeenSet();
   unsigned j = 0;
-  for(const auto & a : atom_value_ind) {
-    std::size_t nn = a.first, kk = a.second;
-    positions[j][0] = xpos[nn]->data[kk];
-    positions[j][1] = ypos[nn]->data[kk];
-    positions[j][2] = zpos[nn]->data[kk];
-    charges[j] = chargev[nn]->data[kk];
-    masses[j] = masv[nn]->data[kk];
-    j++;
+
+// for(const auto & a : atom_value_ind) {
+//   std::size_t nn = a.first, kk = a.second;
+//   positions[j][0] = xpos[nn]->data[kk];
+//   positions[j][1] = ypos[nn]->data[kk];
+//   positions[j][2] = zpos[nn]->data[kk];
+//   charges[j] = chargev[nn]->data[kk];
+//   masses[j] = masv[nn]->data[kk];
+//   j++;
+// }
+
+  for(const auto & a : atom_value_ind_grouped) {
+    const auto nn=a.first;
+    auto & xp=xpos[nn]->data;
+    auto & yp=ypos[nn]->data;
+    auto & zp=zpos[nn]->data;
+    auto & ch=chargev[nn]->data;
+    auto & ma=masv[nn]->data;
+    for(const auto & kk : a.second) {
+      positions[j][0] = xp[kk];
+      positions[j][1] = yp[kk];
+      positions[j][2] = zp[kk];
+      charges[j] = ch[kk];
+      masses[j] = ma[kk];
+      j++;
+    }
   }
+
 }
 
 void ActionAtomistic::setForcesOnAtoms(const std::vector<double>& forcesToApply, unsigned& ind) {
@@ -314,6 +333,19 @@ void ActionAtomistic::setForcesOnAtoms(const std::vector<double>& forcesToApply,
     ypos[nn]->inputForce[kk] += forcesToApply[ind]; ind++;
     zpos[nn]->inputForce[kk] += forcesToApply[ind]; ind++;
   }
+
+  for(const auto & a : atom_value_ind_grouped) {
+    const auto nn=a.first;
+    auto & xp=xpos[nn]->inputForce;
+    auto & yp=ypos[nn]->inputForce;
+    auto & zp=zpos[nn]->inputForce;
+    for(const auto & kk : a.second) {
+      xp[kk] += forcesToApply[ind]; ind++;
+      yp[kk] += forcesToApply[ind]; ind++;
+      zp[kk] += forcesToApply[ind]; ind++;
+    }
+  }
+
   setForcesOnCell( forcesToApply, ind );
 }
 
