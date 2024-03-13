@@ -98,6 +98,24 @@ void ActionAtomistic::requestAtoms(const std::vector<AtomNumber> & a, const bool
     if( atom_value_ind[i].first==0 ) unique.push_back(indexes[i]);
     else if( atom_value_ind[i].second>0 ) error("action atomistic is not set up to deal with multiple vectors in position input");
   }
+
+  atom_value_ind_grouped.clear();
+
+  if(atom_value_ind.size()>0) {
+    auto nn = atom_value_ind[0].first;
+    auto kk = atom_value_ind[0].second;
+    atom_value_ind_grouped.push_back(std::pair<std::size_t,std::vector<std::size_t>>(nn,{}));
+    atom_value_ind_grouped.back().second.push_back(kk);
+    auto prev_nn=nn;
+    for(unsigned i=1;i<atom_value_ind.size();i++) {
+      auto nn = atom_value_ind[i].first;
+      auto kk = atom_value_ind[i].second;
+      if(nn!=prev_nn) atom_value_ind_grouped.push_back(std::pair<std::size_t,std::vector<std::size_t>>(nn,{}));
+      atom_value_ind_grouped.back().second.push_back(kk);
+      prev_nn=nn;
+    }
+  }
+
   // Add the dependencies to the actions that we require
   Tools::removeDuplicates(unique); value_depends.resize(0);
   for(unsigned i=0; i<requirements.size(); ++i ) {
