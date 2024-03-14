@@ -74,19 +74,22 @@ PlumedHandle & PlumedHandle::operator=(PlumedHandle && other) noexcept = default
 
 void PlumedHandle::cmd(std::string_view key,const TypesafePtr & ptr) {
   if(local) {
+    // there the string_view is directly passed to the PlumedMain object
     local->cmd(key,ptr);
   } else if(loaded) {
+    // in this case we have to materialize a string, leading to an extra allocation
     auto key_string=std::string(key);
-    // call the const char* version
+    // once we have a string, we can use the const char* version
     cmd(key_string.c_str(),ptr);
   } else plumed_error() << "should never arrive here (either one or the other should work)";
 }
 
 void PlumedHandle::cmd(const char* key,const TypesafePtr & ptr) {
   if(local) {
-    // call the string_view version
-    cmd(std::string_view(key),ptr);
+    // here the char* will be transformed to string_view for the PlumedMain object
+    local->cmd(key,ptr);
   } else if(loaded) {
+    // a const char* is already good for the C like interface
     plumed_safeptr safe;
     safe.ptr=ptr.getRaw();
     safe.nelem=ptr.getNelem();
@@ -94,6 +97,16 @@ void PlumedHandle::cmd(const char* key,const TypesafePtr & ptr) {
     safe.flags=ptr.getFlags();
     safe.opt=nullptr;
     plumed_cmd(plumed_v2c(loaded.get()),key,safe);
+  } else plumed_error() << "should never arrive here (either one or the other should work)";
+}
+
+void PlumedHandle::cmd(const std::string & key,const TypesafePtr & ptr) {
+  if(local) {
+    // here the string will be transformed to char* and then to string_view for the PlumedMain object
+    local->cmd(key,ptr);
+  } else if(loaded) {
+    // here we already have a string, so we can forward to the const char* version
+    cmd(key.c_str(),ptr);
   } else plumed_error() << "should never arrive here (either one or the other should work)";
 }
 

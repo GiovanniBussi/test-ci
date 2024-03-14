@@ -70,6 +70,10 @@ p.cmd("init");
 Notice that if there are problems loading the kernel an exception is thrown.
 Thus, once constructed the object is guaranteed to be functional.
 
+Also notice that this class overrides all the three different flavors of the
+cmd() function, accepting std::string, const char*, or std::string_view as a key.
+This is done to avoid extra allocations, considering that this class
+is used to perform benchmarks.
 */
 class PlumedHandle :
   public WithCmd
@@ -115,10 +119,12 @@ public:
 /// Here we keep things simpler and consider this handle as a movable and not copyable
 /// object (similar to a unique_ptr).
   PlumedHandle & operator=(const PlumedHandle &) = delete;
-/// Execute cmd. This version is used with a local kernel, which accepts a string_view
+/// Execute cmd.
   void cmd(std::string_view key,const TypesafePtr & ptr=nullptr) override;
-/// Execute cmd. This version is used with a loaded kernel, which requires a null terminated string
+/// Execute cmd.
   void cmd(const char* key,const TypesafePtr & ptr=nullptr) override;
+/// Execute cmd.
+  void cmd(const std::string & key,const TypesafePtr & ptr=nullptr) override;
 /// Bring in the possibility to pass shape/nelem
   using WithCmd::cmd;
 };

@@ -36,8 +36,6 @@ namespace PLMD {
 /// It is necessary to implement one of them to break the cycle and avoid a stack overflow!
 /// It is possible to implement multiple variants to minimize allocations, depending on
 /// how the key is used in the cmd function. Normally, the std::string_view version should be sufficient.
-/// However, if cmd is forwarding this to a C-like interface accepting a const char*,
-/// it might be conventient to override the const char* version or both.
 class WithCmd {
 public:
   /// This is the legacy method we used in older plumed versions, so it is still possible.
