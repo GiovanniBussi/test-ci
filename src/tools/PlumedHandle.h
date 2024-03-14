@@ -21,7 +21,7 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 #ifndef __PLUMED_tools_PlumedHandle_h
 #define __PLUMED_tools_PlumedHandle_h
-#include "core/PlumedMainInitializer.h"
+
 #include "core/WithCmd.h"
 #include "TypesafePtr.h"
 #include <memory>
@@ -44,9 +44,10 @@ Differences are:
 - It does not implement global versions (e.g. PLMD::Plumed::gcmd).
 - It does not implement PLMD::Plumed::valid. If kernel cannot be loaded, its constructor throws.
   This will make sure that once constructed the object is usable.
+- This class is not copyable, but move semantics is enabled.
 
 In its implementation, this class uses the PLMD::Plumed class in wrapper/Plumed.h and thus
-has the same capability to load PLUMED kernels of any version (starting with 2.0).
+has the same capability to load PLUMED kernels of any version (in principle starting with PLUMED 2.0).
 It can also be created without passing any kernel path. In that case it refers to the current one
 (the one to which this class belongs).
 
@@ -76,8 +77,14 @@ class PlumedHandle :
 /// Pointer to PlumedMain.
 /// Used when using the current kernel in order to avoid unneeded indirections.
   std::unique_ptr<PlumedMain> local;
-/// Pointer to loaded Plumed object;
-  void* loaded=nullptr;
+/// Custom structure to delete loaded Plumed object.
+  struct LoadedDeleter{
+    void operator()(void* loaded) const noexcept;
+  };
+/// Pointer to loaded Plumed object.
+/// Destroyed by a LoadedDeleter, which takes care of calling
+/// plumed_finalize, which then calls dlclose
+  std::unique_ptr<void,LoadedDeleter> loaded;
 /// Constructor using the path to a kernel.
 /// I keep it private to avoid confusion wrt the
 /// similar constructor of PLMD::Plumed that accepts a string (conversion from FORTRAN).
@@ -90,15 +97,28 @@ public:
 /// It just uses the private constructor PlumedHandle(const char* path).
   static PlumedHandle dlopen(const char* path);
 /// Destructor.
-/// In case a kernel was dlopened, it dlcloses it.
-/// I make it virtual for future extensibility, though this is not necessary now.
-  virtual ~PlumedHandle();
+/// This is the default destructor, but we keep it in the cpp file where PlumedMain is included
+  virtual ~PlumedHandle() noexcept;
 /// Move constructor.
-  PlumedHandle(PlumedHandle && other) noexcept;
+/// This is the default destructor, but we keep it in the cpp file where PlumedMain is included
+  PlumedHandle(PlumedHandle &&) noexcept;
 /// Move assignment.
-  PlumedHandle & operator=(PlumedHandle && other) noexcept;
-/// Execute cmd.
+/// This is the default move assignment, but we keep it in the cpp file where PlumedMain is included
+  PlumedHandle & operator=(PlumedHandle &&) noexcept;
+/// Deleted copy constructor.
+/// In Plumed.h, the Plumed object can be copied using a reference counter (similar to a shared_ptr).
+/// Here we keep things simpler and consider this handle as a movable and not copyable
+/// object (similar to a unique_ptr).
+  PlumedHandle(const PlumedHandle &) = delete;
+/// Deleted copy assignment.
+/// In Plumed.h, the Plumed object can be copied usingh a reference counter (similar to a shared_ptr).
+/// Here we keep things simpler and consider this handle as a movable and not copyable
+/// object (similar to a unique_ptr).
+  PlumedHandle & operator=(const PlumedHandle &) = delete;
+/// Execute cmd. This version is used with a local kernel, which accepts a string_view
   void cmd(std::string_view key,const TypesafePtr & ptr=nullptr) override;
+/// Execute cmd. This version is used with a loaded kernel, which requires a null terminated string
+  void cmd(const char* key,const TypesafePtr & ptr=nullptr) override;
 /// Bring in the possibility to pass shape/nelem
   using WithCmd::cmd;
 };

@@ -21,7 +21,6 @@
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 #include "PlumedHandle.h"
 #include "core/PlumedMain.h"
-#include "Tools.h"
 #include "lepton/Exception.h"
 #include <cstring>
 #ifdef __PLUMED_HAS_DLOPEN
@@ -43,7 +42,7 @@ namespace PLMD
 
 
 PlumedHandle::PlumedHandle():
-  local(Tools::make_unique<PlumedMain>())
+  local(std::make_unique<PlumedMain>())
 {
 }
 
@@ -52,9 +51,8 @@ PlumedHandle::PlumedHandle(const char* kernel)
   :
   loaded(plumed_c2v(plumed_create_dlopen(kernel)))
 {
-  if(!plumed_valid(plumed_v2c(loaded))) {
-    // this is necessary to make sure loaded is properly destroyed
-    plumed_finalize(plumed_v2c(loaded));
+  if(!plumed_valid(plumed_v2c(loaded.get()))) {
+    // destructor of loaded will get rid of the corresponding object
     plumed_error() << "You are trying to dynamically load a kernel, but the path " << kernel <<" could not be opened";
   }
 }
@@ -64,17 +62,30 @@ PlumedHandle::PlumedHandle(const char* kernel)
 }
 #endif
 
-PlumedHandle::~PlumedHandle() {
-  if(loaded) plumed_finalize(plumed_v2c(loaded));
-}
-
 PlumedHandle PlumedHandle::dlopen(const char* path) {
   return PlumedHandle(path);
 }
 
+PlumedHandle::~PlumedHandle() noexcept = default;
+
+PlumedHandle::PlumedHandle(PlumedHandle && other) noexcept = default;
+
+PlumedHandle & PlumedHandle::operator=(PlumedHandle && other) noexcept = default;
+
 void PlumedHandle::cmd(std::string_view key,const TypesafePtr & ptr) {
   if(local) {
     local->cmd(key,ptr);
+  } else if(loaded) {
+    auto key_string=std::string(key);
+    // call the const char* version
+    cmd(key_string.c_str(),ptr);
+  } else plumed_error() << "should never arrive here (either one or the other should work)";
+}
+
+void PlumedHandle::cmd(const char* key,const TypesafePtr & ptr) {
+  if(local) {
+    // call the string_view version
+    cmd(std::string_view(key),ptr);
   } else if(loaded) {
     plumed_safeptr safe;
     safe.ptr=ptr.getRaw();
@@ -82,27 +93,12 @@ void PlumedHandle::cmd(std::string_view key,const TypesafePtr & ptr) {
     safe.shape=const_cast<std::size_t*>(ptr.getShape());
     safe.flags=ptr.getFlags();
     safe.opt=nullptr;
-    // this is to ensure the string_view is null terminated
-    auto key_string=std::string(key);
-    plumed_cmd(plumed_v2c(loaded),key_string.c_str(),safe);
+    plumed_cmd(plumed_v2c(loaded.get()),key,safe);
   } else plumed_error() << "should never arrive here (either one or the other should work)";
 }
 
-PlumedHandle::PlumedHandle(PlumedHandle && other) noexcept:
-  local(std::move(other.local)),
-  loaded(other.loaded)
-{
-  other.loaded=nullptr;
-}
-
-PlumedHandle & PlumedHandle::operator=(PlumedHandle && other) noexcept {
-  if(this!=&other) {
-    if(loaded) plumed_finalize(plumed_v2c(loaded));
-    local=std::move(other.local);
-    loaded=other.loaded;
-    other.loaded=nullptr;
-  }
-  return *this;
+void PlumedHandle::LoadedDeleter::operator()(void* loaded) const noexcept {
+  plumed_finalize(plumed_v2c(loaded));
 }
 
 }
