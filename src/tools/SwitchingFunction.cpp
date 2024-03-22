@@ -316,8 +316,11 @@ void SwitchingFunction::set(const std::string & definition,std::string& errormsg
     double dummy;
     double s0=calculate(0.0,dummy);
     double sd=calculate(dmax,dummy);
-    if(s0>std::numeric_limits<double>::max()/2 || s0<-std::numeric_limits<double>::max()/2) s0=std::numeric_limits<double>::max()/2;
-    stretch=s0/(s0-sd);
+    if(s0>std::numeric_limits<double>::max()/2 || s0<-std::numeric_limits<double>::max()/2) {
+      stretch=1;
+    } else {
+      stretch=s0/(s0-sd);
+    }
     shift=-sd*stretch;
   }
   plumed_assert(!(leptonx2 && d0!=0.0)) << "You cannot use lepton x2 optimization with d0!=0.0 (d0=" << d0 <<")\n"
