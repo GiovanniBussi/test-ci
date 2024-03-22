@@ -4,6 +4,7 @@ RUN yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install centos-release-scl \
  && yum -y install devtoolset-8 \
+ && scl enable devtoolset-8 -- bash \
  && yum -y install environment-modules gawk vim wget \
                    lapack-devel blas-devel zlib-devel gsl-devel fftw-devel
 
