@@ -2,6 +2,7 @@ FROM centos:7
 
 RUN yum -y update \
  && yum -y group install "Development Tools" \
+ && yum -y install devtoolset-8-toolchain \
  && yum -y install environment-modules gawk vim wget \
                    lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel 
 
@@ -29,7 +30,7 @@ RUN . /etc/bashrc \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
  && .ci/install.boost release \
- && ./configure --enable-modules=all --enable-boost_serialization \
+ && ./configure CXX=g++-8 --enable-modules=all --enable-boost_serialization \
  && make -j 4 \
  && make check
 
