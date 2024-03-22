@@ -1,18 +1,9 @@
 FROM centos:7
 
-# NOTE: numpy==1.19 is the last version compatible with python 3.6
-# NOTE: pillow==8.4.0 leads to an error while installing on centos7
-# NOTE: gsd 3 does not compile on centos7
 RUN yum -y update \
  && yum -y group install "Development Tools" \
  && yum -y install environment-modules gawk vim wget \
-                   lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel \
-                   python3 python3-devel python3-pip \
- && pip3 install pillow==8.3.2 \
- && pip3 install numpy==1.19 \
- && pip3 install "cython<3" numpy pandas mdtraj \
- && pip3 install "gsd<3" \
- && pip3 install MDAnalysis==1.0.0
+                   lapack-devel blas-devel zlib-devel gsl-devel fftw-devel openmpi-devel 
 
 RUN useradd -ms /bin/bash plumed
 USER plumed
@@ -37,8 +28,6 @@ RUN . /etc/bashrc \
  && export LD_LIBRARY_PATH=$HOME/opt/lib:$LD_LIBRARY_PATH \
  && tar xzf plumed2.tgz \
  && cd plumed2 \
- && export PYTHONPATH=$PWD/python:$PYTHONPATH \
- && export PYTHON_BIN=python3 \
  && .ci/install.boost release \
  && ./configure --enable-modules=all --enable-boost_serialization \
  && make -j 4 \
