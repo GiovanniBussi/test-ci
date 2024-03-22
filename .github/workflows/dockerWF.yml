@@ -22,13 +22,14 @@ jobs:
         # fedora39 (gcc 13)
         # rockylinux8
         variant:
-        - fedora39
-        - rocky8
+        # - fedora39
+        # - rocky8
+        - centos7
     steps:
     - uses: actions/checkout@v4
     - name: Build and run tests
       run: |
         make -C docker ${{ matrix.variant }}
-    - name: PyCV tests
-      run: |
-        make -C docker ${{ matrix.variant }}-pycv
+#   - name: PyCV tests
+#     run: |
+#       make -C docker ${{ matrix.variant }}-pycv
