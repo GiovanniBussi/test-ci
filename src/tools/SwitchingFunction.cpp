@@ -198,7 +198,7 @@ double baseSwitch::calculate(const double distance, double& dfunc) const {
   if(distance <= dmax) {
     res = 1.0;
     const double rdist = (distance-d0)*invr0;
-    if(rdist > 0.0) {
+    if(rdist >= 0.0) {
       res = function(rdist,dfunc);
       //the following comments came from the original
       // this is for the chain rule (derivative of rdist):
@@ -782,7 +782,7 @@ public:
       if(distance<=dmax) {
         res = 1.0;
         const double rdist = (distance-d0)*invr0;
-        if(rdist > 0.0) {
+        if(rdist >=0.0) {
           const unsigned t=OpenMP::getThreadNum();
           plumed_assert(t<expressions.size());
           std::tie(res,dfunc) = expressions[t](rdist);
