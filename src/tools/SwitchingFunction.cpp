@@ -242,7 +242,11 @@ void baseSwitch::setupStretch() {
     double dummy;
     double s0=calculate(0.0,dummy);
     double sd=calculate(dmax,dummy);
-    stretch=1.0/(s0-sd);
+    if(s0>std::numeric_limits<double>::max()/2 || s0<-std::numeric_limits<double>::max()/2) {
+      stretch=1.0;
+    } else {
+      stretch=s0/(s0-sd);
+    }
     shift=-sd*stretch;
   }
 }
