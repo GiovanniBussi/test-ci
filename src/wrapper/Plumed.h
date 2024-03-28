@@ -2379,21 +2379,39 @@ private:
 private:
   /// Small class that wraps plumed_safeptr in order to make its initialization easier
   class SafePtr {
-    /// non copyable (copy would require managing buffer, could be added in the future if needed)
+    /// non copyable (copy would require managing buffer and shape, could be added in the future if needed)
     SafePtr(const SafePtr&);
-    /// non assignable (assignment would require managing buffer, could be added in the future if needed)
+    /// non assignable (assignment would require managing buffer and shape, could be added in the future if needed)
     SafePtr& operator=(SafePtr const&);
+    /// Internal method to set the shape.
+    void setShape(const __PLUMED_WRAPPER_STD size_t* shape) {
+      if(shape) {
+        unsigned i;
+        for(i=0; i<5; i++) {
+          this->shape[i]=shape[i];
+          if(shape[i]==0) break;
+        }
+        if(i==5) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
+        this->shape[i]=0;
+        safe.shape=this->shape;
+      } else {
+        safe.shape=__PLUMED_WRAPPER_CXX_NULLPTR;
+      }
+    }
   public:
     plumed_safeptr safe;
     /// This buffer holds a copy of the data when they are passed by value.
     /// The size is sufficient to hold any primitive type.
     /// Notice that the buffer is required to enable conversions (e.g., passing a class that can be converted to int)
-    /// and, at the same time, allow the object to exist after SafePtr constructor has completed.
+    /// and, at the same time, allow the object to exist after set() functions are completed.
     /// A perhaps cleaner implementation would require a base class containing
     /// the plumed_safeptr object, derived classes depending on the
     /// argument type as a template parameter, and overloaded functions
     /// returning this derived class.
     char buffer[32];
+    /// A copy of the shape array
+    /// shape[4] will always be 0
+    __PLUMED_WRAPPER_STD size_t shape[5];
     /// Default constructor, nullptr
     SafePtr() __PLUMED_WRAPPER_CXX_NOEXCEPT {
       safe.ptr=__PLUMED_WRAPPER_CXX_NULLPTR;
@@ -2401,19 +2419,18 @@ private:
       safe.shape=__PLUMED_WRAPPER_CXX_NULLPTR;
       safe.flags=0x10000*2;
       safe.opt=__PLUMED_WRAPPER_CXX_NULLPTR;
-      buffer[0]='\0';
     }
 
-    __PLUMED_WRAPPER_CXX_EXPLICIT SafePtr(const plumed_safeptr & safe,__PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT {
+    void set(const plumed_safeptr & safe,__PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT {
       this->safe=safe;
       buffer[0]='\0';
       if(nelem>0) this->safe.nelem=nelem;
-      if(shape) this->safe.shape=const_cast<__PLUMED_WRAPPER_STD size_t*>(shape);
+      setShape(shape);
     }
 
 #if __cplusplus > 199711L
     /// Construct from null
-    SafePtr(__PLUMED_WRAPPER_STD nullptr_t,__PLUMED_WRAPPER_STD size_t nelem, const __PLUMED_WRAPPER_STD size_t* shape) noexcept {
+    void set(__PLUMED_WRAPPER_STD nullptr_t,__PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) noexcept {
       safe.ptr=nullptr;
       safe.nelem=0;
       safe.shape=nullptr;
@@ -2427,10 +2444,10 @@ private:
 
 /// Macro that generate a constructor with given type and flags
 #define __PLUMED_WRAPPER_SAFEPTR_INNER(type_,flags_) \
-  SafePtr(type_*ptr, __PLUMED_WRAPPER_STD size_t nelem, const __PLUMED_WRAPPER_STD size_t* shape) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
+  void set(type_*ptr, __PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
     safe.ptr=ptr; \
     safe.nelem=nelem; \
-    safe.shape=const_cast<__PLUMED_WRAPPER_STD size_t*>(shape); \
+    setShape(shape); \
     safe.flags=flags_; \
     safe.opt=__PLUMED_WRAPPER_CXX_NULLPTR; \
     buffer[0]='\0'; \
@@ -2454,7 +2471,7 @@ private:
 /// allow pass-by-value
 #define __PLUMED_WRAPPER_SAFEPTR_SIZED(type,code) \
   __PLUMED_WRAPPER_SAFEPTR(type,code,sizeof(type)) \
-  SafePtr(type val, __PLUMED_WRAPPER_STD size_t nelem, const __PLUMED_WRAPPER_STD size_t* shape) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
+  void set(type val, __PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
     assert(sizeof(type)<=32); \
     (void) nelem; \
     (void) shape; \
@@ -2490,6 +2507,103 @@ private:
     __PLUMED_WRAPPER_SAFEPTR_SIZED(double,4)
     __PLUMED_WRAPPER_SAFEPTR_SIZED(long double,4)
     __PLUMED_WRAPPER_SAFEPTR_EMPTY(FILE,5)
+
+#if __cplusplus > 199711L && __PLUMED_WRAPPER_CXX_DETECT_SHAPES
+    /// Internal utility to append a shape.
+    /// Create a new shape where newindex has been appended to the last non zero element.
+    std::array<std::size_t,5> append_size(std::size_t* shape,std::size_t newindex) {
+      std::array<std::size_t,5> shape_;
+      unsigned i;
+      for(i=0; i<4; i++) {
+        shape_[i]=shape[i];
+        if(shape[i]==0) break;
+      } // one less because we need to append another number!
+      if(i==4) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
+      shape_[i]=newindex;
+      shape_[i+1]=0;
+      return shape_;
+    }
+
+    /// TODO: fix this doc:
+    /// Helper functions for interpreting commands. **They are all internals**.
+    /// cmd_helper is called when we have no shape information associated.
+    /// cmd_helper_with_shape is called when we have shape information associated.
+    /// The nocopy bool tells us if this pointer is pointing to a temporary variable,
+    /// and thus PLUMED should not keep a copy.
+    /// The variants below change for the type of the val argument
+
+    /// cmd_helper with custom array val (includes std::array)
+    template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
+    void set_helper(T&& val,bool nocopy=false) {
+      std::size_t shape[] { wrapper::custom_array_size<T>(), 0 };
+      set_helper_with_shape(wrapper::custom_array_cast(&val),shape,nocopy);
+    }
+
+    /// cmd_helper with size/data val (typically, std::vector, std::string, small_vector, etc)
+    template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && wrapper::has_size_and_data<T>::value, int>::type = 0>
+    void set_helper(T&& val,bool nocopy=false) {
+      std::size_t shape[] { wrapper::size(val), 0 };
+      set_helper_with_shape(val.data(),shape,nocopy);
+    }
+
+    /// cmd_helper with raw pointer val
+    /// In this case, the nocopy information is not propagated. We can indeed save the pointer, even if it's a temporary
+    /// as it is in the case cmd("a",&a)
+    template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && !wrapper::has_size_and_data<T>::value && std::is_pointer<T>::value, int>::type = 0>
+    void set_helper(T&& val,bool nocopy=false) {
+      (void) nocopy; // suppress warning
+#if __PLUMED_WRAPPER_CXX_DETECT_SHAPES_STRICT
+      // this would be strict checking
+      // "a pointer without a specified size is meant to be pointing to a size 1 object"
+      std::size_t shape[] {  0, 0 };
+      if(val) shape[0]=1;
+      set_helper_with_shape(val,shape);
+#else
+      set(val);
+#endif
+    }
+
+    /// cmd_helper in remaining cases, that is when val is passed by value
+    /// in this case, the nocopy information is not propagated, but the address of the data will be considered not copyable anyway
+    /// by PLUMED ("pass by value")
+    template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && !wrapper::has_size_and_data<T>::value && !std::is_pointer<T>::value, int>::type = 0>
+    void set_helper(T&& val,bool nocopy=false) {
+      set(val);
+    }
+
+    /// cmd_helper_with_shape with custom array val (includes std::array and C arrays)
+    template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
+    void set_helper_with_shape(T* val, __PLUMED_WRAPPER_STD size_t* shape,bool nocopy=false) {
+      auto newptr=wrapper::custom_array_cast(val);
+      auto newshape=append_size(shape,wrapper::custom_array_size<T>());
+      set_helper_with_shape(newptr,newshape.data(),nocopy);
+    }
+
+    /// cmd_helper_with_shape with pointer to simple type val.
+    template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value, int>::type = 0>
+    void set_helper_with_shape(T* val, __PLUMED_WRAPPER_STD size_t* shape,bool nocopy=false) {
+      set(val,0,shape);
+      if(nocopy) safe.flags |= 0x10000000;
+    }
+
+#if ! __PLUMED_WRAPPER_CXX_DETECT_SHAPES_STRICT
+    /// cmd_helper_with_nelem with custom array val (includes std::array)
+    template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
+    void set_helper_with_nelem(T* val, __PLUMED_WRAPPER_STD size_t nelem) {
+      auto newptr=wrapper::custom_array_cast(val);
+      auto newnelem=nelem*wrapper::custom_array_size<T>();
+      set_helper_with_nelem(newptr,newnelem);
+    }
+
+    /// cmd_helper_with_nelem with pointer to simple type val.
+    template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value, int>::type = 0>
+    void set_helper_with_nelem(T* val, __PLUMED_WRAPPER_STD size_t nelem) {
+      // pointer or value, directly managed by SafePtr
+      set(val,nelem,nullptr);
+    }
+#endif
+
+#endif
 
     /// Return the contained plumed_safeptr
     plumed_safeptr get_safeptr() const __PLUMED_WRAPPER_CXX_NOEXCEPT {
@@ -3006,105 +3120,6 @@ public:
 
 #if __cplusplus > 199711L && __PLUMED_WRAPPER_CXX_DETECT_SHAPES
 
-private:
-
-
-  /// Internal utility to append a shape.
-  /// Create a new shape where newindex has been appended to the last non zero element.
-  std::array<std::size_t,5> append_size(std::size_t* shape,std::size_t newindex) {
-    std::array<std::size_t,5> shape_;
-    unsigned i;
-    for(i=0; i<4; i++) {
-      shape_[i]=shape[i];
-      if(shape[i]==0) break;
-    } // one less because we need to append another number!
-    if(i==4) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
-    shape_[i]=newindex;
-    shape_[i+1]=0;
-    return shape_;
-  }
-
-
-/// Helper functions for interpreting commands. **They are all internals**.
-/// cmd_helper is called when we have no shape information associated.
-/// cmd_helper_with_shape is called when we have shape information associated.
-/// The nocopy bool tells us if this pointer is pointing to a temporary variable,
-/// and thus PLUMED should not keep a copy.
-/// The variants below change for the type of the val argument
-
-/// cmd_helper with custom array val (includes std::array)
-  template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
-  void cmd_helper(const char*key,T&& val,bool nocopy=false) {
-    std::size_t shape[] { wrapper::custom_array_size<T>(), 0 };
-    cmd_helper_with_shape(key,wrapper::custom_array_cast(&val),shape,nocopy);
-  }
-
-/// cmd_helper with size/data val (typically, std::vector, std::string, small_vector, etc)
-  template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && wrapper::has_size_and_data<T>::value, int>::type = 0>
-  void cmd_helper(const char*key,T&& val,bool nocopy=false) {
-    std::size_t shape[] { wrapper::size(val), 0 };
-    cmd_helper_with_shape(key,val.data(),shape,nocopy);
-  }
-
-/// cmd_helper with raw pointer val
-/// In this case, the nocopy information is not propagated. We can indeed save the pointer, even if it's a temporary
-/// as it is in the case cmd("a",&a)
-  template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && !wrapper::has_size_and_data<T>::value && std::is_pointer<T>::value, int>::type = 0>
-  void cmd_helper(const char*key,T&& val,bool nocopy=false) {
-    (void) nocopy; // suppress warning
-#if __PLUMED_WRAPPER_CXX_DETECT_SHAPES_STRICT
-    // this would be strict checking
-    // "a pointer without a specified size is meant to be pointing to a size 1 object"
-    std::size_t shape[] {  0, 0 };
-    if(val) shape[0]=1;
-    cmd_helper_with_shape(key,val,shape);
-#else
-    // for backward compatibility, the pointer is directly managed by SafePtr, with no size information
-    SafePtr s(val,0,nullptr);
-    cmd_priv(main,key,&s);
-#endif
-  }
-
-/// cmd_helper in remaining cases, that is when val is passed by value
-/// in this case, the nocopy information is not propagated, but the address of the data will be considered not copyable anyway
-/// by PLUMED ("pass by value")
-  template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value && !wrapper::has_size_and_data<T>::value && !std::is_pointer<T>::value, int>::type = 0>
-  void cmd_helper(const char*key,T&& val,bool nocopy=false) {
-    SafePtr s(val,0,nullptr);
-    cmd_priv(main,key,&s);
-  }
-
-/// cmd_helper_with_shape with custom array val (includes std::array and C arrays)
-  template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
-  void cmd_helper_with_shape(const char*key,T* val, __PLUMED_WRAPPER_STD size_t* shape,bool nocopy=false) {
-    auto newptr=wrapper::custom_array_cast(val);
-    auto newshape=append_size(shape,wrapper::custom_array_size<T>());
-    cmd_helper_with_shape(key,newptr,newshape.data(),nocopy);
-  }
-
-/// cmd_helper_with_shape with pointer to simple type val.
-  template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value, int>::type = 0>
-  void cmd_helper_with_shape(const char*key,T* val, __PLUMED_WRAPPER_STD size_t* shape,bool nocopy=false) {
-    SafePtr s(val,0,shape);
-    if(nocopy) s.safe.flags |= 0x10000000;
-    cmd_priv(main,key,&s);
-  }
-
-/// cmd_helper_with_nelem with custom array val (includes std::array)
-  template<typename T, typename std::enable_if<wrapper::is_custom_array<T>::value, int>::type = 0>
-  void cmd_with_nelem(const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem) {
-    auto newptr=wrapper::custom_array_cast(val);
-    auto newnelem=nelem*wrapper::custom_array_size<T>();
-    cmd_with_nelem(key,newptr,newnelem);
-  }
-
-/// cmd_helper_with_nelem with pointer to simple type val.
-  template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value, int>::type = 0>
-  void cmd_with_nelem(const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem) {
-    // pointer or value, directly managed by SafePtr
-    SafePtr s(val,nelem,nullptr);
-    cmd_priv(main,key,&s);
-  }
 public:
 
   /**
@@ -3117,7 +3132,9 @@ public:
   */
   template<typename T>
   void cmd(const char*key,T&& val) {
-    cmd_helper(key,std::forward<T>(val),true);
+    SafePtr s;
+    s.set_helper(std::forward<T>(val),true);
+    cmd_priv(main,key,&s);
   }
 
   /**
@@ -3131,7 +3148,9 @@ public:
   template<typename T, typename std::enable_if<wrapper::is_array<T>::value, int>::type = 0>
   void cmd(const char*key,T& val) {
     std::size_t shape[] { wrapper::is_array<T>::size, 0 };
-    cmd_helper_with_shape(key,reinterpret_cast<typename wrapper::is_array<T>::value_type*>(val),shape);
+    SafePtr s;
+    s.set_helper_with_shape(reinterpret_cast<typename wrapper::is_array<T>::value_type*>(val),shape);
+    cmd_priv(main,key,&s);
   }
 
   /**
@@ -3142,7 +3161,9 @@ public:
   */
   template<typename T, typename std::enable_if<!wrapper::is_array<T>::value, int>::type = 0>
   void cmd(const char*key,T& val) {
-    cmd_helper(key,std::forward<T>(val));
+    SafePtr s;
+    s.set_helper(std::forward<T>(val));
+    cmd_priv(main,key,&s);
   }
 
   /**
@@ -3159,8 +3180,11 @@ public:
   cmd(const char*key,T* val, I nelem) {
 #if __PLUMED_WRAPPER_CXX_DETECT_SHAPES_STRICT
     static_assert("in strict mode you cannot pass nelem, please pass full shape instead");
+#else
+    SafePtr s;
+    s.set_helper_with_nelem(val,__PLUMED_WRAPPER_STD size_t(nelem));
+    cmd_priv(main,key,&s);
 #endif
-    cmd_with_nelem(key,val,__PLUMED_WRAPPER_STD size_t(nelem));
   }
 
 
@@ -3178,7 +3202,9 @@ public:
     unsigned i;
     for(i=0; i<5; i++) if(shape[i]==0) break;
     if(i==5) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
-    cmd_helper_with_shape(key,val,shape);
+    SafePtr s;
+    s.set_helper_with_shape(val,shape);
+    cmd_priv(main,key,&s);
   }
 
   /**
@@ -3193,7 +3219,9 @@ public:
   template<typename T>
   void cmd(const char*key,T* val, std::initializer_list<SizeLike> shape) {
     auto shape_=make_shape(shape);
-    cmd_helper_with_shape(key,val,shape_.data());
+    SafePtr s;
+    s.set_helper_with_shape(val,shape_.data());
+    cmd_priv(main,key,&s);
   }
 
 
@@ -3313,7 +3341,8 @@ public:
   */
   template<typename T>
   static void plumed_cmd_cxx(plumed p,const char*key,T val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+    SafePtr s;
+    s.set(val);
     cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
   }
 
@@ -3326,7 +3355,8 @@ public:
   */
   template<typename T>
   static void plumed_cmd_cxx(plumed p,const char*key,T* val,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-    SafePtr s(val,0,__PLUMED_WRAPPER_CXX_NULLPTR);
+    SafePtr s;
+    s.set(val);
     cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
   }
 
@@ -3339,7 +3369,8 @@ public:
   */
   template<typename T>
   static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
-    SafePtr s(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+    SafePtr s;
+    s.set(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
     cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
   }
 
@@ -3355,7 +3386,8 @@ public:
     unsigned i;
     for(i=0; i<5; i++) if(shape[i]==0) break;
     if(i==5) throw Plumed::ExceptionTypeError("Maximum shape size is 4");
-    SafePtr s(val,0,shape);
+    SafePtr s;
+    s.set(val,0,shape);
     cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
   }
 
