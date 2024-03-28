@@ -2430,19 +2430,17 @@ private:
 
 #if __cplusplus > 199711L
     /// Construct from null
-    void set(__PLUMED_WRAPPER_STD nullptr_t,__PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) noexcept {
+    void set(__PLUMED_WRAPPER_STD nullptr_t) noexcept {
       safe.ptr=nullptr;
       safe.nelem=0;
       safe.shape=nullptr;
       safe.flags=0x10000*2;
       safe.opt=nullptr;
       buffer[0]='\0';
-      (void) nelem;
-      (void) shape;
     }
 #endif
 
-/// Macro that generate a constructor with given type and flags
+/// Macro that generate a set function overload with given type and flags
 #define __PLUMED_WRAPPER_SAFEPTR_INNER(type_,flags_) \
   void set(type_*ptr, __PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
     safe.ptr=ptr; \
@@ -2463,18 +2461,16 @@ private:
   __PLUMED_WRAPPER_SAFEPTR_INNER(type const*,      size | (0x10000*(code)) | (0x2000000*6)) \
   __PLUMED_WRAPPER_SAFEPTR_INNER(type const*const, size | (0x10000*(code)) | (0x2000000*7))
 
-/// Macro that generates the constructors from empy types (those of which sizeof cannot be computed)
+/// Macro that generates set function overloads from empy types (those of which sizeof cannot be computed)
 #define __PLUMED_WRAPPER_SAFEPTR_EMPTY(type,code) __PLUMED_WRAPPER_SAFEPTR(type,code,0)
 
-/// Macro that generates the constructors from sized types (those of which sizeof can be computed).
-/// In addition to generating constructors with all pointer types, it generates a constructor to
+/// Macro that generates set function overloads from sized types (those of which sizeof can be computed).
+/// In addition to generating functions with all pointer types, it generates a function to
 /// allow pass-by-value
 #define __PLUMED_WRAPPER_SAFEPTR_SIZED(type,code) \
   __PLUMED_WRAPPER_SAFEPTR(type,code,sizeof(type)) \
-  void set(type val, __PLUMED_WRAPPER_STD size_t nelem=0, const __PLUMED_WRAPPER_STD size_t* shape=__PLUMED_WRAPPER_CXX_NULLPTR) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
+  void set(type val) __PLUMED_WRAPPER_CXX_NOEXCEPT { \
     assert(sizeof(type)<=32); \
-    (void) nelem; \
-    (void) shape; \
     safe.ptr=buffer; \
     safe.nelem=1; \
     safe.shape=__PLUMED_WRAPPER_CXX_NULLPTR; \
@@ -2599,7 +2595,7 @@ private:
     template<typename T, typename std::enable_if<!wrapper::is_custom_array<T>::value, int>::type = 0>
     void set_helper_with_nelem(T* val, __PLUMED_WRAPPER_STD size_t nelem) {
       // pointer or value, directly managed by SafePtr
-      set(val,nelem,nullptr);
+      set(val,nelem);
     }
 #endif
 
@@ -3370,7 +3366,7 @@ public:
   template<typename T>
   static void plumed_cmd_cxx(plumed p,const char*key,T* val, __PLUMED_WRAPPER_STD size_t nelem,plumed_error* error=__PLUMED_WRAPPER_CXX_NULLPTR) {
     SafePtr s;
-    s.set(val,nelem,__PLUMED_WRAPPER_CXX_NULLPTR);
+    s.set(val,nelem);
     cmd_priv(p,key,&s,__PLUMED_WRAPPER_CXX_NULLPTR,error);
   }
 
