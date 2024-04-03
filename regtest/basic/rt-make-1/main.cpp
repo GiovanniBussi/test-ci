@@ -110,7 +110,7 @@ int main(){
     ofs<<"Failures "<<err<<"\n";
     ofs.precision(1);
     if(type==5) {
-      nsh=std::round(nsh*4)/4;
+      nsh=std::round(nsh);
     }
     ofs<<"Shifts   "<<nsh<<"\n\n";
   }
