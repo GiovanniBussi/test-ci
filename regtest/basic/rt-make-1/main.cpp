@@ -109,7 +109,7 @@ int main(){
     ofs<<"Box type "<<type<<"\n";
     ofs<<"Failures "<<err<<"\n";
     ofs.precision(1);
-    if(type==5) {
+    if(type==4) {
       nsh=std::round(nsh);
     }
     ofs<<"Shifts   "<<nsh<<"\n\n";
