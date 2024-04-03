@@ -15,12 +15,13 @@ env:
 jobs:
 
   macports:
-    runs-on: macos-12
     strategy:
       fail-fast: false
       matrix:
         variant: [ "" , "+allmodules" ]
+        os: [ macos-12 , macos-14 ]
         # see https://github.community/t/how-to-conditionally-include-exclude-items-in-matrix-eg-based-on-branch/16853/6 for possible exclusions
+    runs-on: ${{ matrix.os }}
     env:
       PYVERS: "py39 py310"
     steps:
