@@ -28,6 +28,8 @@
 #include <iosfwd>
 #include "tools/Keywords.h"
 #include <memory>
+#include <stack>
+#include <mutex>
 
 namespace PLMD {
 
@@ -56,6 +58,8 @@ class ActionRegister {
   std::map<std::string,keywords_pointer> mk;
 /// Set of disabled actions (which were registered more than once)
   std::set<std::string> disabled;
+  std::recursive_mutex registeringMutex;
+  unsigned registeringCounter=0;
 public:
 /// Register a new class.
 /// \param key The name of the directive to be used in the input file
@@ -64,9 +68,11 @@ public:
   void add(std::string key,creator_pointer cp,keywords_pointer kp);
 /// Verify if a directive is present in the register
   bool check(const std::string & action);
+  bool check(const std::vector<void*> & images,const std::string & action);
 /// Create an Action of the type indicated in the options
 /// \param ao object containing information for initialization, such as the full input line, a pointer to PlumedMain, etc
   std::unique_ptr<Action> create(const ActionOptions&ao);
+  std::unique_ptr<Action> create(const std::vector<void*> & images,const ActionOptions&ao);
 /// Print out the keywords for an action in html/vim ready for input into the manual
   bool printManual(const std::string& action, const bool& vimout, const bool& spellout);
 /// Retrieve a keywords object for a particular action
@@ -77,6 +83,9 @@ public:
 /// Get a list of action names
   std::vector<std::string> getActionNames() const ;
   ~ActionRegister();
+  void pushDLRegistration();
+  void popDLRegistration() noexcept;
+  void completeDLRegistration(void*handle);
 };
 
 /// Function returning a reference to the ActionRegister.

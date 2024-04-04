@@ -24,8 +24,23 @@
 #include "Action.h"
 #include <algorithm>
 #include <iostream>
+#include <sstream> //for std::stringstream 
+#include <algorithm>
+
+#ifdef __PLUMED_HAS_DLADDR
+#include <dlfcn.h>
+#endif
 
 namespace PLMD {
+
+namespace {
+  std::string imageToString(void* image){
+    std::stringstream ss;
+    ss << image;
+    return ss.str();
+  }
+}
+
 
 ActionRegister::~ActionRegister() {
   if(m.size()>0) {
@@ -51,6 +66,13 @@ void ActionRegister::remove(creator_pointer f) {
 void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
   // this force each action to be registered as an uppercase string
   if ( std::any_of( std::begin( key ), std::end( key ), []( char c ) { return ( std::islower( c ) ); } ) ) plumed_error() << "Action: " + key + " cannot be registered, use only UPPERCASE characters";
+
+  if(registeringCounter){
+    std::string c;
+    Tools::convert(registeringCounter,c);
+    key="tmp" + c + ":" + key;
+  }
+
   if(m.count(key)) {
     m.erase(key);
     disabled.insert(key);
@@ -64,12 +86,27 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
 }
 
 bool ActionRegister::check(const std::string & key) {
+  std::vector<void*> images; // empty vector
+  return check(images,key);
+}
+
+bool ActionRegister::check(const std::vector<void*> & images,const std::string & key) {
   if(m.count(key)>0 && mk.count(key)>0) return true;
+  for(auto image : images) {
+    std::string k=imageToString(image)+":"+key;
+    if(m.count(k)>0 && mk.count(k)>0) return true;
+  }
   return false;
 }
 
 std::unique_ptr<Action> ActionRegister::create(const ActionOptions&ao) {
+  std::vector<void*> images; // empty vector
+  return create(images,ao);
+}
+
+std::unique_ptr<Action> ActionRegister::create(const std::vector<void*> & images,const ActionOptions&ao) {
   if(ao.line.size()<1)return NULL;
+
   // Create a copy of the manual locally. The manual is
   // then added to the ActionOptions. This allows us to
   // ensure during construction that all the keywords for
@@ -77,10 +114,18 @@ std::unique_ptr<Action> ActionRegister::create(const ActionOptions&ao) {
   // generate the documentation when the user makes an error
   // in the input.
   std::unique_ptr<Action> action;
-  if( check(ao.line[0]) ) {
-    Keywords keys; mk[ao.line[0]](keys);
+  if( check(images,ao.line[0]) ) {
+    std::string found_key=ao.line[0];
+    for(auto image = images.rbegin(); image != images.rend(); ++image) {
+      auto key=imageToString(*image) + ":" + ao.line[0];
+      if(m.count(key)>0 && mk.count(key)>0){
+        found_key=key;
+        break;
+      }
+    }
+    Keywords keys; mk[found_key](keys);
     ActionOptions nao( ao,keys );
-    action=m[ao.line[0]](nao);
+    action=m[found_key](nao);
   }
   return action;
 }
@@ -138,5 +183,65 @@ std::ostream & operator<<(std::ostream &log,const ActionRegister&ar) {
   return log;
 }
 
+void ActionRegister::pushDLRegistration() {
+  registeringMutex.lock();
+  registeringCounter++;
+}
+
+void ActionRegister::popDLRegistration() noexcept {
+  std::string c;
+  Tools::convert(registeringCounter,c);
+
+  // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
+  for(auto it=m.cbegin(); it!=m.cend();) {
+    if(Tools::startWith(it->first,"tmp"+c+":")) {
+      it=m.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for(auto it=mk.cbegin(); it!=mk.cend();) {
+    if(Tools::startWith(it->first,"tmp"+c+":")) {
+      it=mk.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  registeringCounter--;
+  registeringMutex.unlock();
+}
+
+void ActionRegister::completeDLRegistration(void* handle) {
+  std::string c;
+  Tools::convert(registeringCounter,c);
+  // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
+  std::vector<std::pair<std::string,creator_pointer>> to_add;
+  for(auto it=m.cbegin(); it!=m.cend();) {
+    if(Tools::startWith(it->first,"tmp"+c+":")) {
+      auto newk=it->first;
+      newk.replace(0,newk.find(":"),imageToString(handle));
+      to_add.push_back(std::pair<std::string,creator_pointer>(newk,it->second));
+      it=m.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  for(auto & i : to_add) m.insert(i);
+
+  std::vector<std::pair<std::string,keywords_pointer>> to_addk;
+  for(auto it=mk.cbegin(); it!=mk.cend();) {
+    if(Tools::startWith(it->first,"tmp"+c+":")) {
+      auto newk=it->first;
+      newk.replace(0,newk.find(":"),imageToString(handle));
+      to_addk.push_back(std::pair<std::string,keywords_pointer>(newk,it->second));
+      it=mk.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  for(auto & i : to_addk) mk.insert(i);
+}
 
 }
