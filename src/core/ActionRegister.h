@@ -50,10 +50,12 @@ class ActionRegister {
   typedef std::unique_ptr<Action>(*creator_pointer)(const ActionOptions&);
 /// Pointer to a function which, returns the keywords allowed
   typedef void(*keywords_pointer)(Keywords&);
-/// Map action to a function which creates the related object
-  std::map<std::string,creator_pointer> m;
-/// Map action to a function which documents the related object
-  std::map<std::string,keywords_pointer> mk;
+  struct Item {
+    creator_pointer create;
+    keywords_pointer keys;
+  };
+/// Map action to a function which creates the related object and a function which documents the related object
+  std::map<std::string,Item> m;
   std::recursive_mutex registeringMutex;
   unsigned registeringCounter=0;
 public:

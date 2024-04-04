@@ -57,7 +57,7 @@ ActionRegister& actionRegister() {
 
 void ActionRegister::remove(creator_pointer f) {
   for(auto p=m.begin(); p!=m.end(); ++p) {
-    if((*p).second==f) {
+    if((*p).second.create==f) {
       m.erase(p); break;
     }
   }
@@ -75,24 +75,22 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
 
   plumed_assert(!m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
 
-  m.insert(std::pair<std::string,creator_pointer>(key,f));
   // Store a pointer to the function that creates keywords
   // A pointer is stored and not the keywords because all
   // Vessels must be dynamically loaded before the actions.
-  mk.insert(std::pair<std::string,keywords_pointer>(key,k));
-  };
+  m.insert(std::pair<std::string,Item>(key,{f,k}));
 }
 
 bool ActionRegister::check(const std::string & key) {
   std::vector<void*> images; // empty vector
   return check(images,key);
-
+}
 
 bool ActionRegister::check(const std::vector<void*> & images,const std::string & key) {
-  if(m.count(key)>0 && mk.count(key)>0) return true;
+  if(m.count(key)>0) return true;
   for(auto image : images) {
     std::string k=imageToString(image)+":"+key;
-    if(m.count(k)>0 && mk.count(k)>0) return true;
+    if(m.count(k)>0) return true;
   }
   return false;
 }
@@ -116,20 +114,20 @@ std::unique_ptr<Action> ActionRegister::create(const std::vector<void*> & images
     std::string found_key=ao.line[0];
     for(auto image = images.rbegin(); image != images.rend(); ++image) {
       auto key=imageToString(*image) + ":" + ao.line[0];
-      if(m.count(key)>0 && mk.count(key)>0){
+      if(m.count(key)>0){
         found_key=key;
         break;
       }
     }
-    Keywords keys; mk[found_key](keys);
+    Keywords keys; m[found_key].keys(keys);
     ActionOptions nao( ao,keys );
-    action=m[found_key](nao);
+    action=m[found_key].create(nao);
   }
   return action;
 }
 
 bool ActionRegister::getKeywords(const std::string& action, Keywords& keys) {
-  if ( check(action) ) {  mk[action](keys); return true; }
+  if ( check(action) ) {  m[action].keys(keys); return true; }
   return false;
 }
 
@@ -151,7 +149,7 @@ bool ActionRegister::printManual(const std::string& action, const bool& vimout, 
 
 bool ActionRegister::printTemplate(const std::string& action, bool include_optional) {
   if( check(action) ) {
-    Keywords keys; mk[action](keys);
+    Keywords keys; m[action].keys(keys);
     keys.print_template(action, include_optional);
     return true;
   } else {
@@ -190,14 +188,6 @@ void ActionRegister::popDLRegistration() noexcept {
     }
   }
 
-  for(auto it=mk.cbegin(); it!=mk.cend();) {
-    if(Tools::startWith(it->first,"tmp"+c+":")) {
-      it=mk.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
   registeringCounter--;
   registeringMutex.unlock();
 }
@@ -206,31 +196,18 @@ void ActionRegister::completeDLRegistration(void* handle) {
   std::string c;
   Tools::convert(registeringCounter,c);
   // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
-  std::vector<std::pair<std::string,creator_pointer>> to_add;
+  std::vector<std::pair<std::string,Item>> to_add;
   for(auto it=m.cbegin(); it!=m.cend();) {
     if(Tools::startWith(it->first,"tmp"+c+":")) {
       auto newk=it->first;
       newk.replace(0,newk.find(":"),imageToString(handle));
-      to_add.push_back(std::pair<std::string,creator_pointer>(newk,it->second));
+      to_add.push_back(std::pair<std::string,Item>(newk,it->second));
       it=m.erase(it);
     } else {
       ++it;
     }
   }
   for(auto & i : to_add) m.insert(i);
-
-  std::vector<std::pair<std::string,keywords_pointer>> to_addk;
-  for(auto it=mk.cbegin(); it!=mk.cend();) {
-    if(Tools::startWith(it->first,"tmp"+c+":")) {
-      auto newk=it->first;
-      newk.replace(0,newk.find(":"),imageToString(handle));
-      to_addk.push_back(std::pair<std::string,keywords_pointer>(newk,it->second));
-      it=mk.erase(it);
-    } else {
-      ++it;
-    }
-  }
-  for(auto & i : to_addk) mk.insert(i);
 }
 
 }
