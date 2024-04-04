@@ -42,8 +42,6 @@ class ActionOptions;
 /// the corresponding class given the corresponding options (ActionOptions).
 /// There should be only one of there objects allocated.
 /// Actions should be registered here at the beginning of execution
-/// If the same directive is used for different classes, it is automatically disabled
-/// to avoid random results.
 ///
 class ActionRegister {
 /// Write on a stream the list of registered directives
@@ -56,8 +54,6 @@ class ActionRegister {
   std::map<std::string,creator_pointer> m;
 /// Map action to a function which documents the related object
   std::map<std::string,keywords_pointer> mk;
-/// Set of disabled actions (which were registered more than once)
-  std::set<std::string> disabled;
   std::recursive_mutex registeringMutex;
   unsigned registeringCounter=0;
 public:

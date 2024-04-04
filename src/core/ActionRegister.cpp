@@ -73,22 +73,20 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
     key="tmp" + c + ":" + key;
   }
 
-  if(m.count(key)) {
-    m.erase(key);
-    disabled.insert(key);
-  } else {
-    m.insert(std::pair<std::string,creator_pointer>(key,f));
-    // Store a pointer to the function that creates keywords
-    // A pointer is stored and not the keywords because all
-    // Vessels must be dynamically loaded before the actions.
-    mk.insert(std::pair<std::string,keywords_pointer>(key,k));
+  plumed_assert(!m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
+
+  m.insert(std::pair<std::string,creator_pointer>(key,f));
+  // Store a pointer to the function that creates keywords
+  // A pointer is stored and not the keywords because all
+  // Vessels must be dynamically loaded before the actions.
+  mk.insert(std::pair<std::string,keywords_pointer>(key,k));
   };
 }
 
 bool ActionRegister::check(const std::string & key) {
   std::vector<void*> images; // empty vector
   return check(images,key);
-}
+
 
 bool ActionRegister::check(const std::vector<void*> & images,const std::string & key) {
   if(m.count(key)>0 && mk.count(key)>0) return true;
@@ -171,15 +169,6 @@ std::vector<std::string> ActionRegister::getActionNames() const {
 std::ostream & operator<<(std::ostream &log,const ActionRegister&ar) {
   std::vector<std::string> s(ar.getActionNames());
   for(unsigned i=0; i<s.size(); i++) log<<"  "<<s[i]<<"\n";
-  if(!ar.disabled.empty()) {
-    s.assign(ar.disabled.size(),"");
-    std::copy(ar.disabled.begin(),ar.disabled.end(),s.begin());
-    std::sort(s.begin(),s.end());
-    log<<"+++++++ WARNING +++++++\n";
-    log<<"The following keywords have been registered more than once and will be disabled:\n";
-    for(unsigned i=0; i<s.size(); i++) log<<"  - "<<s[i]<<"\n";
-    log<<"+++++++ END WARNING +++++++\n";
-  };
   return log;
 }
 
