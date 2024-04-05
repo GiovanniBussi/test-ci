@@ -81,9 +81,40 @@ public:
 /// Get a list of action names
   std::vector<std::string> getActionNames() const ;
   ~ActionRegister();
+  /// initiate registration
+  /// all actions registered after this call will be staged
+  /// with a tmp prefix in their name.
+  /// Better use the RAII interface as registrationLock()
   void pushDLRegistration();
+  /// finish registration
+  /// all actions that were staged will be removed.
+  /// Better use the RAII interface as registrationLock()
   void popDLRegistration() noexcept;
+  /// complete registration
+  /// all staged actions will be enabled
+  /// Should be called after dlopen has been completed correctly.
   void completeDLRegistration(void*handle);
+
+  class RegistrationLock {
+    ActionRegister* ar=nullptr;
+  public:
+    RegistrationLock(ActionRegister* ar):
+      ar(ar)
+    {};
+    RegistrationLock(const RegistrationLock&) = delete;
+    RegistrationLock(RegistrationLock&& other) noexcept:
+      ar(other.ar)
+    {
+      other.ar=nullptr;
+    }
+    ~RegistrationLock() noexcept {
+      if(ar) ar->popDLRegistration();
+    }
+  };
+
+  RegistrationLock registrationLock() {
+    return RegistrationLock(this);
+  }
 };
 
 /// Function returning a reference to the ActionRegister.
