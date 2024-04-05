@@ -34,11 +34,11 @@
 namespace PLMD {
 
 namespace {
-  std::string imageToString(void* image){
-    std::stringstream ss;
-    ss << image;
-    return ss.str();
-  }
+std::string imageToString(void* image) {
+  std::stringstream ss;
+  ss << image;
+  return ss.str();
+}
 }
 
 
@@ -67,7 +67,7 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
   // this force each action to be registered as an uppercase string
   if ( std::any_of( std::begin( key ), std::end( key ), []( char c ) { return ( std::islower( c ) ); } ) ) plumed_error() << "Action: " + key + " cannot be registered, use only UPPERCASE characters";
 
-  if(registeringCounter){
+  if(registeringCounter) {
     std::string c;
     Tools::convert(registeringCounter,c);
     key="tmp" + c + ":" + key;
@@ -78,7 +78,7 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
   // Store a pointer to the function that creates keywords
   // A pointer is stored and not the keywords because all
   // Vessels must be dynamically loaded before the actions.
-  m.insert(std::pair<std::string,Item>(key,{f,k}));
+  m.insert(std::pair<std::string,Item>(key, {f,k}));
 }
 
 bool ActionRegister::check(const std::string & key) {
@@ -114,7 +114,7 @@ std::unique_ptr<Action> ActionRegister::create(const std::vector<void*> & images
     std::string found_key=ao.line[0];
     for(auto image = images.rbegin(); image != images.rend(); ++image) {
       auto key=imageToString(*image) + ":" + ao.line[0];
-      if(m.count(key)>0){
+      if(m.count(key)>0) {
         found_key=key;
         break;
       }
@@ -179,16 +179,22 @@ void ActionRegister::pushDLRegistration() {
 }
 
 void ActionRegister::popDLRegistration() noexcept {
-  std::string c;
-  Tools::convert(registeringCounter,c);
+  char buffer[1000];
+  std::snprintf(buffer,1000,"tmp%u:",registeringCounter);
 
-  // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
-  for(auto it=m.cbegin(); it!=m.cend();) {
-    if(Tools::startWith(it->first,"tmp"+c+":")) {
-      it=m.erase(it);
-    } else {
-      ++it;
+  try {
+    // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
+    for(auto it=m.cbegin(); it!=m.cend();) {
+      if(Tools::startWith(it->first,buffer)) {
+        it=m.erase(it);
+      } else {
+        ++it;
+      }
     }
+  } catch(...) {
+    // should never happen
+    std::fprintf(stderr,"Unexpected error in popDLRegistration\n");
+    std::terminate();
   }
 
   registeringCounter--;
@@ -196,12 +202,12 @@ void ActionRegister::popDLRegistration() noexcept {
 }
 
 void ActionRegister::completeDLRegistration(void* handle) {
-  std::string c;
-  Tools::convert(registeringCounter,c);
+  char buffer[1000];
+  std::snprintf(buffer,1000,"tmp%u:",registeringCounter);
   // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
   std::vector<std::pair<std::string,Item>> to_add;
   for(auto it=m.cbegin(); it!=m.cend();) {
-    if(Tools::startWith(it->first,"tmp"+c+":")) {
+    if(Tools::startWith(it->first,buffer)) {
       auto newk=it->first;
       newk.replace(0,newk.find(":"),imageToString(handle));
       to_add.push_back(std::pair<std::string,Item>(newk,it->second));

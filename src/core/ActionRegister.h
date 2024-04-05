@@ -100,7 +100,9 @@ public:
   public:
     RegistrationLock(ActionRegister* ar):
       ar(ar)
-    {};
+    {
+      ar->pushDLRegistration();
+    };
     RegistrationLock(const RegistrationLock&) = delete;
     RegistrationLock(RegistrationLock&& other) noexcept:
       ar(other.ar)
