@@ -171,10 +171,12 @@ std::ostream & operator<<(std::ostream &log,const ActionRegister&ar) {
 }
 
 void ActionRegister::pushDLRegistration() {
-  // throw before locking
-  plumed_assert(registeringCounter==0)<<"recursive registrations are technically possible but disabled at this stage";
 
   registeringMutex.lock();
+  if(registeringCounter>0) {
+    registeringMutex.unlock();
+    plumed_error()<<"recursive registrations are technically possible but disabled at this stage";
+  }
   registeringCounter++;
 }
 
