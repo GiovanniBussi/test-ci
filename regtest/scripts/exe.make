@@ -1,6 +1,9 @@
+ifeq ($(CXX_SRC),)
+  CXX_SRC := *.cpp
+endif
 
 exe:
-	$(CXX) -c $(CPPFLAGS) $(ADDCPPFLAGS) $(CXXFLAGS) *.cpp
+	$(CXX) -c $(CPPFLAGS) $(ADDCPPFLAGS) $(CXXFLAGS) $(CXX_SRC)
 	$(LD) *.o -o $@ $(PLUMED_LOAD)
 
 exe-c:
