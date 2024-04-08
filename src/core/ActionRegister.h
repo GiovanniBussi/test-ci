@@ -56,6 +56,7 @@ class ActionRegister {
   };
 /// Map action to a function which creates the related object and a function which documents the related object
   std::map<std::string,Item> m;
+  std::map<std::string,Item> staged_m;
   std::recursive_mutex registeringMutex;
   unsigned registeringCounter=0;
 public:

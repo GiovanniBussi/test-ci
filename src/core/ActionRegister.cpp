@@ -68,17 +68,15 @@ void ActionRegister::add(std::string key,creator_pointer f,keywords_pointer k) {
   if ( std::any_of( std::begin( key ), std::end( key ), []( char c ) { return ( std::islower( c ) ); } ) ) plumed_error() << "Action: " + key + " cannot be registered, use only UPPERCASE characters";
 
   if(registeringCounter) {
-    std::string c;
-    Tools::convert(registeringCounter,c);
-    key="tmp" + c + ":" + key;
+    plumed_assert(!staged_m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
+    // Store a pointer to the function that creates keywords
+    // A pointer is stored and not the keywords because all
+    // Vessels must be dynamically loaded before the actions.
+    staged_m.insert(std::pair<std::string,Item>(key, {f,k}));
+  } else {
+    plumed_assert(!m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
+    m.insert(std::pair<std::string,Item>(key, {f,k}));
   }
-
-  plumed_assert(!m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
-
-  // Store a pointer to the function that creates keywords
-  // A pointer is stored and not the keywords because all
-  // Vessels must be dynamically loaded before the actions.
-  m.insert(std::pair<std::string,Item>(key, {f,k}));
 }
 
 bool ActionRegister::check(const std::string & key) {
@@ -181,18 +179,8 @@ void ActionRegister::pushDLRegistration() {
 }
 
 void ActionRegister::popDLRegistration() noexcept {
-  char buffer[1000];
-  std::snprintf(buffer,1000,"tmp%u:",registeringCounter);
-
   try {
-    // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
-    for(auto it=m.cbegin(); it!=m.cend();) {
-      if(Tools::startWith(it->first,buffer)) {
-        it=m.erase(it);
-      } else {
-        ++it;
-      }
-    }
+   staged_m.clear();
   } catch(...) {
     // should never happen
     std::fprintf(stderr,"Unexpected error in popDLRegistration\n");
@@ -204,21 +192,11 @@ void ActionRegister::popDLRegistration() noexcept {
 }
 
 void ActionRegister::completeDLRegistration(void* handle) {
-  char buffer[1000];
-  std::snprintf(buffer,1000,"tmp%u:",registeringCounter);
-  // https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
-  std::vector<std::pair<std::string,Item>> to_add;
-  for(auto it=m.cbegin(); it!=m.cend();) {
-    if(Tools::startWith(it->first,buffer)) {
-      auto newk=it->first;
-      newk.replace(0,newk.find(":"),imageToString(handle));
-      to_add.push_back(std::pair<std::string,Item>(newk,it->second));
-      it=m.erase(it);
-    } else {
-      ++it;
-    }
+  for(auto & it : staged_m) {
+    auto newk=imageToString(handle) + ":" + it.first;
+    m.insert(std::pair<std::string,Item>(newk,it.second));
   }
-  for(auto & i : to_add) m.insert(i);
+  staged_m.clear();
 }
 
 }
