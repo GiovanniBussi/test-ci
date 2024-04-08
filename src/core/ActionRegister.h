@@ -56,9 +56,21 @@ class ActionRegister {
   };
 /// Map action to a function which creates the related object and a function which documents the related object
   std::map<std::string,Item> m;
+/// Map of staged actions
   std::map<std::string,Item> staged_m;
+/// Mutex to avoid simultaneous registrations from multiple threads
+/// It is a recursive mutex so that recursive calls will be detected and throw.
+/// (a non recursive mutex would lead to a lock instead)
   std::recursive_mutex registeringMutex;
   unsigned registeringCounter=0;
+  /// initiate registration
+  /// all actions registered after this call will be staged
+  /// Better use the RAII interface as registrationLock()
+  void pushDLRegistration();
+  /// finish registration
+  /// all actions that were staged will be removed.
+  /// Better use the RAII interface as registrationLock()
+  void popDLRegistration() noexcept;
 public:
 /// Register a new class.
 /// \param key The name of the directive to be used in the input file
@@ -82,15 +94,6 @@ public:
 /// Get a list of action names
   std::vector<std::string> getActionNames() const ;
   ~ActionRegister();
-  /// initiate registration
-  /// all actions registered after this call will be staged
-  /// with a tmp prefix in their name.
-  /// Better use the RAII interface as registrationLock()
-  void pushDLRegistration();
-  /// finish registration
-  /// all actions that were staged will be removed.
-  /// Better use the RAII interface as registrationLock()
-  void popDLRegistration() noexcept;
   /// complete registration
   /// all staged actions will be enabled
   /// Should be called after dlopen has been completed correctly.
