@@ -50,7 +50,7 @@ void* DLLoader::load(const std::string&s) {
   } else {
     lastError="";
     handles.push_back(p);
-    actionRegister().completeDLRegistration(p);
+    actionRegister().completeRegistration(p);
   }
   return p;
 #else

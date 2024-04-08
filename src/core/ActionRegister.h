@@ -97,30 +97,20 @@ public:
   /// complete registration
   /// all staged actions will be enabled
   /// Should be called after dlopen has been completed correctly.
-  void completeDLRegistration(void*handle);
+  void completeRegistration(void*handle);
 
+  /// small class to manage registration lock
   class RegistrationLock {
     ActionRegister* ar=nullptr;
   public:
-    RegistrationLock(ActionRegister* ar):
-      ar(ar)
-    {
-      ar->pushDLRegistration();
-    };
+    RegistrationLock(ActionRegister* ar);
     RegistrationLock(const RegistrationLock&) = delete;
-    RegistrationLock(RegistrationLock&& other) noexcept:
-      ar(other.ar)
-    {
-      other.ar=nullptr;
-    }
-    ~RegistrationLock() noexcept {
-      if(ar) ar->popDLRegistration();
-    }
+    RegistrationLock(RegistrationLock&& other) noexcept;
+    ~RegistrationLock() noexcept;
   };
 
-  RegistrationLock registrationLock() {
-    return RegistrationLock(this);
-  }
+  /// return a registration lock
+  RegistrationLock registrationLock();
 };
 
 /// Function returning a reference to the ActionRegister.

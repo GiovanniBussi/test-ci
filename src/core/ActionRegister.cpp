@@ -191,12 +191,32 @@ void ActionRegister::popDLRegistration() noexcept {
   registeringMutex.unlock();
 }
 
-void ActionRegister::completeDLRegistration(void* handle) {
+void ActionRegister::completeRegistration(void* handle) {
   for(auto & it : staged_m) {
-    auto newk=imageToString(handle) + ":" + it.first;
-    m.insert(std::pair<std::string,Item>(newk,it.second));
+    auto key=imageToString(handle) + ":" + it.first;
+    plumed_assert(!m.count(key)) << "cannot registed action twice with the same name "<< key<<"\n";
+    m.insert(std::pair<std::string,Item>(key,it.second));
   }
   staged_m.clear();
 }
+
+ActionRegister::RegistrationLock::RegistrationLock(ActionRegister* ar):
+  ar(ar)
+{
+  ar->pushDLRegistration();
+}
+ActionRegister::RegistrationLock::RegistrationLock(RegistrationLock&& other) noexcept:
+  ar(other.ar)
+{
+  other.ar=nullptr;
+}
+ActionRegister::RegistrationLock::~RegistrationLock() noexcept {
+  if(ar) ar->popDLRegistration();
+}
+
+ActionRegister::RegistrationLock ActionRegister::registrationLock() {
+  return RegistrationLock(this);
+}
+
 
 }
