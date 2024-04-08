@@ -180,7 +180,7 @@ void ActionRegister::pushDLRegistration() {
 
 void ActionRegister::popDLRegistration() noexcept {
   try {
-   staged_m.clear();
+    staged_m.clear();
   } catch(...) {
     // should never happen
     std::fprintf(stderr,"Unexpected error in popDLRegistration\n");
