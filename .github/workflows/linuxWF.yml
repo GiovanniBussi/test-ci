@@ -186,7 +186,7 @@ jobs:
       run: |
          make -C developer-doc coverage
          .ci/push coverage
-         bash <(curl -s https://codecov.io/bash) > /dev/null
+         #bash <(curl -s https://codecov.io/bash) > /dev/null
     - name: Push doc
       if: contains( matrix.variant, '-doc-' )
       env:
