@@ -55,6 +55,7 @@ class Ghost:
 {
   std::vector<double> coord;
   std::vector<Tensor> deriv;
+  bool nopbc=false;
 public:
   explicit Ghost(const ActionOptions&ao);
   void calculate() override;
@@ -66,6 +67,7 @@ PLUMED_REGISTER_ACTION(Ghost,"GHOST")
 void Ghost::registerKeywords(Keywords& keys) {
   ActionWithVirtualAtom::registerKeywords(keys);
   keys.add("atoms","COORDINATES","coordinates of the ghost atom in the local reference frame");
+  keys.addFlag("NOPBC",false,"ignore the periodic boundary conditions when calculating distances");
 }
 
 Ghost::Ghost(const ActionOptions&ao):
@@ -79,14 +81,25 @@ Ghost::Ghost(const ActionOptions&ao):
   parseVector("COORDINATES",coord);
   if(coord.size()!=3) error("COORDINATES should be a list of three real numbers");
 
+  parseFlag("NOPBC",nopbc);
+
   checkRead();
   log.printf("  of atoms");
   for(unsigned i=0; i<atoms.size(); ++i) log.printf(" %d",atoms[i].serial());
   log.printf("\n");
+
+  if(nopbc) {
+    log<<"  PBC will be ignored\n";
+  } else {
+    log<<"  broken molecules will be rebuilt assuming atoms are in the proper order\n";
+  }
   requestAtoms(atoms);
 }
 
 void Ghost::calculate() {
+
+  if(!nopbc) makeWhole();
+
   Vector pos;
   deriv.resize(getNumberOfAtoms());
   std::array<Vector,3> n;
