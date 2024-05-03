@@ -100,7 +100,8 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## Here I also exclude (style) and (information) messages
 ## perhaps we could keep some of them to make to code cleaner at some point
 ## (the "true" command is necessary so that the script does not fail if some string is not found)
-grep -v "(style)" "${CLEAN_FILE}" | grep -v "(information)" | grep -v :duplInheritedMember: >> "${FATAL_FILE}" || true
+## The registerKeywords function is by design redefined in each class, so this should not be included among fatal warning
+grep -v "(style)" "${CLEAN_FILE}" | grep -v "(information)" | grep -v ":duplInheritedMember:.*registerKeywords" >> "${FATAL_FILE}" || true
 count=$(cat "${FATAL_FILE}" | wc -l)
 echo 
 echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
