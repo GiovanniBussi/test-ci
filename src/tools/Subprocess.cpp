@@ -57,9 +57,11 @@ public:
     // I disable them for now.
     if(SubprocessPidGetenvSignals()) kill(pid,SIGCONT);
   }
-  ~SubprocessPid() {
-    // this is apparently working also with MPI on Travis.
+  void terminate() noexcept {
     kill(pid,SIGINT);
+  }
+  ~SubprocessPid() {
+    terminate();
     int status;
     waitpid(pid,&status,0);
   }
@@ -115,13 +117,14 @@ Subprocess::Subprocess(const std::string & cmd) {
 
 Subprocess::~Subprocess() {
 #ifdef __PLUMED_HAS_SUBPROCESS
-// fpc should be closed to terminate the child executable
+  // first kill the process
+  pid->terminate();
+  // then close all pipes
   fclose(fppc);
   close(fpc);
   fclose(fpcp);
   close(fcp);
-// fcp should not be closed because it could make the child executable fail
-/// TODO: check if this is necessary and make this class exception safe!
+  // then the pid destructor will wait for completion
 #endif
 }
 
