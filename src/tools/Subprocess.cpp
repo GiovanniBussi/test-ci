@@ -60,6 +60,8 @@ public:
   ~SubprocessPid() {
     // this is apparently working also with MPI on Travis.
     kill(pid,SIGINT);
+    int status;
+    waitpid(pid,&status,0);
   }
 #endif
 };
