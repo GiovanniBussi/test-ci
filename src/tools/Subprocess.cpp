@@ -24,6 +24,7 @@
 #include "Tools.h"
 #ifdef __PLUMED_HAS_SUBPROCESS
 #include <unistd.h>
+#include <sys/wait.h>
 #include <csignal>
 #endif
 
