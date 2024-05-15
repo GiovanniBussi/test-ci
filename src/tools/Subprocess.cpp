@@ -50,16 +50,16 @@ public:
   void stop() noexcept {
     // Signals give problems with MPI on Travis.
     // I disable them for now.
-    if(SubprocessPidGetenvSignals()) if(pid!=0 && pid!=-1) kill(pid,SIGSTOP);
+    if(SubprocessPidGetenvSignals()) kill(pid,SIGSTOP);
   }
   void cont() noexcept {
     // Signals give problems with MPI on Travis.
     // I disable them for now.
-    if(SubprocessPidGetenvSignals()) if(pid!=0 && pid!=-1) kill(pid,SIGCONT);
+    if(SubprocessPidGetenvSignals()) kill(pid,SIGCONT);
   }
   ~SubprocessPid() {
     // this is apparently working also with MPI on Travis.
-    if(pid!=0 && pid!=-1) kill(pid,SIGINT);
+    kill(pid,SIGINT);
   }
 #endif
 };
