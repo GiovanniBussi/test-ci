@@ -118,6 +118,8 @@ Subprocess::~Subprocess() {
 // fpc should be closed to terminate the child executable
   fclose(fppc);
   close(fpc);
+  fclose(fpcp);
+  close(fcp);
 // fcp should not be closed because it could make the child executable fail
 /// TODO: check if this is necessary and make this class exception safe!
 #endif
