@@ -313,6 +313,7 @@ void GenericMolInfo::interpretSymbol( const std::string& symbol, std::vector<Ato
       }
       size_t nat=0;
       comm.Bcast(nat,0);
+      atoms.resize(nat);
       comm.Bcast(atoms,0);
     }
     log<<"  selection interpreted using ";
