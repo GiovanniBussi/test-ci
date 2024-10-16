@@ -41,7 +41,7 @@ jobs:
       run: |
         wget https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
         source ./macports-ci install
-        source ./macports-ci ccache
+        #source ./macports-ci ccache
     - name: Build local Portfile
       run: |
         make macports
@@ -56,7 +56,7 @@ jobs:
         for p in $PYVERS ; do
           sudo port -N install $p-plumed
         done
-        source ./macports-ci ccache --save
+        #source ./macports-ci ccache --save
     - name: Run tests
       run: |
         sudo port -N -d test plumed ${{ matrix.variant }}
