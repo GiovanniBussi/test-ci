@@ -50,7 +50,8 @@ jobs:
       run: |
         # in case native git has issues
         sudo port -N install git
-        sudo port -N -k install plumed ${{ matrix.variant }}
+        sudo port -N -k install plumed ${{ matrix.variant }} || true
+        cat /opt/local/var/macports/logs/_Users_runner_work_test-ci_test-ci_macports_science_plumed/plumed/main.log
         plumed config show
         for p in $PYVERS ; do
           sudo port -N install $p-plumed
