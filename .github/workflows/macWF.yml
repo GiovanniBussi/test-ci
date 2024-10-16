@@ -48,6 +48,8 @@ jobs:
         source ./macports-ci localports macports
     - name: Build PLUMED
       run: |
+        # in case native git has issues
+        sudo port -N install git
         sudo port -N -k install plumed ${{ matrix.variant }}
         plumed config show
         for p in $PYVERS ; do
