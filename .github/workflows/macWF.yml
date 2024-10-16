@@ -50,6 +50,7 @@ jobs:
       run: |
         # test:
         sudo git config --system --add safe.directory /Users/runner/work/test-ci/test-ci
+        sudo git config --system --add safe.directory /Users/runner/work/test-ci/test-ci/.git
         sudo port -N -k -d install plumed ${{ matrix.variant }}
         plumed config show
         for p in $PYVERS ; do
