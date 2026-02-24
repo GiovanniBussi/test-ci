@@ -449,7 +449,7 @@ double SwitchingFunction::calculateSqr(double distance2,double&dfunc)const {
     }
     const unsigned t=OpenMP::getThreadNum();
     const double rdist_2 = distance2*invr0_2;
-    plumed_assert(t<expression.size());
+    plumed_assert(t<expression.size()) << "t: " << t << " size: "<< expression.size();
     if(lepton_ref[t]) {
       *lepton_ref[t]=rdist_2;
     }
@@ -531,7 +531,7 @@ double SwitchingFunction::calculate(double distance,double&dfunc)const {
       }
     } else if(type==leptontype) {
       const unsigned t=OpenMP::getThreadNum();
-      plumed_assert(t<expression.size());
+      plumed_assert(t<expression.size()) << "t: " << t << " size: "<< expression.size();
       if(lepton_ref[t]) {
         *lepton_ref[t]=rdist;
       }
