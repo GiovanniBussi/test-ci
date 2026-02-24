@@ -804,7 +804,7 @@ public:
         const double rdist = (distance-d0)*invr0;
         if(rdist > 0.0) {
           const unsigned t=OpenMP::getThreadNum();
-          plumed_assert(t<expressions.size());
+          plumed_assert(t<expression.size()) << "t: " << t << " size: "<< expression.size();
           std::tie(res,dfunc) = expressions[t](rdist);
           dfunc *= invr0;
           dfunc /= distance;
@@ -823,7 +823,7 @@ public:
       if(distance2<=dmax_2) {
         const unsigned t=OpenMP::getThreadNum();
         const double rdist_2 = distance2*invr0_2;
-        plumed_assert(t<expressions.size());
+        plumed_assert(t<expression.size()) << "t: " << t << " size: "<< expression.size();
         std::tie(result,dfunc) = expressions[t](rdist_2);
         // chain rule:
         dfunc*=2*invr0_2;
